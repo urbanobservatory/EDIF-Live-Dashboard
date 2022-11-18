@@ -1,24 +1,30 @@
 #TODO: Error handling if no data is available for selected period
-#TODO: Figure out why data is requested twice (or seems to be at least)
-#TODO: Auto update after n minutes
+#TODO: Figure out a way of only updating streams once every n minutes, rather than updating every graph with a new request
+#TODO: Auto update after n minutes - Test
+#TODO: On refresh only request data which isn't already available, and remove data older than limit
 
 import requests
 import json
 import dash
+from dash import dcc, html
 from dash.dependencies import Output, Input, State
 import pandas as pd
+import time
 import datetime
 import plotly.graph_objs as go
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 
 load_dotenv()
-day_period = 7
-variables = ["PM2.5", "Temperature"]
+day_period = 1
+#variables = ["PM2.5", "Temperature"]
 pm25_display_limit = 30
 temperature_display_limit = 50
 thin_data_by_factor_of = 50
+update_frequency = 5 #minutes
+latest_reading_threshold = 60 #minutes
 figures = {}
+dict_all = {}
 
 def stringtimes(day_period):
     start_datetime = datetime.datetime.now()-relativedelta(days=day_period)
@@ -36,14 +42,22 @@ def get_uo_data(variable, start, end):
     df = df[df['data.'+variable].notna()]
     return df
 
-def uo_graph(ds, name, color):
-    return go.Scatter(x=list(ds['Datetime']),
-                      y=list(ds['Value']),
+def uo_graph(df, name, color):
+    return go.Scatter(x=list(df['Datetime']),
+                      y=list(df['Value']),
                       mode='markers',
                       marker_symbol='circle-open',
                       marker_color=color,
                       opacity=0.2,
                       name=name)
+
+# def uo_map(df):
+#     #TODO: May need to iterate through dataframe?
+#     return go.Scattergeo(#dict(data_frame=df['Value'], ),
+#                          lat=df['Sensor Centroid Latitude.0'],
+#                          lon=df['Sensor Centroid Longitude.0'],
+#                          #text=df['Sensor Name'],
+#                          projection='natural earth')
 
 def apply_graph_customisation(ds, variable):
     if variable == "PM2.5":
@@ -56,9 +70,16 @@ def apply_graph_customisation(ds, variable):
         color = '#8a8888'
     return ds, color
 
-def uo_sensor_values(variable, df, df_list):
+def uo_sensor_values(variable, df):
+    sensor_dfs=[]
     for i, l in enumerate(df['data.'+variable]):
         ds = pd.DataFrame(l)
+        sensor_dfs.append(ds)
+    return sensor_dfs
+
+def sensor_display_graphs(variable, sensor_dfs):
+    display_graphs=[]
+    for ds in sensor_dfs:
         ds = ds[ds['Flagged as Suspect Reading'] == False]
         ds, color = apply_graph_customisation(ds, variable)
         ds['Datetime'] = pd.to_datetime(ds['Timestamp'], unit='ms')
@@ -67,28 +88,55 @@ def uo_sensor_values(variable, df, df_list):
             name = ds['Sensor Name'].iloc[0]
         except:
             name = 'unknown sensor name'
-        df_list.append(uo_graph(ds, name, color))
-    return df, df_list
+        display_graphs.append(uo_graph(ds, name, color))
+    return display_graphs
 
-def get_suspect_readings(variable, df, suspects=[]):
-    #TODO: Make sure table headings are always displayed in same order
+def display_maps(df):
+    return list(uo_map(df))
+
+def get_suspect_readings(variable, df):
+    suspects = []
     for i, l in enumerate(df['data.'+variable]):
         ds = pd.DataFrame(l)
         ds = ds[ds['Flagged as Suspect Reading'] == True]
         ds = ds.drop('Flagged as Suspect Reading', axis=1)
         suspects.append(ds)
-    sus_df = pd.concat(suspects).drop_duplicates().reset_index(drop=True)
-    return sus_df
+    suspect_df = pd.concat(suspects).drop_duplicates().reset_index(drop=True)
+    return suspect_df
+
+def get_latest_readings(df, sensor_dfs):
+    ds_list = []
+    for sensor_df in sensor_dfs:
+        ds_list.append(
+            sensor_df.loc[
+                (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
+                (sensor_df['Timestamp'] > (int(time.time())*1000)-(latest_reading_threshold*60000)) &
+                (sensor_df['Flagged as Suspect Reading'] == False)
+            ]
+        )
+    ds = pd.concat(ds_list)
+    ds = ds.drop('Flagged as Suspect Reading', axis=1)
+    return pd.merge(ds, df, how='inner', left_on='Sensor Name', right_on='Sensor Name.0')
 
 def run(variable):
-    df_list = []
-    start, end = stringtimes(day_period)
-    df = get_uo_data(variable, start, end)
-    df, df_list = uo_sensor_values(variable, df, df_list)
-    sus_df = get_suspect_readings(variable, df)
-    return df_list, sus_df
+    start, end         = stringtimes(day_period)
+    df                 = get_uo_data(variable, start, end)
+    sensor_dfs         = uo_sensor_values(variable, df)
+    display_graphs     = sensor_display_graphs(variable, sensor_dfs)
+    suspect_df         = get_suspect_readings(variable, df)
+    latest_readings_df = get_latest_readings(df, sensor_dfs)
+    # map_display        = display_maps(latest_readings_df)
+    dict_all[variable] = {'start': start, 
+                          'end': end, 
+                          'dataframe': df, 
+                          'display_graphs': display_graphs, 
+                          'suspect_dataframe': suspect_df,
+                          'latest_readings': latest_readings_df#,
+                          #'map_display': map_display
+                          }
+    return dict_all
 
-def layout(variable):
+def graph_layout(variable):
     return dict(title=f'Newcastle UO {variable}', 
                 showlegend=False, 
                 autosize = False,
@@ -110,80 +158,126 @@ def layout(variable):
                                 step="day",
                                 stepmode="backward")
                         ])
-                    ), rangeslider=dict(visible=True),
+                    ), #rangeslider=dict(visible=True),
                 type="date"
                 )
             )
 
-for v in variables:
-    df_list, sus_df = run(v)
-    figures[v] = dict(data=df_list, layout=layout(v))
+# for v in variables:
+#     sensor_dfs, sus_df = run(v)
+#     figures[v] = dict(data=sensor_dfs, layout=layout(v))
 
 app = dash.Dash(__name__, 
                 external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
 
-app.layout = dash.html.Div([
-    dash.html.Div(
-        dash.html.H1('EDIF Live Dashboard'),
+app.layout = html.Div([
+    html.Div(
+        html.H1('EDIF Live Dashboard'),
         className="banner"
     ),
-    dash.html.Div([
-        dash.dcc.Input(
-            id='Graph_3-input',
-            placeholder='Enter variable to be charted',
-            type='text',
-            value='Temperature'),
-        dash.html.Button(id="submit-button", n_clicks=0, children="Submit")
-    ]),
-    # dash.html.Div(
-    #     dash.dcc.Dropdown(
+    # html.Div([
+    #     dcc.Input(
+    #         id='Graph_3-input',
+    #         placeholder='Enter variable to be charted',
+    #         type='text',
+    #         value='Humidity'
+    #     ),
+    #     html.Button(id="submit-button", 
+    #                 n_clicks=0, 
+    #                 children="Submit"
+    #     )
+    # ]),
+    # html.Div(
+    #     dcc.Dropdown(
     #         options=[
     #             {'label': 'Candlestick', 'value': 'Candlestick'},
     #             {'label': 'Line', 'value': 'Line'}
     #         ]
     #     )
     # ),
-    dash.html.Div([
-        dash.html.Div([
-            dash.dcc.Graph(
-                id='Graph_1', 
-                figure=figures["Temperature"]
+    html.Div([
+        html.Div([
+            dcc.Graph(
+                id='Graph_1'
             )
         ], className="six columns"),
-        dash.html.Div([
-            dash.dcc.Graph(
-                id='Graph_2', 
-                figure=figures["PM2.5"]
+        html.Div([
+            dcc.Graph(
+                id='Graph_2'
             )
-        ], className="six columns"),
-        dash.html.Div([
-            dash.dcc.Graph(
-                id='Graph_3'
+        ], className="six columns")#,
+        # html.Div([
+        #     dcc.Graph(
+        #         id='Graph_3'
+        #     )
+        # ], className="six columns")
+    ], className='row'
+    ),
+    html.Div([
+        html.Div([
+            #TODO: Figure out out to center labels
+            html.Label('Suspect Readings'),
+            dash.dash_table.DataTable(
+                id='Suspect_table',
+                page_size=10
             )
         ], className="six columns")
     ], className='row'
     ),
-    dash.html.Div([
-        dash.html.Div([
-            dash.dash_table.DataTable(
-                sus_df.to_dict('records'), 
-                [{"name": i, "id": i} for i in sus_df.columns],
-                id='Suspect_table')
-        ], className="six columns")
-    ], className='row')
+    # html.Div([
+    #     dcc.Graph(
+    #         id='map'
+    #     )
+    # ]),
+    dcc.Interval(
+        id='interval-component',
+        interval=60000*update_frequency,
+        n_intervals=0
+    )
 ])
 
 # CALLBACKS
-@app.callback(Output("Graph_3", "figure"),
-             [Input("submit-button", "n_clicks")],
-             [State("Graph_3-input", "value")])
+# @app.callback(Output("Graph_3", "figure"),
+#              [Input("submit-button", "n_clicks")],
+#              [State("Graph_3-input", "value")])
+# def update_fig(n_clicks, input_value):
+#     if input_value in figures:
+#         sensor_dfs = figures[input_value]["data"]
+#     else:
+#         sensor_dfs, sus_df = run(input_value)
+#     return dict(data=sensor_dfs, layout=layout(input_value))
 
-def update_fig(n_clicks, input_value):
-    if input_value in figures:
-        df_list = figures[input_value]["data"]
-    else:
-        df_list = run(input_value)
-    return dict(data=df_list, layout=layout(input_value))
+#TODO: Figure out how to update entire page with a single callback
+@app.callback(Output('Graph_1', 'figure'),
+              Input('interval-component', 'n_intervals'))
+def update_graph_live(n):
+    run('Temperature')
+    display_graphs = dict_all['Temperature']['display_graphs']
+    return dict(data=display_graphs, layout=graph_layout('Temperature'))
+
+@app.callback(Output('Graph_2', 'figure'),
+              Input('interval-component', 'n_intervals'))
+def update_graph_live(n):
+    run('PM2.5')
+    display_graphs = dict_all['PM2.5']['display_graphs']
+    return dict(data=display_graphs, layout=graph_layout('PM2.5'))
+
+@app.callback(Output('Suspect_table', 'data'),
+              Input('interval-component', 'n_intervals'))
+def update_graph_live(n):
+    run('Temperature')
+    run('PM2.5')
+    sus_df = pd.concat([dict_all['Temperature']['suspect_dataframe'], dict_all['PM2.5']['suspect_dataframe']])
+    sus_df = sus_df.loc[:, ["Sensor Name", "Timestamp", "Variable", "Value", "Units"]]
+    return sus_df.to_dict('records')
+
+# @app.callback(Output('map', 'figure'),
+#               Input('interval-component', 'n_intervals'))
+# def update_graph_live(n):
+#     #run('Temperature')
+#     run('PM2.5')
+#     map = dict_all['PM2.5']['map_display']
+#     return dict(data=map)
 
 if __name__ == "__main__":
     app.run_server(debug=True)
