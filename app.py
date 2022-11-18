@@ -16,9 +16,9 @@ from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 
 load_dotenv()
-day_period = 1
-#variables = ["PM2.5", "Temperature"]
-pm25_display_limit = 30
+day_period = 7
+variables = ["PM2.5", "Temperature"]
+pm25_display_limit = 100
 temperature_display_limit = 50
 thin_data_by_factor_of = 50
 update_frequency = 5 #minutes
@@ -91,8 +91,8 @@ def sensor_display_graphs(variable, sensor_dfs):
         display_graphs.append(uo_graph(ds, name, color))
     return display_graphs
 
-def display_maps(df):
-    return list(uo_map(df))
+# def display_maps(df):
+#     return list(uo_map(df))
 
 def get_suspect_readings(variable, df):
     suspects = []
@@ -119,6 +119,7 @@ def get_latest_readings(df, sensor_dfs):
     return pd.merge(ds, df, how='inner', left_on='Sensor Name', right_on='Sensor Name.0')
 
 def run(variable):
+    print('fetching data...', variable, datetime.datetime.now())
     start, end         = stringtimes(day_period)
     df                 = get_uo_data(variable, start, end)
     sensor_dfs         = uo_sensor_values(variable, df)
@@ -128,6 +129,8 @@ def run(variable):
     # map_display        = display_maps(latest_readings_df)
     dict_all[variable] = {'start': start, 
                           'end': end, 
+                          'start_unix': time.time(),
+                          'end_unix': time.time(),
                           'dataframe': df, 
                           'display_graphs': display_graphs, 
                           'suspect_dataframe': suspect_df,
@@ -163,10 +166,18 @@ def graph_layout(variable):
                 )
             )
 
-# for v in variables:
-#     sensor_dfs, sus_df = run(v)
-#     figures[v] = dict(data=sensor_dfs, layout=layout(v))
+def update_scheduler(variable):
+    # checks whether should update or use previously collected datas
+    # only allow update if last updated over 1 min ago (i.e. not at very start)
+    if time.time() - dict_all[variable]['end_unix'] > 60 \
+    or variable not in dict_all:
+        run(variable)
 
+# INITIAL RUN
+for v in variables:
+    dict_all = run(v)
+
+# APPLICATION
 app = dash.Dash(__name__, 
                 external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"])
 
@@ -175,18 +186,18 @@ app.layout = html.Div([
         html.H1('EDIF Live Dashboard'),
         className="banner"
     ),
-    # html.Div([
-    #     dcc.Input(
-    #         id='Graph_3-input',
-    #         placeholder='Enter variable to be charted',
-    #         type='text',
-    #         value='Humidity'
-    #     ),
-    #     html.Button(id="submit-button", 
-    #                 n_clicks=0, 
-    #                 children="Submit"
-    #     )
-    # ]),
+    html.Div([
+        dcc.Input(
+            id='days-input',
+            placeholder='Enter number of days to be charted',
+            type='number',
+            value=7
+        ),
+        html.Button(id="submit-button", 
+                    n_clicks=0, 
+                    children="Submit"
+        )
+    ]),
     # html.Div(
     #     dcc.Dropdown(
     #         options=[
@@ -251,23 +262,26 @@ app.layout = html.Div([
 @app.callback(Output('Graph_1', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    run('Temperature')
-    display_graphs = dict_all['Temperature']['display_graphs']
-    return dict(data=display_graphs, layout=graph_layout('Temperature'))
+    v = 'Temperature'
+    update_scheduler(v)
+    return dict(data=dict_all[v]['display_graphs'], layout=graph_layout(v))
 
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    run('PM2.5')
-    display_graphs = dict_all['PM2.5']['display_graphs']
-    return dict(data=display_graphs, layout=graph_layout('PM2.5'))
+    v = 'PM2.5'
+    update_scheduler(v)
+    return dict(data=dict_all[v]['display_graphs'], layout=graph_layout(v))
 
 @app.callback(Output('Suspect_table', 'data'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    run('Temperature')
-    run('PM2.5')
-    sus_df = pd.concat([dict_all['Temperature']['suspect_dataframe'], dict_all['PM2.5']['suspect_dataframe']])
+    for v in dict_all:
+        update_scheduler(v)
+    l = []
+    for v in dict_all:
+        l.append(dict_all[v]['suspect_dataframe'])
+    sus_df = pd.concat(l)
     sus_df = sus_df.loc[:, ["Sensor Name", "Timestamp", "Variable", "Value", "Units"]]
     return sus_df.to_dict('records')
 
@@ -278,6 +292,7 @@ def update_graph_live(n):
 #     run('PM2.5')
 #     map = dict_all['PM2.5']['map_display']
 #     return dict(data=map)
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
