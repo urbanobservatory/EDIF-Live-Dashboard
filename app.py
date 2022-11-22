@@ -1,7 +1,6 @@
 #TODO: Error handling if no data is available for selected period
 #TODO: Auto update after n minutes - Test
-#TODO: On refresh only request data which isn't already available, and remove data older than limit
-#TODO: Remove 0 values from plates mathcing display graphs
+#TODO: On refresh only request data which isn't already available, and remove data older than limit - look into traces (https://plotly.com/python/creating-and-updating-figures/#adding-traces)
 #TODO: Error handling if data isn't available - don't want the app to crash
 #TODO: Reference units from something rather than hard coding
 #TODO: Could add a slider to maps to show changes over time - need to group and average data by day (https://plotly.com/python/bubble-maps/#reference)
@@ -207,15 +206,6 @@ def map_layout(variable):
         colorbar = True,
         autosize = True,
         margin = dict(t=60, b=60, l=40, r=40),
-        # geo = dict(
-        #     # projection=dict(type='natural earth'),
-        #     # showland = True,
-        #     # landcolor = "rgb(250, 250, 250)",
-        #     # subunitcolor = "rgb(217, 217, 217)",
-        #     # countrycolor = "rgb(217, 217, 217)",
-        #     # countrywidth = 0.5,
-        #     # subunitwidth = 0.5
-        # ),
         mapbox = dict(
             style = "carto-positron", # "carto-darkmatter"
             bounds = dict(west=-1.8, east=-1.4, south=54.85, north=55.1)
@@ -234,35 +224,13 @@ for v in variables:
     dict_all = run(v)
 
 # APPLICATION
-app = dash.Dash(__name__#, 
-                #external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"]
-                )
+app = dash.Dash(__name__)
 
 app.layout = html.Div([
     html.Div(
         html.H1('EDIF Live Dashboard'),
         className="banner"
     ),
-    # html.Div([
-    #     dcc.Input(
-    #         id='days-input',
-    #         placeholder='Enter number of days to be charted',
-    #         type='number',
-    #         value=7
-    #     ),
-    #     html.Button(id="submit-button", 
-    #                 n_clicks=0, 
-    #                 children="Submit"
-    #     )
-    # ]),
-    # html.Div(
-    #     dcc.Dropdown(
-    #         options=[
-    #             {'label': 'Candlestick', 'value': 'Candlestick'},
-    #             {'label': 'Line', 'value': 'Line'}
-    #         ]
-    #     )
-    # ),
     html.Div([
         html.Div([
             dcc.Graph(
@@ -305,17 +273,7 @@ app.layout = html.Div([
 ])
 
 # CALLBACKS
-# @app.callback(Output("Graph_3", "figure"),
-#              [Input("submit-button", "n_clicks")],
-#              [State("Graph_3-input", "value")])
-# def update_fig(n_clicks, input_value):
-#     if input_value in figures:
-#         sensor_dfs = figures[input_value]["data"]
-#     else:
-#         sensor_dfs, sus_df = run(input_value)
-#     return dict(data=sensor_dfs, layout=layout(input_value))
 
-#TODO: Figure out how to update entire page with a single callback
 @app.callback(Output('Graph_1', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
