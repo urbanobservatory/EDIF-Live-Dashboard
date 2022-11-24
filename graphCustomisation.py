@@ -22,5 +22,15 @@ def uo(df, variable): #TODO: Define colours in parameters/dotenv file
     return df, color
 
 def udx(df, variable):
-    #TODO: This
-    pass
+    if variable == "PM2.5":
+        df = df[df['pm25.value'] <= pm25_display_limit]
+        color = '#f44242'
+    elif variable == "Temperature":
+        df = df[df['temperature.value'] <= temperature_display_limit]
+        color = '#4254f5'
+    # elif variable == 'Plates Matching':
+    #     df = df[df['Value'] != 0]
+    #     color = '#47d65f'
+    else:
+        color = '#8a8888'
+    return df, color

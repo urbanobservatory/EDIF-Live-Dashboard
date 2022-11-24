@@ -5,14 +5,13 @@ import datetime
 import requests
 import pandas as pd
 import json
+import dateutil.parser
 from dotenv import load_dotenv
 
 load_dotenv()
 local_file_dir = os.getenv('local_file_dir')
 udx_cont       = os.getenv('udx_cont')
 udx_auth       = os.getenv('udx_auth')
-udx_PM25_url   = os.getenv('udx_PM25_url')
-udx_PM25_key   = os.getenv('udx_PM25_key')
 
 def fromUOFile(variable):
     print('fetching UO data from local file...', variable, datetime.datetime.now())
@@ -38,15 +37,19 @@ def uo(variable, start, end):
     return df
 
 def udx(variable):
-    #TODO: Remove hard coded variables
     print('fetching UDX data...', variable, datetime.datetime.now())
-    response_API = requests.get(udx_PM25_url, headers={
-        "Content-Type":udx_cont, "Authorization":udx_auth+' '+udx_PM25_key})
+    if variable == 'PM2.5': variable = 'pm25'
+    response_API = requests.get(os.getenv(f'udx_{variable}_url'), 
+        headers={"Content-Type":udx_cont, "Authorization":udx_auth+' '+os.getenv(f'udx_{variable}_key')})
     print(variable, 'status code: ', response_API.status_code)
     json_data = json.loads(response_API.text)
     df = pd.json_normalize(json_data)
-    df = df.drop(['type','@context','pm25.type','height.type','altitude.type',
+    df = df.drop(['type','@context',variable+'.type','height.type','altitude.type',
                   'location.type','timestamp.type','aggregation.type',
                   'dateObserved.type','suspectReading.type','location.value.type'], axis=1)
-    df = df[df['pm25.value'].notna()]
+    df['id'] = df['id'].str.split(":").str[3]
+    df = df[df[variable+'.value'].notna()]
+    df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000',''), format='%Y-%m-%dT%H:%M:%SZ')
+    df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
+    df['Variable'] = variable
     return df

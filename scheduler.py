@@ -5,7 +5,7 @@ import time
 import run
 
 def update(variable, dict_all, src):
-    print(time.time() - (time.mktime(dict_all[variable]['end'].timetuple())))
+    #print(time.time() - (time.mktime(dict_all[variable]['end'].timetuple())))
     if time.time() - (time.mktime(dict_all[variable]['end'].timetuple())) > 240 \
     or variable not in dict_all:
         if src == 'UO' or src == 'UOFile':

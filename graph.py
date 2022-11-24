@@ -12,5 +12,10 @@ def uo(df, name, color):
                       name=name)
 
 def udx(df, name, color):
-    #TODO: This
-    pass
+    return go.Scatter(x=list(df['Datetime']),
+                      y=list(df['pm25.value']),
+                      mode='markers',
+                      #marker_symbol='circle-open',
+                      marker_color=color,
+                      opacity=0.4,
+                      name=name)

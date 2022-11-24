@@ -24,5 +24,13 @@ def uo(variable, sensor_dfs):
     return display_graphs
 
 def udx(variable, sensor_dfs):
-    #TODO: This
-    pass
+    display_graphs=[]
+    for ds in sensor_dfs:
+        ds = ds[ds['suspectReading.value'] == False]
+        ds, color = graphCustomisation.udx(ds, variable)
+        try:
+            name = ds['id'].iloc[0]
+        except:
+            name = 'unknown sensor name'
+        display_graphs.append(graph.udx(ds, name, color))
+    return display_graphs

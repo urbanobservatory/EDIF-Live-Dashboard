@@ -10,18 +10,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-src = 'UOFile' # 'UOFile', 'UO', 'UDX', 'UDXFile'
-variables = ["PM2.5", "Temperature", "Plates Matching"]
+src = 'UDX' # 'UOFile', 'UO', 'UDX', 'UDXFile'
+variables = ["PM2.5"] #["PM2.5", "Temperature", "Plates Matching"]
 update_frequency = int(os.getenv('update_frequency'))
 figures = {}
 dict_all = {}
 
 # INITIAL RUN
 for v in variables:
-    if src == 'UO' or src == 'UOFile':
-        run.uo(v, dict_all, src)
-    elif src == 'UDX' or src == 'UDXFile':
-        run.udx(v, dict_all, src)
+    if src == 'UO' or src == 'UOFile': run.uo(v, dict_all, src)
+    elif src == 'UDX' or src == 'UDXFile': run.udx(v, dict_all, src)
     
 
 # APPLICATION
@@ -108,7 +106,7 @@ def update_graph_live(n):
     for v in dict_all:
         l.append(dict_all[v]['suspect_dataframe'])
     sus_df = pd.concat(l)
-    sus_df = sus_df.loc[:, ["Sensor Name", "Timestamp", "Variable", "Value", "Units"]]
+    sus_df = sus_df.loc[:, ["id", "dateObserved.value", "Variable", "pm25.value", "pm25.unit"]]
     return sus_df.to_dict('records')
 
 @app.callback(Output('map', 'figure'),

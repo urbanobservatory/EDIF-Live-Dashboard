@@ -9,6 +9,10 @@ def uo(variable, df):
         sensor_dfs.append(ds)
     return sensor_dfs
 
-def udx(variable, df):
-    #TODO: This
-    pass
+def udx(df):
+    sensor_dfs=[]
+    id_list = list(dict.fromkeys(list(df['id'])))
+    grouped = df.groupby(df['id'])
+    for i in id_list:
+        sensor_dfs.append(grouped.get_group(i))
+    return sensor_dfs

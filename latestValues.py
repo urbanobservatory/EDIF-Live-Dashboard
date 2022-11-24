@@ -23,5 +23,9 @@ def uo(df, sensor_dfs, src):
     return pd.merge(ds, df, how='inner', left_on='Sensor Name', right_on='Sensor Name.0')
 
 def udx(df, sensor_dfs, src):
-    #TODO: This
-    pass
+    ds_list = []
+    for sensor_df in sensor_dfs:
+        ds_list.append(sensor_df.loc[
+            (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
+            (sensor_df['suspectReading.value'] == False)])
+    return pd.concat(ds_list)
