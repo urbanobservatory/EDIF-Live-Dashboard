@@ -11,4 +11,4 @@ def update(variable, dict_all, src):
         if src == 'UO' or src == 'UOFile':
             run.uo(variable, dict_all, src)
         elif src == 'UDX' or src == 'UDXFile':
-            run.udx(variable, dict_all)
+            run.udx(variable, dict_all, src)

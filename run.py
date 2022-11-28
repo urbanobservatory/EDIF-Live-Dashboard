@@ -9,6 +9,7 @@ import latestValues
 import displayGraphs
 import displayMaps
 import suspectReadings
+import displayGauge
 
 load_dotenv()
 day_period = float(os.getenv('day_period'))
@@ -23,16 +24,18 @@ def uo(variable, dict_all, src):
     df = getData.fromUOFile(variable) if src=='UOFile' else getData.uo(variable,start,end)
     sensor_dfs         = allValues.uo(variable, df)
     latest_readings_df = latestValues.uo(df, sensor_dfs, src)
-    display_graphs     = displayGraphs.uo(variable, sensor_dfs)
     suspect_df         = suspectReadings.uo(variable, df, dict_all)
-    map_display        = displayMaps.uo(variable, latest_readings_df)
+    display_graphs     = displayGraphs.uo(variable, sensor_dfs)
+    display_maps       = displayMaps.uo(variable, latest_readings_df)
+    display_gauge      = displayGauge.uo(latest_readings_df)
     dict_all[variable] = {'start': start, 
                           'end': end,
                           'dataframe': df, 
                           'display_graphs': display_graphs, 
                           'suspect_dataframe': suspect_df,
                           'latest_readings': latest_readings_df,
-                          'map_display': map_display
+                          'map_display': display_maps,
+                          'display_gauge': display_gauge
                           }
     return dict_all
 
@@ -41,15 +44,17 @@ def udx(variable, dict_all, src):
     df = getData.fromUOFile(variable) if src=='UDXFile' else getData.udx(variable)
     sensor_dfs         = allValues.udx(df)
     latest_readings_df = latestValues.udx(variable, df, sensor_dfs, src)
-    display_graphs     = displayGraphs.udx(variable, sensor_dfs)
     suspect_df         = suspectReadings.udx(variable, df, dict_all)
-    map_display        = displayMaps.udx(variable, latest_readings_df)
+    display_graphs     = displayGraphs.udx(variable, sensor_dfs)
+    display_maps       = displayMaps.udx(variable, latest_readings_df)
+    display_gauge      = displayGauge.udx(variable, latest_readings_df)
     dict_all[variable] = {'start': start, 
                           'end': end,
                           'dataframe': df, 
                           'display_graphs': display_graphs, 
                           'suspect_dataframe': suspect_df,
                           'latest_readings': latest_readings_df,
-                          'map_display': map_display
+                          'map_display': display_maps,
+                          'display_gauge': display_gauge
                           }
     return dict_all

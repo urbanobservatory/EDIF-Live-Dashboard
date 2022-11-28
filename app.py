@@ -84,7 +84,8 @@ def update_graph_live(n):
     elif src == 'UDX' or src == 'UDXFile': v = 'temperature'
     units = '°C'
     scheduler.update(v, dict_all, src)
-    return dict(data=dict_all[v]['display_graphs'], layout=layouts.graph(v, units, src, location))
+    # return dict(data=dict_all[v]['display_graphs'], layout=layouts.graph(v, units, src, location))
+    return dict(data=dict_all[v]['display_gauge'], layout=layouts.gauge(v, src, location))
 
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))
