@@ -1,7 +1,7 @@
 #TODO: Remove hard coded titles
 
-def graph(variable, units):
-    return dict(title=f'Newcastle UO {variable}',
+def graph(variable, units, src, location):
+    return dict(title=f'{location} {variable} ({src})',
         showlegend = False, 
         autosize = True,
         margin = dict(t=80, b=60, l=40, r=20),
@@ -31,9 +31,9 @@ def graph(variable, units):
         yaxis = dict(title = units)
     )
 
-def map(variable):
+def map(variable, src, location):
     return dict(
-        title = f'Newcastle UO {variable} Map',
+        title = f'{location} {variable} Map ({src})',
         colorbar = True,
         autosize = True,
         margin = dict(t=80, b=60, l=40, r=20),

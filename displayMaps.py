@@ -9,6 +9,6 @@ def uo(variable, df):
     return map.uo(df)
 
 def udx(variable, df):
-    df['text'] = df['id']+', '+df['pm25.value'].astype(str)+' μgm⁻³'
+    df['text'] = df['id']+', '+df[variable+'.value'].astype(str)+' μgm⁻³'
     df, color = graphCustomisation.udx(df, variable)
-    return map.udx(df)
+    return map.udx(variable, df)

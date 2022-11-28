@@ -22,10 +22,15 @@ def uo(df, sensor_dfs, src):
     ds = ds.drop('Flagged as Suspect Reading', axis=1)
     return pd.merge(ds, df, how='inner', left_on='Sensor Name', right_on='Sensor Name.0')
 
-def udx(df, sensor_dfs, src):
+def udx(variable, df, sensor_dfs, src):
     ds_list = []
     for sensor_df in sensor_dfs:
-        ds_list.append(sensor_df.loc[
-            (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
-            (sensor_df['suspectReading.value'] == False)])
+        if variable == 'pm25' or variable == 'intensity':
+            ds_list.append(sensor_df.loc[
+                (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
+                (sensor_df['suspectReading.value'] == False)])
+        elif variable == 'temperature':
+            ds_list.append(sensor_df.loc[
+                (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
+                (sensor_df[variable+'.suspectReading'] == False)])
     return pd.concat(ds_list)

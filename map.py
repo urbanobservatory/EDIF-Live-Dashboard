@@ -27,7 +27,7 @@ def uo(df):
             )
         ))]
 
-def udx(df):
+def udx(variable, df):
     return [dict(
         type = 'scattermapbox', #'scattergeo',
         locationmode = 'country names',
@@ -36,7 +36,7 @@ def udx(df):
         text = df['text'],
         mode = 'markers',
         marker = dict(
-            size = df['pm25.value'],
+            size = df[variable+'.value'],
             opacity = 0.8,
             reversescale = False,
             autocolorscale = False,
@@ -47,8 +47,8 @@ def udx(df):
             ),
             colorscale = "Reds", #Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd
             cmin = 0,
-            color = df['pm25.value'],
-            cmax = df['pm25.value'].max(),
+            color = df[variable+'.value'],
+            cmax = df[variable+'.value'].max(),
             colorbar=dict(
                 title="μgm⁻³"
             )

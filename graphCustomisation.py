@@ -7,7 +7,7 @@ load_dotenv()
 pm25_display_limit = int(os.getenv('pm25_display_limit'))
 temperature_display_limit = int(os.getenv('temperature_display_limit'))
 
-def uo(df, variable): #TODO: Define colours in parameters/dotenv file
+def uo(df, variable):
     if variable == "PM2.5":
         df = df[df['Value'] <= pm25_display_limit]
         color = '#f44242'
@@ -22,15 +22,15 @@ def uo(df, variable): #TODO: Define colours in parameters/dotenv file
     return df, color
 
 def udx(df, variable):
-    if variable == "PM2.5":
-        df = df[df['pm25.value'] <= pm25_display_limit]
+    if variable == "pm25":
+        df = df[df[variable+'.value'] <= pm25_display_limit]
         color = '#f44242'
-    elif variable == "Temperature":
-        df = df[df['temperature.value'] <= temperature_display_limit]
+    elif variable == "temperature":
+        df = df[df[variable+'.value'] <= temperature_display_limit]
         color = '#4254f5'
-    # elif variable == 'Plates Matching':
-    #     df = df[df['Value'] != 0]
-    #     color = '#47d65f'
+    elif variable == 'intensity':
+        df = df[df[variable+'.value'] != 0]
+        color = '#47d65f'
     else:
         color = '#8a8888'
     return df, color

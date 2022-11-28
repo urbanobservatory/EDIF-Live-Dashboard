@@ -40,7 +40,7 @@ def udx(variable, dict_all, src):
     start, end         = times(day_period)
     df = getData.fromUOFile(variable) if src=='UDXFile' else getData.udx(variable)
     sensor_dfs         = allValues.udx(df)
-    latest_readings_df = latestValues.udx(df, sensor_dfs, src)
+    latest_readings_df = latestValues.udx(variable, df, sensor_dfs, src)
     display_graphs     = displayGraphs.udx(variable, sensor_dfs)
     suspect_df         = suspectReadings.udx(variable, df, dict_all)
     map_display        = displayMaps.udx(variable, latest_readings_df)
@@ -53,4 +53,3 @@ def udx(variable, dict_all, src):
                           'map_display': map_display
                           }
     return dict_all
-

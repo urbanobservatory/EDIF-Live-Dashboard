@@ -38,18 +38,17 @@ def uo(variable, start, end):
 
 def udx(variable):
     print('fetching UDX data...', variable, datetime.datetime.now())
-    if variable == 'PM2.5': variable = 'pm25'
     response_API = requests.get(os.getenv(f'udx_{variable}_url'), 
         headers={"Content-Type":udx_cont, "Authorization":udx_auth+' '+os.getenv(f'udx_{variable}_key')})
     print(variable, 'status code: ', response_API.status_code)
     json_data = json.loads(response_API.text)
     df = pd.json_normalize(json_data)
-    df = df.drop(['type','@context',variable+'.type','height.type','altitude.type',
-                  'location.type','timestamp.type','aggregation.type',
-                  'dateObserved.type','suspectReading.type','location.value.type'], axis=1)
+    # df = df.drop(['type','@context',variable+'.type','height.type','altitude.type',
+    #               'location.type','timestamp.type','aggregation.type',
+    #               'dateObserved.type','suspectReading.type','location.value.type'], axis=1)
     df['id'] = df['id'].str.split(":").str[3]
     df = df[df[variable+'.value'].notna()]
-    df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000',''), format='%Y-%m-%dT%H:%M:%SZ')
+    df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
     df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
     df['Variable'] = variable
     return df
