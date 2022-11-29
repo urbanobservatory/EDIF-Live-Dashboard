@@ -36,7 +36,7 @@ def udx(variable, df):
         text = df['text'],
         mode = 'markers',
         marker = dict(
-            size = df[variable+'.value'],
+            size = df['Value'],
             opacity = 0.8,
             reversescale = False,
             autocolorscale = False,
@@ -47,8 +47,8 @@ def udx(variable, df):
             ),
             colorscale = "Reds", #Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd
             cmin = 0,
-            color = df[variable+'.value'],
-            cmax = df[variable+'.value'].max(),
+            color = df['Value'],
+            cmax = df['Value'].max(),
             colorbar=dict(
                 title="μgm⁻³"
             )

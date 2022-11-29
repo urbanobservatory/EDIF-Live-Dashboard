@@ -27,10 +27,8 @@ def udx(variable, df, sensor_dfs, src):
     for sensor_df in sensor_dfs:
         if variable == 'pm25' or variable == 'intensity':
             ds_list.append(sensor_df.loc[
-                (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
-                (sensor_df['suspectReading.value'] == False)])
+                (sensor_df['Timestamp'] == max(sensor_df['Timestamp']))])
         elif variable == 'temperature':
             ds_list.append(sensor_df.loc[
-                (sensor_df['Timestamp'] == max(sensor_df['Timestamp'])) &
-                (sensor_df[variable+'.suspectReading'] == False)])
+                (sensor_df['Timestamp'] == max(sensor_df['Timestamp']))])
     return pd.concat(ds_list)

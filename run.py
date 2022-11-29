@@ -39,22 +39,44 @@ def uo(variable, dict_all, src):
                           }
     return dict_all
 
-def udx(variable, dict_all, src):
-    start, end         = times(day_period)
-    df = getData.fromUOFile(variable) if src=='UDXFile' else getData.udx(variable)
-    sensor_dfs         = allValues.udx(df)
-    latest_readings_df = latestValues.udx(variable, df, sensor_dfs, src)
-    suspect_df         = suspectReadings.udx(variable, df, dict_all)
-    display_graphs     = displayGraphs.udx(variable, sensor_dfs)
-    display_maps       = displayMaps.udx(variable, latest_readings_df)
-    display_gauge      = displayGauge.udx(variable, latest_readings_df)
-    dict_all[variable] = {'start': start, 
-                          'end': end,
-                          'dataframe': df, 
-                          'display_graphs': display_graphs, 
-                          'suspect_dataframe': suspect_df,
-                          'latest_readings': latest_readings_df,
-                          'map_display': display_maps,
-                          'display_gauge': display_gauge
-                          }
-    return dict_all
+def udx(locations, src):
+    for loc in locations:
+        for variable_name in locations[loc]['Variables']:
+
+            variable_input = locations[loc]['Variables'][variable_name]
+
+            start, end = times(day_period)
+            df = getData.udx(loc, variable_input)
+
+            if loc == 'Newcastle':
+                df, sus_df = suspectReadings.udx(variable_input, df, locations, loc)
+
+            sensor_dfs         = allValues.udx(df)
+            latest_readings_df = latestValues.udx(variable_input, df, sensor_dfs, src)
+            
+            display_graphs     = displayGraphs.udx(variable_input, sensor_dfs)
+            display_maps       = displayMaps.udx(variable_input, latest_readings_df)
+            display_gauge      = displayGauge.display(latest_readings_df)
+
+            if loc == 'Newcastle':
+                locations[loc][variable_input] = {'start': start, 
+                                                  'end': end,
+                                                  'dataframe': df, 
+                                                  'display_graphs': display_graphs, 
+                                                  'suspect_dataframe': sus_df,
+                                                  'latest_readings': latest_readings_df,
+                                                  'map_display': display_maps,
+                                                  'display_gauge': display_gauge
+                                                }
+
+            elif loc == 'Manchester' or loc == 'Birmingham':
+                locations[loc][variable_input] = {'start': start, 
+                                                  'end': end,
+                                                  'dataframe': df, 
+                                                  'display_graphs': display_graphs,
+                                                  'latest_readings': latest_readings_df,
+                                                  'map_display': display_maps,
+                                                  'display_gauge': display_gauge
+                                                }
+
+    return locations

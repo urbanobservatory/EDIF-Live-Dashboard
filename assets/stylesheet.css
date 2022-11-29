@@ -1,10 +1,23 @@
 .banner {
     height: 75px;
     margin: 0px, -10px, 10px;
-    background-color: #2568e4;
+    background-color: #111217;
     border-radius: 2px;
     text-align: center;
-    color: white;
+    color: #ccccdc;
+}
+
+.body {
+  background-color:#111217;
+  margin: 0;
+}
+
+.labels {
+  text-align: center;
+  color: #ccccdc;
+  width: 550px;
+  display: inline-block;
+  font-size: 1.2em;
 }
 
 /* Table of contents
@@ -141,7 +154,8 @@
     line-height: 1.6;
     font-weight: 400;
     font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: rgb(50, 50, 50); }
+    color: rgb(50, 50, 50); 
+    margin: 0 }
   
   
   /* Typography
