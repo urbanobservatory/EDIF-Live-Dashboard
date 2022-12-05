@@ -42,41 +42,35 @@ def uo(variable, dict_all, src):
 def udx(locations, src):
     for loc in locations:
         for variable_name in locations[loc]['Variables']:
-
             variable_input = locations[loc]['Variables'][variable_name]
 
             start, end = times(day_period)
+            locations[loc][variable_input] = {'start': start, 'end': end}
+
             df = getData.udx(loc, variable_input)
+            if df.empty:
+                locations[loc][variable_input].update({'status': 'Offline'})
+                continue
+            df = getData.format(loc, variable_input, df)
 
             if loc == 'Newcastle':
                 df, sus_df = suspectReadings.udx(variable_input, df, locations, loc)
+                locations[loc][variable_input].update({'suspect_dataframe': sus_df})
 
-            sensor_dfs         = allValues.udx(df)
+            sensor_dfs = allValues.udx(df)
             latest_readings_df = latestValues.udx(variable_input, df, sensor_dfs, src)
             
-            display_graphs     = displayGraphs.udx(variable_input, sensor_dfs)
-            display_maps       = displayMaps.udx(variable_input, latest_readings_df)
-            display_gauge      = displayGauge.display(latest_readings_df)
+            display_graphs = displayGraphs.udx(variable_input, sensor_dfs)
+            display_maps   = displayMaps.udx(variable_input, latest_readings_df)
+            display_gauge  = displayGauge.display(latest_readings_df)
 
-            if loc == 'Newcastle':
-                locations[loc][variable_input] = {'start': start, 
-                                                  'end': end,
-                                                  'dataframe': df, 
-                                                  'display_graphs': display_graphs, 
-                                                  'suspect_dataframe': sus_df,
-                                                  'latest_readings': latest_readings_df,
-                                                  'map_display': display_maps,
-                                                  'display_gauge': display_gauge
-                                                }
-
-            elif loc == 'Manchester' or loc == 'Birmingham':
-                locations[loc][variable_input] = {'start': start, 
-                                                  'end': end,
-                                                  'dataframe': df, 
-                                                  'display_graphs': display_graphs,
-                                                  'latest_readings': latest_readings_df,
-                                                  'map_display': display_maps,
-                                                  'display_gauge': display_gauge
-                                                }
+            locations[loc][variable_input].update({
+                'dataframe': df, 
+                'display_graphs': display_graphs,
+                'latest_readings': latest_readings_df,
+                'map_display': display_maps,
+                'display_gauge': display_gauge,
+                'status': 'Online'
+            })
 
     return locations

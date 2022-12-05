@@ -41,6 +41,39 @@ def udx(location, variable):
     print(variable, 'status code: ', response_API.status_code)
     json_data = json.loads(response_API.text)
     df = pd.json_normalize(json_data)
+    return df
+
+
+def format(loc, variable, df):
+    # id, value, variable, units, suspect reading, unix time, datetime, latitude, longitude
+
+    if loc == 'Newcastle':
+
+        if variable == 'pm25':
+            pass
+
+        elif variable == 'temperature':
+            pass
+
+        elif variable == 'intensity':
+            pass
+
+    elif loc == 'Manchester':
+        print(df.info())
+
+        if variable == 'pm25':
+            pass
+
+        elif variable == 'intensity':
+            pass
+
+        if variable == 'bc':
+            pass
+
+    elif loc == 'Birmingham':
+
+        if variable == 'pm25':
+            pass
 
     #TODO: Drop relevant columns for each variable to save on memory
     # df = df.drop(['type','@context',variable+'.type','height.type','altitude.type',

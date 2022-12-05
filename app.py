@@ -41,7 +41,7 @@ locations = {
             }
 
 # INITIAL RUN
-run.udx(locations, src)
+locations = run.udx(locations, src)
     
 
 # APPLICATION
@@ -74,11 +74,24 @@ app.layout = html.Div([
             dash.dash_table.DataTable(
                 id='Suspect_table',
                 page_size=12,
-                style_table={'height': '421.2px', 
+                style_table={'height': '210.6px', 
                              'width': '550px',
                              'overflowY': 'auto'},
                 style_as_list_view=True,
                 style_cell=dict(backgroundColor='#111217'),
+                style_header=dict(backgroundColor='#181b1f',
+                                  fontWeight='bold',
+                                  color='#ccccdc'),
+                style_data=dict(color="#ccccdc")
+            ),
+            dash.dash_table.DataTable(
+                id='Alerts_table',
+                page_size=12,
+                style_table={'height': '210.6px', 
+                             'width': '550px',
+                             'overflowY': 'auto'},
+                style_as_list_view=True,
+                style_cell=dict(backgroundColor='#111217', textAlign='center'),
                 style_header=dict(backgroundColor='#181b1f',
                                   fontWeight='bold',
                                   color='#ccccdc'),
@@ -97,7 +110,7 @@ app.layout = html.Div([
             dcc.Graph(
                 id='Graph_3'
             )
-        ], className="eight columns")
+        ], className="eight columns"),
     ], className='row'
     ),
     dcc.Interval(
@@ -140,18 +153,31 @@ def update_graph_live(n):
 @app.callback(Output('Suspect_table', 'data'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    # for v in variables:
-    # scheduler.update(v, l, locations, src)
     i = []
-    for v in locations[l]:
-        if v != 'Variables':
-            i.append(locations[l][v]['suspect_dataframe'])
+    for l in locations:
+        for v in locations[l]:
+            if v != 'Variables' and l == 'Newcastle':
+                i.append(locations[l][v]['suspect_dataframe'])
     sus_df = pd.concat(i)
     if src == 'UO' or src == 'UOFile':
         sus_df = sus_df.loc[:, ["Sensor Name", "Timestamp", "Variable", "Value", "Units"]]
     elif src == 'UDX' or src == 'UDXFile':
         sus_df = sus_df.loc[:, ["id", "dateObserved.value", "Variable", "Value", "Units"]]
     return sus_df.to_dict('records')
+
+@app.callback(Output('Alerts_table', 'data'),
+              Input('interval-component', 'n_intervals'))
+def update_graph_live(n): 
+    a = []
+    for l in locations:
+        for v in locations[l]:
+            if v != 'Variables' and locations[l][v]['status'] == 'Offline':
+                if f'{l} {v} Stream is Offline' not in a:
+                    a.append(f'{l} {v} Stream is Offline')
+    if len(a) == 0:
+        a.append('No Alerts')
+    df = pd.DataFrame({'Alerts':a})
+    return df.to_dict('records')
 
 @app.callback(Output('map', 'figure'),
               Input('interval-component', 'n_intervals'))
