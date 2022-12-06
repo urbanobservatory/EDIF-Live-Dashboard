@@ -1,4 +1,4 @@
-def graph(variable, units, src, location):
+def graph(src, location, variable, units):
     if src == 'UO' or src == 'UOFile':
         period = ['day', 1, 3, 5, 'd']
     elif src == 'UDX' or src == 'UDXFile':
@@ -42,7 +42,7 @@ def graph(variable, units, src, location):
         font=dict(color="#ccccdc")
     )
 
-def map(variable, src, location):
+def map(src, location, variable):
     #TODO: Remove all if statements like one below and have associated display names for variables
     if variable == 'intensity' or variable == 'Plates Out':
         variable = 'Traffic Flow'
@@ -62,7 +62,7 @@ def map(variable, src, location):
         )
     )
 
-def gauge(variable, src, location):
+def gauge(src, location, variable):
     #TODO: Remove all if statements like one below and have associated display names for variables
     if variable == 'intensity' or variable == 'Plates Out':
         variable = 'Traffic Flow'

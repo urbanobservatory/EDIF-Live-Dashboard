@@ -5,43 +5,10 @@ from dash.dependencies import Output, Input, State
 import pandas as pd
 import run
 import layouts
-import scheduler
 from dotenv import load_dotenv
 
 load_dotenv()
-
-l = 'Newcastle'
-src = 'UDX' # 'UOFile', 'UO', 'UDX', 'UDXFile'
-if src == 'UO' or src == 'UOFile':
-    variables = ["PM2.5", "Temperature", "Plates Matching"]
-elif src == 'UDX' or src == 'UDXFile':
-    variables = ['pm25', 'temperature', 'intensity']
 update_frequency = int(os.getenv('update_frequency'))
-
-locations = {
-                'Newcastle': {
-                    'Variables': {
-                        'PM2.5': 'pm25', 
-                        'Temperature': 'temperature', 
-                        'Traffic Flow': 'intensity'
-                    }
-                },
-                'Manchester': {
-                    'Variables': {
-                        'PM2.5': 'pm25', 
-                        'Traffic Flow': 'intensity',
-                        'Black Carbon': 'bc'
-                    }
-                },
-                'Birmingham': {
-                    'Variables': {
-                        'PM2.5': 'pm25'
-                    }
-                }
-            }
-
-# INITIAL RUN
-locations = run.udx(locations, src)
     
 
 # APPLICATION
@@ -117,75 +84,92 @@ app.layout = html.Div([
         id='interval-component',
         interval=60000*update_frequency,
         n_intervals=0
+    ),
+    html.Div(
+        html.H1('EDIF Interactive Live Dashboard'),
+        className="footer"
     )
 ], className="body")
 
-# CALLBACKS
 
+# CALLBACKS
 @app.callback(Output('Graph_1', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    if src == 'UO' or src == 'UOFile': v = 'Temperature'
-    elif src == 'UDX' or src == 'UDXFile': v = 'temperature'
-    units = '°C'
-    scheduler.update(v, l, locations, src)
-    # return dict(data=dict_all[v]['display_graphs'], layout=layouts.graph(v, units, src, location))
-    return dict(data=locations[l][v]['display_gauge'], layout=layouts.gauge(v, src, l))
+    src      = 'UDX'
+    location = 'Newcastle'
+    variable = 'temperature'
+    units    = '°C'
+    data = run.udx(src, location, variable)
+    layout = layouts.gauge(src, variable, location)
+    return dict(data=data['display_gauge'], layout=layout)
 
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    if src == 'UO' or src == 'UOFile': v = 'PM2.5'
-    elif src == 'UDX' or src == 'UDXFile': v = 'pm25'
-    units = 'μgm⁻³'
-    scheduler.update(v, l, locations, src)
-    return dict(data=locations[l][v]['display_graphs'], layout=layouts.graph(v, units, src, l))
+    src      = 'UDX'
+    location = 'Newcastle'
+    variable = 'pm25'
+    units    = 'μgm⁻³'
+    data = run.udx(src, location, variable)
+    layout = layouts.graph(src, location, variable, units)
+    return dict(data=data['display_graphs'], layout=layout)
 
 @app.callback(Output('Graph_3', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    if src == 'UO' or src == 'UOFile': v = 'Plates Matching'
-    elif src == 'UDX' or src == 'UDXFile': v = 'intensity'
-    units = 'Number of Vehicles'
-    scheduler.update(v, l, locations, src)
-    return dict(data=locations[l][v]['display_graphs'], layout=layouts.graph(v, units, src, l))
+    src      = 'UDX'
+    location = 'Newcastle'
+    variable = 'intensity'
+    units    = 'Number of Vehicles'
+    data = run.udx(src, location, variable)
+    layout = layouts.graph(src, location, variable, units)
+    return dict(data=data['display_graphs'], layout=layout)
 
 @app.callback(Output('Suspect_table', 'data'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    i = []
-    for l in locations:
-        for v in locations[l]:
-            if v != 'Variables' and l == 'Newcastle':
-                i.append(locations[l][v]['suspect_dataframe'])
-    sus_df = pd.concat(i)
-    if src == 'UO' or src == 'UOFile':
-        sus_df = sus_df.loc[:, ["Sensor Name", "Timestamp", "Variable", "Value", "Units"]]
-    elif src == 'UDX' or src == 'UDXFile':
-        sus_df = sus_df.loc[:, ["id", "dateObserved.value", "Variable", "Value", "Units"]]
-    return sus_df.to_dict('records')
+    src       = 'UDX'
+    location  = 'Newcastle'
+    variables = ['pm25', 'temperature', 'intensity']
+    l = []
+    for variable in variables:
+        data = run.udx(src, location, variable)
+        l.append(data['suspect_dataframe'])
+    df = pd.concat(l)
+    df = df.loc[:, ["id", "dateObserved.value", "Variable", "Value", "Units"]]
+    return df.to_dict('records')
 
 @app.callback(Output('Alerts_table', 'data'),
               Input('interval-component', 'n_intervals'))
-def update_graph_live(n): 
-    a = []
-    for l in locations:
-        for v in locations[l]:
-            if v != 'Variables' and locations[l][v]['status'] == 'Offline':
-                if f'{l} {v} Stream is Offline' not in a:
-                    a.append(f'{l} {v} Stream is Offline')
-    if len(a) == 0:
-        a.append('No Alerts')
-    df = pd.DataFrame({'Alerts':a})
+def update_graph_live(n):
+    src       = 'UDX'
+    locations = ['Newcastle', 'Manchester', 'Birmingham']
+    variables = ['pm25', 'temperature', 'intensity', 'bc']
+    l = []
+    for location in locations:
+        for variable in variables:
+            try:
+                data = run.udx(src, location, variable)
+                if data['status'] == 'Offline':
+                    l.append(f'{location} {variable} Stream is Offline')
+            except:
+                continue
+    if len(l) == 0:
+        l.append('No Alerts')
+    df = pd.DataFrame({'Alerts':l})
     return df.to_dict('records')
 
 @app.callback(Output('map', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    if src == 'UO' or src == 'UOFile': v = 'PM2.5'
-    elif src == 'UDX' or src == 'UDXFile': v = 'pm25'
-    scheduler.update(v, l, locations, src)
-    return dict(data=locations[l][v]['map_display'], layout=layouts.map(v, src, l))
+    src      = 'UDX'
+    location = 'Newcastle'
+    variable = 'pm25'
+    units    = 'μgm⁻³'
+    data = run.udx(src, location, variable)
+    layout = layouts.map(src, location, variable)
+    return dict(data=data['map_display'], layout=layout)
 
 
 if __name__ == "__main__":

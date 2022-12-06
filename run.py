@@ -39,38 +39,35 @@ def uo(variable, dict_all, src):
                           }
     return dict_all
 
-def udx(locations, src):
-    for loc in locations:
-        for variable_name in locations[loc]['Variables']:
-            variable_input = locations[loc]['Variables'][variable_name]
+def udx(src, location, variable):
+    start, end = times(day_period)
+    data = {'start': start, 'end': end}
 
-            start, end = times(day_period)
-            locations[loc][variable_input] = {'start': start, 'end': end}
+    df = getData.udx(location, variable)
+    if df.empty:
+        data.update({'status': 'Offline'})
 
-            df = getData.udx(loc, variable_input)
-            if df.empty:
-                locations[loc][variable_input].update({'status': 'Offline'})
-                continue
-            df = getData.format(loc, variable_input, df)
+    else:
+        df = getData.format(location, variable, df)
 
-            if loc == 'Newcastle':
-                df, sus_df = suspectReadings.udx(variable_input, df, locations, loc)
-                locations[loc][variable_input].update({'suspect_dataframe': sus_df})
+        if location == 'Newcastle':
+            df, sus_df = suspectReadings.udx(variable, df)
+            data.update({'suspect_dataframe': sus_df})
 
-            sensor_dfs = allValues.udx(df)
-            latest_readings_df = latestValues.udx(variable_input, df, sensor_dfs, src)
-            
-            display_graphs = displayGraphs.udx(variable_input, sensor_dfs)
-            display_maps   = displayMaps.udx(variable_input, latest_readings_df)
-            display_gauge  = displayGauge.display(latest_readings_df)
+        sensor_dfs = allValues.udx(df)
+        latest_readings_df = latestValues.udx(variable, df, sensor_dfs, src)
+        
+        display_graphs = displayGraphs.udx(variable, sensor_dfs)
+        display_maps   = displayMaps.udx(variable, latest_readings_df)
+        display_gauge  = displayGauge.display(latest_readings_df)
 
-            locations[loc][variable_input].update({
-                'dataframe': df, 
-                'display_graphs': display_graphs,
-                'latest_readings': latest_readings_df,
-                'map_display': display_maps,
-                'display_gauge': display_gauge,
-                'status': 'Online'
-            })
+        data.update({
+            'dataframe': df, 
+            'display_graphs': display_graphs,
+            'latest_readings': latest_readings_df,
+            'map_display': display_maps,
+            'display_gauge': display_gauge,
+            'status': 'Online'
+        })
 
-    return locations
+    return data

@@ -17,7 +17,7 @@ def uo(variable, df, dict_all):
     #     suspects = suspects[0]
     return pd.concat(suspects).drop_duplicates().reset_index(drop=True)
 
-def udx(variable, df, locations, loc):
+def udx(variable, df):
     if variable == 'pm25' or variable == 'intensity':
         df = df.loc[df['suspectReading.value'] == False]
         sus_df = df.loc[df['suspectReading.value'] == True]
