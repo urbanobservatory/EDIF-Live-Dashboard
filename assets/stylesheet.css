@@ -22,13 +22,18 @@
 }
 
 .footer {
-  height: 200px;
   margin: 0px, -100px, 10px;
-  background-color: #181b1f;
+  background-color: #ccccdc;
   border-radius: 2px;
-  text-align: center;
-  color: #ccccdc;
   padding: 10px;
+  width: 100%;
+  float: left;
+  display: flex;
+}
+
+.img {
+  margin: 0px 65px 0px 0px;
+  display: inline;
 }
 
 /* Table of contents

@@ -85,9 +85,32 @@ app.layout = html.Div([
         interval=60000*update_frequency,
         n_intervals=0
     ),
-    html.Div(
-        html.H1('EDIF Interactive Live Dashboard'),
-        className="footer"
+    html.Div([
+        html.Div(
+            html.Img(src="/assets/DfT_logo_60.png"),
+            className='img'            
+        ),
+        html.Div(
+            html.Img(src="/assets/ATI_logo_60.png"),
+            className='img'            
+        ),
+        html.Div(
+            html.Img(src="/assets/UDX_logo_60.png"),
+            className='img'            
+        ),
+        html.Div(
+            html.Img(src="/assets/UO_logo_60.png"),
+            className='img'
+        ),
+        html.Div(
+            html.Img(src="/assets/Man_UO_logo_60.png"),
+            className='img'
+        ),
+        html.Div(
+            html.Img(src="/assets/Birm_UO_logo_60.png"),
+            className='img'
+        )
+    ], className="footer"
     )
 ], className="body")
 
