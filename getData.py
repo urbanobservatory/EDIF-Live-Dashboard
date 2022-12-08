@@ -179,7 +179,9 @@ def fetch(src, location, variable, units, start, end):
             df = df.drop([source+'.time', 'altitude'], axis='columns')
             df['Variable'] = variable
             df['Units'] = units
-            df['Suspect Readings'] = np.nan
+            df['Suspect Readings'] = False
+            df['Datetime'] = pd.to_datetime(df['Timestamp'], unit='ms')
+            df['ID'] = df['ID'].astype(str)
             dfs.append(df)
 
         df = pd.concat(dfs)

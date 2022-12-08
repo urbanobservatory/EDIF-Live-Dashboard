@@ -3,6 +3,8 @@ def graph(src, location, variable, units):
         period = ['day', 1, 3, 5, 'd']
     elif src == 'UDX' or src == 'UDXFile':
         period = ['minute', 20, 40, 60, 'm']
+    elif src == 'SUF':
+        period = ['hour', 1, 2, 3, 'h']
     #TODO: Remove all if statements like one below and have associated display names for variables
     if variable == 'intensity' or variable == 'Plates Out':
         variable = 'Traffic Flow'

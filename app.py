@@ -130,9 +130,9 @@ def update_graph_live(n):
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    src      = 'UDX'
-    location = 'Newcastle'
-    variable = 'pm25'
+    src      = 'SUF'
+    location = 'Sheffield'
+    variable = 'PM25'
     units    = 'μgm⁻³'
     data = run.udx(src, location, variable, units)
     layout = layouts.graph(src, location, variable, units)
@@ -160,7 +160,6 @@ def update_graph_live(n):
         data = run.udx(src, location, variable)
         l.append(data['suspect_dataframe'])
     df = pd.concat(l)
-    print(df)
     df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]
     return df.to_dict('records')
 
