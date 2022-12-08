@@ -123,7 +123,7 @@ def update_graph_live(n):
     location = 'Newcastle'
     variable = 'temperature'
     units    = '°C'
-    data = run.udx(src, location, variable)
+    data = run.udx(src, location, variable, units)
     layout = layouts.gauge(src, variable, location)
     return dict(data=data['display_gauge'], layout=layout)
 
@@ -134,7 +134,7 @@ def update_graph_live(n):
     location = 'Newcastle'
     variable = 'pm25'
     units    = 'μgm⁻³'
-    data = run.udx(src, location, variable)
+    data = run.udx(src, location, variable, units)
     layout = layouts.graph(src, location, variable, units)
     return dict(data=data['display_graphs'], layout=layout)
 
@@ -145,7 +145,7 @@ def update_graph_live(n):
     location = 'Newcastle'
     variable = 'intensity'
     units    = 'Number of Vehicles'
-    data = run.udx(src, location, variable)
+    data = run.udx(src, location, variable, units)
     layout = layouts.graph(src, location, variable, units)
     return dict(data=data['display_graphs'], layout=layout)
 
@@ -160,7 +160,8 @@ def update_graph_live(n):
         data = run.udx(src, location, variable)
         l.append(data['suspect_dataframe'])
     df = pd.concat(l)
-    df = df.loc[:, ["id", "dateObserved.value", "Variable", "Value", "Units"]]
+    print(df)
+    df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]
     return df.to_dict('records')
 
 @app.callback(Output('Alerts_table', 'data'),
@@ -190,7 +191,7 @@ def update_graph_live(n):
     location = 'Newcastle'
     variable = 'pm25'
     units    = 'μgm⁻³'
-    data = run.udx(src, location, variable)
+    data = run.udx(src, location, variable, units)
     layout = layouts.map(src, location, variable)
     return dict(data=data['map_display'], layout=layout)
 

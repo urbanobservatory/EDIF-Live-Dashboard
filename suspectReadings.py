@@ -18,18 +18,13 @@ def uo(variable, df, dict_all):
     return pd.concat(suspects).drop_duplicates().reset_index(drop=True)
 
 def udx(variable, df):
-    if variable == 'pm25' or variable == 'intensity':
-        df = df.loc[df['suspectReading.value'] == False]
-        sus_df = df.loc[df['suspectReading.value'] == True]
-
-    elif variable == 'temperature':
-        df = df.loc[df[variable+'.suspectReading'] == False]
-        sus_df = df.loc[df[variable+'.suspectReading'] == True]
+    df = df.loc[df['Suspect Reading'] == False]
+    sus_df = df.loc[df['Suspect Reading'] == True]
 
     if sus_df.empty:
-        sus_df = pd.DataFrame.from_dict({"id":['None'], "dateObserved.value":['-'], "Variable":[variable], "Value":['-'], "Units":['-']})
+        sus_df = pd.DataFrame.from_dict({"ID":['None'], "Datetime":['-'], "Variable":[variable], "Value":['-'], "Units":['-']})
 
-    sus_df = sus_df.drop_duplicates(subset=['id', 'dateObserved.value'], keep='last')
+    sus_df = sus_df.drop_duplicates(subset=['ID', 'Datetime'], keep='last')
 
     #TODO: Figure out the below on how to concatenate previous suspects
     # suspects = []

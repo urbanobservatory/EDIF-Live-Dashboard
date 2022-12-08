@@ -11,8 +11,8 @@ def uo(variable, df):
 
 def udx(df):
     sensor_dfs=[]
-    id_list = list(dict.fromkeys(list(df['id'])))
-    grouped = df.groupby(df['id'])
+    id_list = list(dict.fromkeys(list(df['ID'])))
+    grouped = df.groupby(df['ID'])
     for i in id_list:
         sensor_dfs.append(grouped.get_group(i))
     return sensor_dfs

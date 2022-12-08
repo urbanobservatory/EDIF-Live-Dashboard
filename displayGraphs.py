@@ -28,7 +28,7 @@ def udx(variable, sensor_dfs):
     for ds in sensor_dfs:
         ds, color = graphCustomisation.customise(ds, variable)
         try:
-            name = ds['id'].iloc[0]
+            name = ds['ID'].iloc[0]
         except:
             name = 'unknown sensor name'
         display_graphs.append(graph.plot(ds, name, color))

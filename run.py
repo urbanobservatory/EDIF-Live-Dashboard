@@ -39,17 +39,15 @@ def uo(variable, dict_all, src):
                           }
     return dict_all
 
-def udx(src, location, variable):
+def udx(src, location, variable, units=None):
     start, end = times(day_period)
     data = {'start': start, 'end': end}
 
-    df = getData.udx(location, variable)
+    df = getData.fetch(src, location, variable, units, start, end)
     if df.empty:
         data.update({'status': 'Offline'})
 
     else:
-        df = getData.format(location, variable, df)
-
         if location == 'Newcastle':
             df, sus_df = suspectReadings.udx(variable, df)
             data.update({'suspect_dataframe': sus_df})

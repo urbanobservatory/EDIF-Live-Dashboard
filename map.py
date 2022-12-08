@@ -31,8 +31,8 @@ def udx(variable, df):
     return [dict(
         type = 'scattermapbox', #'scattergeo',
         locationmode = 'country names',
-        lon = df['location.value.coordinates'].str[0],
-        lat = df['location.value.coordinates'].str[1],
+        lon = df['Longitude'],
+        lat = df['Latitude'],
         text = df['text'],
         mode = 'markers',
         marker = dict(
