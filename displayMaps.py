@@ -1,14 +1,35 @@
 # Returns customised plotly maps
 
 import graphCustomisation
-import map
 
-def uo(variable, df):
-    df['text'] = df['Sensor Name']+', '+df['Value'].astype(str)+' μgm⁻³'
-    df, color = graphCustomisation.uo(df, variable)
-    return map.uo(df)
+def map(variable, df):
+    return [dict(
+        type = 'scattermapbox', #'scattergeo',
+        locationmode = 'country names',
+        lon = df['Longitude'],
+        lat = df['Latitude'],
+        text = df['text'],
+        mode = 'markers',
+        marker = dict(
+            size = df['Value'],
+            opacity = 0.8,
+            reversescale = False,
+            autocolorscale = False,
+            symbol = 'circle',
+            line = dict(
+                width=1,
+                color='rgba(102, 102, 102)'
+            ),
+            colorscale = "Reds", #Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd
+            cmin = 0,
+            color = df['Value'],
+            cmax = df['Value'].max(),
+            colorbar=dict(
+                title="μgm⁻³"
+            )
+        ))]
 
-def udx(variable, df):
+def run(variable, df):
     df['text'] = df['ID']+', '+df['Value'].astype(str)+' μgm⁻³'
     df, color = graphCustomisation.customise(df, variable)
-    return map.udx(variable, df)
+    return map(variable, df)

@@ -121,20 +121,20 @@ app.layout = html.Div([
 def update_graph_live(n):
     src      = 'UDX'
     location = 'Newcastle'
-    variable = 'temperature'
+    variable = 'Temperature'
     units    = '°C'
-    data = run.udx(src, location, variable, units)
+    data = run.run(src, location, variable, units)
     layout = layouts.gauge(src, variable, location)
     return dict(data=data['display_gauge'], layout=layout)
 
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
-    src      = 'SUF'
-    location = 'Sheffield'
-    variable = 'PM25'
+    src      = 'UDX'
+    location = 'Newcastle'
+    variable = 'PM2.5'
     units    = 'μgm⁻³'
-    data = run.udx(src, location, variable, units)
+    data = run.run(src, location, variable, units)
     layout = layouts.graph(src, location, variable, units)
     return dict(data=data['display_graphs'], layout=layout)
 
@@ -143,9 +143,9 @@ def update_graph_live(n):
 def update_graph_live(n):
     src      = 'UDX'
     location = 'Newcastle'
-    variable = 'intensity'
+    variable = 'Traffic Flow'
     units    = 'Number of Vehicles'
-    data = run.udx(src, location, variable, units)
+    data = run.run(src, location, variable, units)
     layout = layouts.graph(src, location, variable, units)
     return dict(data=data['display_graphs'], layout=layout)
 
@@ -154,10 +154,10 @@ def update_graph_live(n):
 def update_graph_live(n):
     src       = 'UDX'
     location  = 'Newcastle'
-    variables = ['pm25', 'temperature', 'intensity']
+    variables = ['PM2.5', 'Temperature', 'Traffic Flow']
     l = []
     for variable in variables:
-        data = run.udx(src, location, variable)
+        data = run.run(src, location, variable)
         l.append(data['suspect_dataframe'])
     df = pd.concat(l)
     df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]
@@ -168,12 +168,12 @@ def update_graph_live(n):
 def update_graph_live(n):
     src       = 'UDX'
     locations = ['Newcastle', 'Manchester', 'Birmingham']
-    variables = ['pm25', 'temperature', 'intensity', 'bc']
+    variables = ['PM2.5', 'Temperature', 'Traffic Flow', 'Black Carbon']
     l = []
     for location in locations:
         for variable in variables:
             try:
-                data = run.udx(src, location, variable)
+                data = run.run(src, location, variable)
                 if data['status'] == 'Offline':
                     l.append(f'{location} {variable} Stream is Offline')
             except:
@@ -188,9 +188,9 @@ def update_graph_live(n):
 def update_graph_live(n):
     src      = 'UDX'
     location = 'Newcastle'
-    variable = 'pm25'
+    variable = 'PM2.5'
     units    = 'μgm⁻³'
-    data = run.udx(src, location, variable, units)
+    data = run.run(src, location, variable, units)
     layout = layouts.map(src, location, variable)
     return dict(data=data['map_display'], layout=layout)
 
