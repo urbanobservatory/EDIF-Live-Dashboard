@@ -2,7 +2,7 @@
 
 import graphCustomisation
 
-def map(variable, df):
+def map(variable, df, units):
     return [dict(
         type = 'scattermapbox', #'scattergeo',
         locationmode = 'country names',
@@ -25,11 +25,11 @@ def map(variable, df):
             color = df['Value'],
             cmax = df['Value'].max(),
             colorbar=dict(
-                title="μgm⁻³"
+                title=units
             )
         ))]
 
-def run(variable, df):
-    df['text'] = df['ID']+', '+df['Value'].astype(str)+' μgm⁻³'
+def run(variable, df, units):
+    df['text'] = df['ID']+', '+df['Value'].astype(str)+units
     df, color = graphCustomisation.customise(df, variable)
-    return map(variable, df)
+    return map(variable, df, units)

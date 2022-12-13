@@ -41,9 +41,11 @@ app.layout = html.Div([
             dash.dash_table.DataTable(
                 id='Suspect_table',
                 page_size=12,
-                style_table={'height': '210.6px', 
-                             'width': '550px',
-                             'overflowY': 'auto'},
+                style_table={
+                    'height': '210.6px', 
+                    'width': '550px',
+                    'overflowY': 'auto'
+                    },
                 style_as_list_view=True,
                 style_cell=dict(backgroundColor='#111217'),
                 style_header=dict(backgroundColor='#181b1f',
@@ -54,9 +56,11 @@ app.layout = html.Div([
             dash.dash_table.DataTable(
                 id='Alerts_table',
                 page_size=12,
-                style_table={'height': '210.6px', 
-                             'width': '550px',
-                             'overflowY': 'auto'},
+                style_table={
+                    'height': '210.6px', 
+                    'width': '550px',
+                    'overflowY': 'auto'
+                    },
                 style_as_list_view=True,
                 style_cell=dict(backgroundColor='#111217', textAlign='center'),
                 style_header=dict(backgroundColor='#181b1f',
@@ -157,10 +161,11 @@ def update_graph_live(n):
     variables = ['PM2.5', 'Temperature', 'Traffic Flow']
     l = []
     for variable in variables:
-        data = run.run(src, location, variable)
-        l.append(data['suspect_dataframe'])
+        d = run.run(src, location, variable)
+        l.append(d['suspect_dataframe'])
     df = pd.concat(l)
-    df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]
+    df = df.drop_duplicates(subset=['ID', 'Datetime'], keep='last')
+    df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]  
     return df.to_dict('records')
 
 @app.callback(Output('Alerts_table', 'data'),
@@ -173,8 +178,8 @@ def update_graph_live(n):
     for location in locations:
         for variable in variables:
             try:
-                data = run.run(src, location, variable)
-                if data['status'] == 'Offline':
+                d = run.run(src, location, variable)
+                if d['status'] == 'Offline':
                     l.append(f'{location} {variable} Stream is Offline')
             except:
                 continue

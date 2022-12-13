@@ -1,7 +1,7 @@
 # EDIF-Live-Dashboard
-Pip install requirements:
+Install requirements:
 
-    dash, pandas, plotly, dotenv
+    pip install dash pandas plotly dotenv requests numpy
 
 run: 
     

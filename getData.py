@@ -87,7 +87,7 @@ def getSUF(location, variable, units, start, end):
         df = df.drop([source+'.time', 'altitude'], axis='columns')
         df['Variable'] = variable
         df['Units'] = units
-        df['Suspect Readings'] = False
+        df['Suspect Reading'] = False
         df['Datetime'] = pd.to_datetime(df['Timestamp'], unit='ms')
         df['ID'] = df['ID'].astype(str)
         dfs.append(df)
@@ -100,17 +100,20 @@ def fetch(src, location, variable, units, start, end):
     if src == 'UO':
 
         if variable == 'PM2.5':
+            units = 'μgm⁻³'
             df = getUO(variable, start, end)
             if df.empty:
                 return df
 
         elif variable == 'Temperature':
+            units = '°C'
             df = getUO(variable, start, end)
             if df.empty:
                 return df
 
         elif variable == 'Traffic Flow':
             variable = 'Plates Matching'
+            units = 'Number of Vehicles'
             df = getUO(variable, start, end)
             if df.empty:
                 return df
@@ -145,6 +148,7 @@ def fetch(src, location, variable, units, start, end):
             if variable == 'PM2.5':
 
                 variable = 'pm25'
+                units = 'μgm⁻³'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -170,6 +174,7 @@ def fetch(src, location, variable, units, start, end):
             elif variable == 'Temperature':
 
                 variable = 'temperature'
+                units = '°C'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -195,6 +200,7 @@ def fetch(src, location, variable, units, start, end):
             elif variable == 'Traffic Flow':
 
                 variable = 'intensity'
+                units = 'Number of Vehicles'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -231,6 +237,7 @@ def fetch(src, location, variable, units, start, end):
             if variable == 'PM2.5':
 
                 variable = 'pm25'
+                units = 'μgm⁻³'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -253,6 +260,7 @@ def fetch(src, location, variable, units, start, end):
             elif variable == 'Traffic Flow':
 
                 variable = 'intensity'
+                units = 'Number of Vehicles'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -277,6 +285,7 @@ def fetch(src, location, variable, units, start, end):
             elif variable == 'Black Carbon':
 
                 variable = 'bc'
+                units = 'ngm⁻³'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -310,6 +319,7 @@ def fetch(src, location, variable, units, start, end):
             if variable == 'PM2.5':
 
                 variable = 'pm25'
+                units = 'μgm⁻³'
                 df = getUDX(location, variable)
 
                 if df.empty:
@@ -343,14 +353,14 @@ def fetch(src, location, variable, units, start, end):
 
         if variable == 'PM2.5':
             variable = 'PM25'
+            units = 'μgm⁻³'
 
             df = getSUF(location, variable, units, start, end)
 
             if df.empty:
                     return df
 
-        
-
+    
     df = df[df['Value'].notna()]
     
     return df
