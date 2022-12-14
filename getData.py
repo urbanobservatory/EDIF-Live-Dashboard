@@ -35,8 +35,12 @@ def getUO(variable, start, end):
 
 def getUDX(location, variable):
     print('fetching UDX data...', location, variable, datetime.datetime.now())
-    response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
-    headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
+    if location == 'Birmingham':
+        response_API = requests.get(os.getenv(f'{location}_url'), 
+        headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')})
+    else:
+        response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
+        headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
     print(variable, 'status code: ', response_API.status_code)
     json_data = json.loads(response_API.text)
     return pd.json_normalize(json_data)
@@ -317,27 +321,59 @@ def fetch(src, location, variable, units, start, end):
         elif location == 'Birmingham':
 
             if variable == 'PM2.5':
-
                 variable = 'pm25'
                 units = 'μgm⁻³'
-                df = getUDX(location, variable)
 
-                if df.empty:
+            elif variable == 'Nitric Oxide':
+                variable = 'no'
+                units = 'μgm⁻³'
+
+            elif variable == 'Ozone':
+                variable = 'o3'
+                units = 'μgm⁻³'
+
+            elif variable == 'Nitrogen Dioxide':
+                variable = 'no2'
+                units = 'μgm⁻³'
+
+            elif variable == 'PM1':
+                variable = 'pm1'
+                units = 'μgm⁻³'
+
+            elif variable == 'PM10':
+                variable = 'pm10'
+                units = 'μgm⁻³'
+
+            elif variable == 'Humidity':
+                variable = 'humidity'
+                units = '%'
+
+            elif variable == 'Pressure':
+                variable = 'pressure'
+                units = 'Pa'
+
+            elif variable == 'Temperature':
+                variable = 'temperature'
+                units = '°C'
+
+            df = getUDX(location, variable)
+
+            if df.empty:
                     return df
 
-                df = df[[
-                    'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
-                    'dateObserved.value'
-                    ]]
+            df = df[[
+                'id', 
+                variable+'.unit', 
+                variable+'.value', 
+                'dateObserved.value'
+                ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
-                    'timestamp.value': 'Timestamp',
-                }, axis='columns', inplace=True)
+            df.rename({
+                'id': 'ID',
+                variable+'.unit': 'Units',
+                variable+'.value': 'Value',
+                'timestamp.value': 'Timestamp',
+            }, axis='columns', inplace=True)
 
             df['ID'] = df['ID'].str.split(":").str[3]
             df['Variable'] = variable

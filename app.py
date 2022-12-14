@@ -2,8 +2,11 @@ import os
 import dash
 from dash import dcc, html
 from dash.dependencies import Output, Input, State
+import plotly.graph_objects as go
 import pandas as pd
 import run
+import displayCard
+import displayGauge
 import layouts
 from dotenv import load_dotenv
 
@@ -125,11 +128,34 @@ app.layout = html.Div([
 def update_graph_live(n):
     src      = 'UDX'
     location = 'Newcastle'
-    variable = 'Temperature'
-    units    = '°C'
-    data = run.run(src, location, variable, units)
-    layout = layouts.gauge(src, variable, location)
-    return dict(data=data['display_gauge'], layout=layout)
+    variables_a = ['PM2.5', 'Temperature', 'Traffic Flow']
+    variable_b = 'Temperature'
+    domain_a = {'row': 0, 'column': 0}
+    domain_b = {'row': 0, 'column': 1}
+    units_b = '°C'
+    fig = go.Figure()
+
+    sensors_online = 0
+    for variable_a in variables_a:
+        data_a = run.run(src, location, variable_a)
+        sensors_online += data_a['sensors_online']
+    fig.add_trace(displayCard.run(location, sensors_online, domain_a))
+
+    data_b = run.run(src, location, variable_b)
+    display_gauge = displayGauge.run(src, location, variable_b, units_b, data_b['latest_readings'], domain_b)
+    fig.add_trace(display_gauge[0])
+
+    layout = layouts.indicators()
+    fig.update_layout(
+        autosize      = layout['autosize'],
+        paper_bgcolor = layout['paper_bgcolor'],
+        plot_bgcolor  = layout['plot_bgcolor'],
+        font          = layout['font'],
+        margin        = layout['margin'],
+        grid          = layout['grid'],
+        template      = layout['template']
+    )
+    return fig
 
 @app.callback(Output('Graph_2', 'figure'),
               Input('interval-component', 'n_intervals'))

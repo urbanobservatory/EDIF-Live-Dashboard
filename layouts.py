@@ -5,11 +5,6 @@ def graph(src, location, variable, units):
         period = ['minute', 20, 40, 60, 'm']
     elif src == 'SUF':
         period = ['hour', 1, 2, 3, 'h']
-    #TODO: Remove all if statements like one below and have associated display names for variables
-    if variable == 'intensity' or variable == 'Plates Out':
-        variable = 'Traffic Flow'
-    elif variable == 'pm25': variable = 'PM2.5'
-    elif variable == 'temperature': variable = 'Temperature'
     return dict(title=f'{location} {variable} ({src})',
         showlegend = False, 
         autosize = True,
@@ -45,11 +40,6 @@ def graph(src, location, variable, units):
     )
 
 def map(src, location, variable):
-    #TODO: Remove all if statements like one below and have associated display names for variables
-    if variable == 'intensity' or variable == 'Plates Out':
-        variable = 'Traffic Flow'
-    elif variable == 'pm25': variable = 'PM2.5'
-    elif variable == 'temperature': variable = 'Temperature'
     return dict(
         title = f'{location} {variable} Map ({src})',
         colorbar = True,
@@ -65,15 +55,43 @@ def map(src, location, variable):
     )
 
 def gauge(src, location, variable):
-    #TODO: Remove all if statements like one below and have associated display names for variables
-    if variable == 'intensity' or variable == 'Plates Out':
-        variable = 'Traffic Flow'
-    elif variable == 'pm25': variable = 'PM2.5'
-    elif variable == 'temperature': variable = 'Temperature'
     return dict(
        title = f'{location} Average {variable} ({src})',
        paper_bgcolor='rgba(0,0,0,0)',
        plot_bgcolor='rgba(0,0,0,0)',
        font=dict(color="#ccccdc")
     #    margin = dict(t=80, b=60, l=40, r=20),
+    )
+
+def card():
+    return dict(
+        autosize = True,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color="#ccccdc"),
+        margin = dict(t=80, b=60, l=40, r=20)
+    )
+
+def indicators():
+    return dict(
+        autosize = True,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color="#ccccdc"),
+        margin = dict(t=80, b=60, l=40, r=20),
+        grid = {
+            'rows': 1, 
+            'columns': 2, 
+            'pattern': "independent"
+        },
+        template = {
+            'data' : {
+                'indicator': [{
+                    'title': {
+                        'text': "Speed"
+                    },
+                    'mode' : "number+gauge"
+                }]
+            }
+        }
     )

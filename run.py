@@ -34,19 +34,19 @@ def run(src, location, variable, units='None'):
         data.update({'suspect_dataframe': sus_df})
 
     sensor_dfs = allValues.run(df)
+    sensors_online = len(sensor_dfs)
     latest_readings_df = latestValues.run(variable, df, sensor_dfs, src)
     
     display_graphs = displayGraphs.run(variable, sensor_dfs)
     display_maps   = displayMaps.run(variable, latest_readings_df, units)
-    display_gauge  = displayGauge.display(latest_readings_df)
 
     data.update({
         'dataframe': df, 
         'display_graphs': display_graphs,
         'latest_readings': latest_readings_df,
         'map_display': display_maps,
-        'display_gauge': display_gauge,
-        'status': 'Online'
+        'status': 'Online',
+        'sensors_online': sensors_online
     })
 
     return data
