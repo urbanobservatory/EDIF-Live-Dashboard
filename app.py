@@ -22,6 +22,15 @@ app.layout = html.Div([
         html.H1('EDIF Interactive Live Dashboard'),
         className="banner"
     ),
+    html.Div(
+        dcc.Checklist(
+            id='checklist',
+            options=['Birmingham', 'Manchester', 'Newcastle'],
+            value=['Birmingham', 'Manchester', 'Newcastle'],
+            inline=True,
+            style={'color': '#ccccdc', 'font-size': 20}
+        )
+    ),
     html.Div([
         html.Div([
             dcc.Graph(
@@ -131,53 +140,84 @@ def update_graph_live(n):
     variables_a = ['PM2.5', 'Temperature', 'Traffic Flow']
     variable_b = 'Temperature'
     domain_a = {'row': 0, 'column': 0}
-    domain_b = {'row': 0, 'column': 1}
+    domain_b = {'row': 1, 'column': 0}
+    domain_c = {'row': 0, 'column': 1}
     units_b = '°C'
     fig = go.Figure()
 
-    sensors_online = 0
+    sensors, records = 0, 0
     for variable_a in variables_a:
         data_a = run.run(src, location, variable_a)
-        sensors_online += data_a['sensors_online']
-    fig.add_trace(displayCard.run(location, sensors_online, domain_a))
+        sensors += data_a['sensors']
+        records += data_a['records']
+    fig.add_trace(displayCard.run(location, sensors, domain_a, 'Active Sensors'))
+    fig.add_trace(displayCard.run(location, records, domain_c, 'Number of Records'))
 
     data_b = run.run(src, location, variable_b)
     display_gauge = displayGauge.run(src, location, variable_b, units_b, data_b['latest_readings'], domain_b)
     fig.add_trace(display_gauge[0])
 
-    layout = layouts.indicators()
+    layout = layouts.indicators(location, variables_a)
     fig.update_layout(
+        title         = layout['title'],
         autosize      = layout['autosize'],
         paper_bgcolor = layout['paper_bgcolor'],
         plot_bgcolor  = layout['plot_bgcolor'],
         font          = layout['font'],
-        margin        = layout['margin'],
+        # margin        = layout['margin'],
         grid          = layout['grid'],
         template      = layout['template']
     )
     return fig
 
-@app.callback(Output('Graph_2', 'figure'),
-              Input('interval-component', 'n_intervals'))
-def update_graph_live(n):
+@app.callback(
+    Output('Graph_2', 'figure'),
+    [
+        Input('interval-component', 'n_intervals'),
+        Input('checklist', 'value')
+    ]
+)
+def update_graph_live(n, checklist_locations):
+    #TODO: Add all sensors as traces
     src      = 'UDX'
-    location = 'Newcastle'
     variable = 'PM2.5'
     units    = 'μgm⁻³'
-    data = run.run(src, location, variable, units)
-    layout = layouts.graph(src, location, variable, units)
-    return dict(data=data['display_graphs'], layout=layout)
+    fig = go.Figure(layout=layouts.graph(src, checklist_locations, variable, units))
+    for location in checklist_locations:
+        try:
+            data = run.run(src, location, variable, units)
+            for graph in data['display_graphs']:
+                fig.add_trace(graph)
+        except:
+            continue
+    return fig
 
-@app.callback(Output('Graph_3', 'figure'),
-              Input('interval-component', 'n_intervals'))
-def update_graph_live(n):
+@app.callback(
+    Output('Graph_3', 'figure'),
+    [
+        Input('interval-component', 'n_intervals'),
+        Input('checklist', 'value')
+    ]
+)
+def update_graph_live(n, checklist_locations):
     src      = 'UDX'
-    location = 'Newcastle'
     variable = 'Traffic Flow'
     units    = 'Number of Vehicles'
-    data = run.run(src, location, variable, units)
-    layout = layouts.graph(src, location, variable, units)
-    return dict(data=data['display_graphs'], layout=layout)
+
+    if 'Birmingham' in checklist_locations:
+        checklist_locations.remove('Birmingham')
+
+    fig = go.Figure(layout=layouts.graph(src, checklist_locations, variable, units))
+
+    for location in checklist_locations:
+        try:
+            data = run.run(src, location, variable, units)
+            for graph in data['display_graphs']:
+                fig.add_trace(graph)
+        except:
+            continue
+        
+    return fig
 
 @app.callback(Output('Suspect_table', 'data'),
               Input('interval-component', 'n_intervals'))

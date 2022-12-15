@@ -1,8 +1,8 @@
 import plotly.graph_objs as go
 
-def card(location, sensors_online, domain):
+def card(location, sensors_online, domain, title):
     return go.Indicator(
-        title = f'Active Streams in {location}',
+        title = title,
         mode = "number",
         value = sensors_online,
         # number = {'prefix': "Active Streams"},
@@ -10,5 +10,5 @@ def card(location, sensors_online, domain):
         domain = domain
         )
 
-def run(location, sensors_online, domain):
-    return card(location, sensors_online, domain)
+def run(location, sensors_online, domain, title):
+    return card(location, sensors_online, domain, title)

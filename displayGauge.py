@@ -41,7 +41,7 @@ def gauge(src, location, variable, units, value, domain):
         mode = "gauge+number",
         value = value,
         number = {'suffix': ' '+units},
-        title = f'{variable} Average {location} ({src})',
+        title = f'{variable} Average',
         gauge = {
             'axis': {'range': [minimum, maximum]}, 
             'bar': {'color': color},

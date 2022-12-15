@@ -29,7 +29,7 @@ def map(variable, df, units):
             )
         ))]
 
-def run(variable, df, units):
+def run(location, variable, df, units):
     df['text'] = df['ID']+', '+df['Value'].astype(str)+units
-    df, color = graphCustomisation.customise(df, variable)
+    df, color = graphCustomisation.customise(df, variable, location)
     return map(variable, df, units)

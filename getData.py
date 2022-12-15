@@ -359,7 +359,7 @@ def fetch(src, location, variable, units, start, end):
             df = getUDX(location, variable)
 
             if df.empty:
-                    return df
+                return df
 
             df = df[[
                 'id', 

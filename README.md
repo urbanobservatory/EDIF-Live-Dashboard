@@ -21,23 +21,23 @@ Access Port:
 | PM2.5            | μgm⁻³              | Working      | Working      | Working     |
 | Temperature      | °C                 | Working      | Unavailable  | Working     |
 | Traffic Flow     | Number of Vehicles | Working      | Working      | Unavailable |
-| Black Carbon     | ngm⁻³              | Unintegrated | Working      | Unavailable |
-| Nitric Oxide     | μgm⁻³              | Unintegrated | Unavailable  | Working     |
-| Ozone            | μgm⁻³              | Unintegrated | Unavailable  | Working     |
-| Nitrogen Dioxide | μgm⁻³              | Unintegrated | Unavailable  | Working     |
-| PM1              | μgm⁻³              | Unintegrated | Unavailable  | Working     |
-| PM10             | μgm⁻³              | Unintegrated | Unavailable  | Working     |
-| Humidity         | %                  | Unintegrated | Unavailable  | Working     |
-| Pressure         | Pa                 | Unintegrated | Unavailable  | Working     |
+| Black Carbon     | ngm⁻³              | Unavailable  | Working      | Unavailable |
+| Nitric Oxide     | μgm⁻³              | Unavailable  | Unavailable  | Working     |
+| Ozone            | μgm⁻³              | Unavailable  | Unavailable  | Working     |
+| Nitrogen Dioxide | μgm⁻³              | Unavailable  | Unavailable  | Working     |
+| PM1              | μgm⁻³              | Unavailable  | Unavailable  | Working     |
+| PM10             | μgm⁻³              | Unavailable  | Unavailable  | Working     |
+| Humidity         | %                  | Unavailable  | Unavailable  | Working     |
+| Pressure         | Pa                 | Unavailable  | Unavailable  | Working     |
 
 
 <br>
 
 ### To Add:
-- [] Number of sensors online etc.
+- [x] Number of sensors online etc.
 - [] Map of all locations
 - [] Baseline historical data - monthly averages over the past n years
-- [] Dropdown to switch between observatories
+- [x] Dropdown to switch between observatories
 
 <br>
 

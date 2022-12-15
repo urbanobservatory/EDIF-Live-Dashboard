@@ -10,6 +10,7 @@ import displayGraphs
 import displayMaps
 import suspectReadings
 import displayGauge
+import indicators
 
 load_dotenv()
 day_period = float(os.getenv('day_period'))
@@ -34,11 +35,11 @@ def run(src, location, variable, units='None'):
         data.update({'suspect_dataframe': sus_df})
 
     sensor_dfs = allValues.run(df)
-    sensors_online = len(sensor_dfs)
+    sensors, records = indicators.run(df)
     latest_readings_df = latestValues.run(variable, df, sensor_dfs, src)
     
-    display_graphs = displayGraphs.run(variable, sensor_dfs)
-    display_maps   = displayMaps.run(variable, latest_readings_df, units)
+    display_graphs = displayGraphs.run(location, variable, sensor_dfs)
+    display_maps   = displayMaps.run(location, variable, latest_readings_df, units)
 
     data.update({
         'dataframe': df, 
@@ -46,7 +47,8 @@ def run(src, location, variable, units='None'):
         'latest_readings': latest_readings_df,
         'map_display': display_maps,
         'status': 'Online',
-        'sensors_online': sensors_online
+        'sensors': sensors,
+        'records': records
     })
 
     return data

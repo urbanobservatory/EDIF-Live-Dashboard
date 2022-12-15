@@ -1,17 +1,29 @@
+import plotly.graph_objects as go
+
 def graph(src, location, variable, units):
+    location = ', '.join(location)
+
     if src == 'UO' or src == 'UOFile':
         period = ['day', 1, 3, 5, 'd']
     elif src == 'UDX' or src == 'UDXFile':
         period = ['minute', 20, 40, 60, 'm']
     elif src == 'SUF':
         period = ['hour', 1, 2, 3, 'h']
-    return dict(title=f'{location} {variable} ({src})',
+
+    return go.Layout(
+        title = dict(
+            text = f'{variable}: {location}',
+            x = 0.5
+        ),
         showlegend = False, 
         autosize = True,
         margin = dict(t=80, b=60, l=40, r=20),
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         xaxis = dict(
+            gridwidth=1, 
+            gridcolor='#2e2f30',
+            zerolinecolor='#2e2f30',
             rangeselector=dict(
                 bgcolor='#111217',
                 buttons=list([
@@ -33,7 +45,12 @@ def graph(src, location, variable, units):
             ), #rangeslider=dict(visible=True),
         type="date"
         ),
-        yaxis = dict(title = units),
+        yaxis = dict(
+            title = units,
+            gridwidth=1, 
+            gridcolor='#2e2f30',
+            zerolinecolor='#2e2f30'
+        ),
         paper_bgcolor='#181b1f',
         plot_bgcolor='#181b1f',
         font=dict(color="#ccccdc")
@@ -72,24 +89,26 @@ def card():
         margin = dict(t=80, b=60, l=40, r=20)
     )
 
-def indicators():
+def indicators(location, variables):
+    v = ', '.join(variables)
     return dict(
+        title = {
+            'text': f'{location} Status Indicators (1H) [{v}]',
+            'x': 0.5
+        },
         autosize = True,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ccccdc"),
-        margin = dict(t=80, b=60, l=40, r=20),
+        # margin = dict(t=80, b=60, l=40, r=20),
         grid = {
-            'rows': 1, 
+            'rows': 2, 
             'columns': 2, 
             'pattern': "independent"
         },
         template = {
             'data' : {
                 'indicator': [{
-                    'title': {
-                        'text': "Speed"
-                    },
                     'mode' : "number+gauge"
                 }]
             }
