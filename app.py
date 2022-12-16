@@ -2,12 +2,7 @@ import os
 import dash
 from dash import dcc, html
 from dash.dependencies import Output, Input, State
-import plotly.graph_objects as go
-import pandas as pd
-import run
-import displayCard
-import displayGauge
-import layouts
+import figures
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,21 +20,37 @@ app.layout = html.Div([
     html.Div(
         dcc.Checklist(
             id='checklist',
-            options=['Birmingham', 'Manchester', 'Newcastle'],
-            value=['Birmingham', 'Manchester', 'Newcastle'],
+            options=[
+                'Birmingham',
+                'Hull',
+                'Manchester',
+                'Newcastle',
+                'Sheffield'
+            ],
+            value=[
+                'Birmingham',
+                'Hull',
+                'Manchester',
+                'Newcastle',
+                'Sheffield'
+            ],
             inline=True,
-            style={'color': '#ccccdc', 'font-size': 20}
+            style={
+                'color': '#ccccdc', 
+                'font-size': 20,
+                'text-align': 'center'
+            }
         )
     ),
     html.Div([
         html.Div([
             dcc.Graph(
-                id='Graph_1'
+                id='indicators'
             )
         ], className="four columns"),
         html.Div([
             dcc.Graph(
-                id='Graph_2'
+                id='PM25 Graph'
             )
         ], className="four columns"),
         html.Div([
@@ -91,7 +102,7 @@ app.layout = html.Div([
         ], className="four columns"),
         html.Div([
             dcc.Graph(
-                id='Graph_3'
+                id='Traffic Flow Graph'
             )
         ], className="eight columns"),
     ], className='row'
@@ -132,92 +143,39 @@ app.layout = html.Div([
 
 
 # CALLBACKS
-@app.callback(Output('Graph_1', 'figure'),
-              Input('interval-component', 'n_intervals'))
-def update_graph_live(n):
+@app.callback(
+    Output('indicators', 'figure'),
+    [Input('interval-component', 'n_intervals'), Input('checklist', 'value')])
+def update_graph_live(n, checklist_locations):
     src      = 'UDX'
-    location = 'Newcastle'
-    variables_a = ['PM2.5', 'Temperature', 'Traffic Flow']
+    variables_a = ['PM2.5', 'Temperature', 'Traffic Flow', 'Black Carbon']
     variable_b = 'Temperature'
     domain_a = {'row': 0, 'column': 0}
     domain_b = {'row': 1, 'column': 0}
     domain_c = {'row': 0, 'column': 1}
     units_b = '°C'
-    fig = go.Figure()
+    return figures.indicators(src, checklist_locations, variables_a, variable_b, domain_a, domain_b, domain_c, units_b)
 
-    sensors, records = 0, 0
-    for variable_a in variables_a:
-        data_a = run.run(src, location, variable_a)
-        sensors += data_a['sensors']
-        records += data_a['records']
-    fig.add_trace(displayCard.run(location, sensors, domain_a, 'Active Sensors'))
-    fig.add_trace(displayCard.run(location, records, domain_c, 'Number of Records'))
-
-    data_b = run.run(src, location, variable_b)
-    display_gauge = displayGauge.run(src, location, variable_b, units_b, data_b['latest_readings'], domain_b)
-    fig.add_trace(display_gauge[0])
-
-    layout = layouts.indicators(location, variables_a)
-    fig.update_layout(
-        title         = layout['title'],
-        autosize      = layout['autosize'],
-        paper_bgcolor = layout['paper_bgcolor'],
-        plot_bgcolor  = layout['plot_bgcolor'],
-        font          = layout['font'],
-        # margin        = layout['margin'],
-        grid          = layout['grid'],
-        template      = layout['template']
-    )
-    return fig
 
 @app.callback(
-    Output('Graph_2', 'figure'),
-    [
-        Input('interval-component', 'n_intervals'),
-        Input('checklist', 'value')
-    ]
-)
+    Output('PM25 Graph', 'figure'),
+    [Input('interval-component', 'n_intervals'), Input('checklist', 'value')])
 def update_graph_live(n, checklist_locations):
-    #TODO: Add all sensors as traces
     src      = 'UDX'
     variable = 'PM2.5'
     units    = 'μgm⁻³'
-    fig = go.Figure(layout=layouts.graph(src, checklist_locations, variable, units))
-    for location in checklist_locations:
-        try:
-            data = run.run(src, location, variable, units)
-            for graph in data['display_graphs']:
-                fig.add_trace(graph)
-        except:
-            continue
-    return fig
+    return figures.pm25Graph(src, checklist_locations, variable, units)
+
 
 @app.callback(
-    Output('Graph_3', 'figure'),
-    [
-        Input('interval-component', 'n_intervals'),
-        Input('checklist', 'value')
-    ]
-)
+    Output('Traffic Flow Graph', 'figure'),
+    [Input('interval-component', 'n_intervals'), Input('checklist', 'value')])
 def update_graph_live(n, checklist_locations):
     src      = 'UDX'
     variable = 'Traffic Flow'
-    units    = 'Number of Vehicles'
+    units    = 'Number of Vehicles'        
+    return figures.trafficFlowGraph(src, checklist_locations, variable, units)
 
-    if 'Birmingham' in checklist_locations:
-        checklist_locations.remove('Birmingham')
-
-    fig = go.Figure(layout=layouts.graph(src, checklist_locations, variable, units))
-
-    for location in checklist_locations:
-        try:
-            data = run.run(src, location, variable, units)
-            for graph in data['display_graphs']:
-                fig.add_trace(graph)
-        except:
-            continue
-        
-    return fig
 
 @app.callback(Output('Suspect_table', 'data'),
               Input('interval-component', 'n_intervals'))
@@ -225,14 +183,8 @@ def update_graph_live(n):
     src       = 'UDX'
     location  = 'Newcastle'
     variables = ['PM2.5', 'Temperature', 'Traffic Flow']
-    l = []
-    for variable in variables:
-        d = run.run(src, location, variable)
-        l.append(d['suspect_dataframe'])
-    df = pd.concat(l)
-    df = df.drop_duplicates(subset=['ID', 'Datetime'], keep='last')
-    df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]  
-    return df.to_dict('records')
+    return figures.suspectTable(src, location, variables)
+
 
 @app.callback(Output('Alerts_table', 'data'),
               Input('interval-component', 'n_intervals'))
@@ -240,19 +192,8 @@ def update_graph_live(n):
     src       = 'UDX'
     locations = ['Newcastle', 'Manchester', 'Birmingham']
     variables = ['PM2.5', 'Temperature', 'Traffic Flow', 'Black Carbon']
-    l = []
-    for location in locations:
-        for variable in variables:
-            try:
-                d = run.run(src, location, variable)
-                if d['status'] == 'Offline':
-                    l.append(f'{location} {variable} Stream is Offline')
-            except:
-                continue
-    if len(l) == 0:
-        l.append('No Alerts')
-    df = pd.DataFrame({'Alerts':l})
-    return df.to_dict('records')
+    return figures.alertsTable(src, locations, variables)
+
 
 @app.callback(Output('map', 'figure'),
               Input('interval-component', 'n_intervals'))
@@ -261,9 +202,7 @@ def update_graph_live(n):
     location = 'Newcastle'
     variable = 'PM2.5'
     units    = 'μgm⁻³'
-    data = run.run(src, location, variable, units)
-    layout = layouts.map(src, location, variable)
-    return dict(data=data['map_display'], layout=layout)
+    return figures.map(src, location, variable, units)
 
 
 if __name__ == "__main__":

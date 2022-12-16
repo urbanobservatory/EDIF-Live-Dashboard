@@ -16,19 +16,19 @@ Access Port:
 
 ## UDX Onboarding Status
 
-| Variable         | Units              | Newcastle    | Manchester   | Birmingham  |
-| ---------------- | ------------------ | ------------ | ------------ | ----------- |
-| PM2.5            | μgm⁻³              | Working      | Working      | Working     |
-| Temperature      | °C                 | Working      | Unavailable  | Working     |
-| Traffic Flow     | Number of Vehicles | Working      | Working      | Unavailable |
-| Black Carbon     | ngm⁻³              | Unavailable  | Working      | Unavailable |
-| Nitric Oxide     | μgm⁻³              | Unavailable  | Unavailable  | Working     |
-| Ozone            | μgm⁻³              | Unavailable  | Unavailable  | Working     |
-| Nitrogen Dioxide | μgm⁻³              | Unavailable  | Unavailable  | Working     |
-| PM1              | μgm⁻³              | Unavailable  | Unavailable  | Working     |
-| PM10             | μgm⁻³              | Unavailable  | Unavailable  | Working     |
-| Humidity         | %                  | Unavailable  | Unavailable  | Working     |
-| Pressure         | Pa                 | Unavailable  | Unavailable  | Working     |
+| Variable         | Units              | Newcastle    | Manchester   | Birmingham / TfWM    | Hull | Sheffield |
+| ---------------- | ------------------ | ------------ | ------------ | -------------------- | ---- | --------- |
+| PM2.5            | μgm⁻³              | Working      | Working      | Working              |      |           |
+| Temperature      | °C                 | Working      | Unavailable  | Working              |      |           |
+| Traffic Flow     | Number of Vehicles | Working      | Working      | Needs UDX Onboarding |      |           |
+| Black Carbon     | ngm⁻³              | Unavailable  | Working      | Unavailable          |      |           |
+| Nitric Oxide     | μgm⁻³              | Unavailable  | Unavailable  | Working              |      |           |
+| Ozone            | μgm⁻³              | Unavailable  | Unavailable  | Working              |      |           |
+| Nitrogen Dioxide | μgm⁻³              | Unavailable  | Unavailable  | Working              |      |           |
+| PM1              | μgm⁻³              | Unavailable  | Unavailable  | Working              |      |           |
+| PM10             | μgm⁻³              | Unavailable  | Unavailable  | Working              |      |           |
+| Humidity         | %                  | Unavailable  | Unavailable  | Working              |      |           |
+| Pressure         | Pa                 | Unavailable  | Unavailable  | Working              |      |           |
 
 
 <br>

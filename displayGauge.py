@@ -57,5 +57,5 @@ def gauge(src, location, variable, units, value, domain):
         domain = domain
     )
 
-def run(src, location, variable, units, df, domain):
-    return [gauge(src, location, variable, units, round(df['Value'].mean(), 1), domain)]
+def run(src, location, variable, units, value, domain):
+    return [gauge(src, location, variable, units, value, domain)]

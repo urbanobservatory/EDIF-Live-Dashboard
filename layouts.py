@@ -42,7 +42,7 @@ def graph(src, location, variable, units):
                         step=period[0],
                         stepmode="backward")
                 ])
-            ), #rangeslider=dict(visible=True),
+            ), # rangeslider=dict(visible=True),
         type="date"
         ),
         yaxis = dict(
@@ -58,7 +58,7 @@ def graph(src, location, variable, units):
 
 def map(src, location, variable):
     return dict(
-        title = f'{location} {variable} Map ({src})',
+        title = f'{variable} Map: {location}',
         colorbar = True,
         autosize = True,
         paper_bgcolor='rgba(0,0,0,0)',
@@ -89,11 +89,12 @@ def card():
         margin = dict(t=80, b=60, l=40, r=20)
     )
 
-def indicators(location, variables):
+def indicators(locations, variables):
+    l = ', '.join(locations)
     v = ', '.join(variables)
-    return dict(
+    return go.Layout(
         title = {
-            'text': f'{location} Status Indicators (1H) [{v}]',
+            'text': f'Hourly Status: {l}',
             'x': 0.5
         },
         autosize = True,
