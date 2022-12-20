@@ -44,102 +44,119 @@ app.layout = html.Div([
     ),
     html.Div([
         html.Div([
-            dcc.Graph(
-                id='indicators'
-            )
-        ], className="four columns"),
-        html.Div([
-            dcc.Graph(
-                id='PM25 Graph'
-            )
-        ], className="four columns"),
-        html.Div([
-            #TODO: Figure out to center labels
-            html.Label(
-                children=[
-                    html.Span('Suspect Reading Logs', className='labels')
-                ]
+            html.Div([
+                html.Div([
+                    html.Div([
+                        dcc.Graph(
+                            id='indicators'
+                        )
+                    ], className='six columns'
+                    ),
+                    html.Div([
+                        #TODO: Figure out to center labels
+                        html.Label(
+                            children=[
+                                html.Span('Suspect Reading Logs', className='labels')
+                            ]
+                        ),
+                        #TODO: Create layout for datatable
+                        dash.dash_table.DataTable(
+                            id='Suspect_table',
+                            page_size=12,
+                            style_table={
+                                'height': '210.6px', 
+                                'width': '550px',
+                                'overflowY': 'auto'
+                                },
+                            style_as_list_view=True,
+                            style_cell=dict(backgroundColor='#111217'),
+                            style_header=dict(backgroundColor='#181b1f',
+                                            fontWeight='bold',
+                                            color='#ccccdc'),
+                            style_data=dict(color="#ccccdc")
+                        ),
+                        dash.dash_table.DataTable(
+                            id='Alerts_table',
+                            page_size=12,
+                            style_table={
+                                'height': '210.6px', 
+                                'width': '550px',
+                                'overflowY': 'auto'
+                                },
+                            style_as_list_view=True,
+                            style_cell=dict(backgroundColor='#111217', textAlign='center'),
+                            style_header=dict(backgroundColor='#181b1f',
+                                            fontWeight='bold',
+                                            color='#ccccdc'),
+                            style_data=dict(color="#ccccdc")
+                        )
+                    ], className='six columns'
+                    )
+                ])
+            ], className="row"
             ),
-            #TODO: Create layout for datatable
-            dash.dash_table.DataTable(
-                id='Suspect_table',
-                page_size=12,
-                style_table={
-                    'height': '210.6px', 
-                    'width': '550px',
-                    'overflowY': 'auto'
-                    },
-                style_as_list_view=True,
-                style_cell=dict(backgroundColor='#111217'),
-                style_header=dict(backgroundColor='#181b1f',
-                                  fontWeight='bold',
-                                  color='#ccccdc'),
-                style_data=dict(color="#ccccdc")
-            ),
-            dash.dash_table.DataTable(
-                id='Alerts_table',
-                page_size=12,
-                style_table={
-                    'height': '210.6px', 
-                    'width': '550px',
-                    'overflowY': 'auto'
-                    },
-                style_as_list_view=True,
-                style_cell=dict(backgroundColor='#111217', textAlign='center'),
-                style_header=dict(backgroundColor='#181b1f',
-                                  fontWeight='bold',
-                                  color='#ccccdc'),
-                style_data=dict(color="#ccccdc")
+            html.Div([
+                html.Div([
+                    dcc.Graph(
+                        id='PM25 Graph'
+                    )
+                ], className='six columns'
+                ),
+                html.Div([
+                    dcc.Graph(
+                        id='Traffic Flow Graph'
+                    )
+                ], className='six columns'
+                )
+            ], className="row"
             )
-        ], className="four columns")
-    ], className='row'
-    ),
-    html.Div([
+        ], className="eight columns"
+        ),
         html.Div([
-            dcc.Graph(
-                id='map'
+            html.Div(
+                dcc.Graph(
+                    id='map',
+                    style={'width': '58vh', 'height': '100vh'}
+                )
             )
-        ], className="four columns"),
-        html.Div([
-            dcc.Graph(
-                id='Traffic Flow Graph'
-            )
-        ], className="eight columns"),
-    ], className='row'
+        ], className='four columns'
+        )
+    ], className="row"
     ),
     dcc.Interval(
         id='interval-component',
         interval=60000*update_frequency,
         n_intervals=0
-    ),
-    html.Div([
-        html.Div(
-            html.Img(src="/assets/DfT_logo_60.png"),
-            className='img'            
-        ),
-        html.Div(
-            html.Img(src="/assets/ATI_logo_60.png"),
-            className='img'            
-        ),
-        html.Div(
-            html.Img(src="/assets/UDX_logo_60.png"),
-            className='img'            
-        ),
-        html.Div(
-            html.Img(src="/assets/UO_logo_60.png"),
-            className='img'
-        ),
-        html.Div(
-            html.Img(src="/assets/Man_UO_logo_60.png"),
-            className='img'
-        ),
-        html.Div(
-            html.Img(src="/assets/Birm_UO_logo_60.png"),
-            className='img'
-        )
-    ], className="footer"
+    # ),
+    # html.Div([
+    #     html.Div(
+    #         html.Img(src="/assets/DfT_logo_60.png"),
+    #         className='img'            
+    #     ),
+    #     html.Div(
+    #         html.Img(src="/assets/ATI_logo_60.png"),
+    #         className='img'            
+    #     ),
+    #     html.Div(
+    #         html.Img(src="/assets/UDX_logo_60.png"),
+    #         className='img'            
+    #     ),
+    #     html.Div(
+    #         html.Img(src="/assets/UO_logo_60.png"),
+    #         className='img'
+    #     ),
+    #     html.Div(
+    #         html.Img(src="/assets/Man_UO_logo_60.png"),
+    #         className='img'
+    #     ),
+    #     html.Div(
+    #         html.Img(src="/assets/Birm_UO_logo_60.png"),
+    #         className='img'
+    #     )
+    # ], className="footer"
     )
-], className="body")
+], className="body"
+)
 
 
 # CALLBACKS

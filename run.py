@@ -7,9 +7,7 @@ import getData
 import allValues
 import latestValues
 import displayGraphs
-import displayMaps
 import suspectReadings
-import displayGauge
 import indicators
 
 load_dotenv()

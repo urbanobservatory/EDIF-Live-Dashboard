@@ -11,7 +11,7 @@ def map(variable, units, df):
         text = df['text'],
         mode = 'markers',
         marker = dict(
-            size = df['Value'],
+            size = 10, #df['Value'],
             opacity = 0.8,
             reversescale = False,
             autocolorscale = False,

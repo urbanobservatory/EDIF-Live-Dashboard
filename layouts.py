@@ -71,7 +71,7 @@ def map(src, locations, variable):
             # NEWCATSLE BOUNDS
             # bounds = dict(west=-1.8, east=-1.4, south=54.85, north=55.1)
             # England BOUNDS
-            bounds = dict(west=-6, east=2, south=52.2, north=55.2)
+            bounds = dict(west=-6, east=2, south=50, north=56)
         )
     )
 
