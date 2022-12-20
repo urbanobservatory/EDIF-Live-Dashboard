@@ -35,13 +35,13 @@ Access Port:
 
 ### To Add:
 - [x] Number of sensors online etc.
-- [] Map of all locations
-- [] Baseline historical data - monthly averages over the past n years
+- [ ] Map of all locations
+- [ ] Baseline historical data - monthly averages over the past n years
 - [x] Dropdown to switch between observatories
 
 <br>
 
 ### To Do:
-- [] Fill in empty lines for suspect and alert tables to keep them the same size
-- [] Error handling if no data is available for selected period
-- [] On refresh only request data which isn't already available, and remove data older than limit - look into traces (https://plotly.com/python/creating-and-updating-figures/#adding-traces)
+- [ ] Fill in empty lines for suspect and alert tables to keep them the same size
+- [ ] Error handling if no data is available for selected period
+- [ ] On refresh only request data which isn't already available, and remove data older than limit - look into traces (https://plotly.com/python/creating-and-updating-figures/#adding-traces)

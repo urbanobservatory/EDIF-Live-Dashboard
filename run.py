@@ -39,13 +39,11 @@ def run(src, location, variable, units='None'):
     latest_readings_df = latestValues.run(variable, df, sensor_dfs, src)
     
     display_graphs = displayGraphs.run(location, variable, sensor_dfs)
-    display_maps   = displayMaps.run(location, variable, latest_readings_df, units)
 
     data.update({
         'dataframe': df, 
         'display_graphs': display_graphs,
         'latest_readings': latest_readings_df,
-        'map_display': display_maps,
         'status': 'Online',
         'sensors': sensors,
         'records': records

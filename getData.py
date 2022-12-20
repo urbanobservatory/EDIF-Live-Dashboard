@@ -251,7 +251,8 @@ def fetch(src, location, variable, units, start, end):
                     'id', 
                     variable+'.unit', 
                     variable+'.value', 
-                    'dateObserved.value'
+                    'dateObserved.value',
+                    'location.value.coordinates'
                     ]]
 
                 df.rename({
@@ -276,7 +277,8 @@ def fetch(src, location, variable, units, start, end):
                     'id', 
                     variable+'.unit', 
                     variable+'.value', 
-                    'dateObserved.value'
+                    'dateObserved.value',
+                    'location.value.coordinates'
                     ]]
 
                 df.rename({
@@ -299,7 +301,8 @@ def fetch(src, location, variable, units, start, end):
                     'id', 
                     variable+'.unit', 
                     variable+'.value', 
-                    'dateObserved.value'
+                    'dateObserved.value',
+                    'location.value.coordinates'
                     ]]
 
                 df.rename({
@@ -314,9 +317,9 @@ def fetch(src, location, variable, units, start, end):
             df['Units'] = units
             df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
             df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-            df['Longitude'] = np.nan
-            df['Latitude'] = np.nan
-            df = df.drop(['dateObserved.value'], axis='columns')
+            df['Longitude'] = df['location.value.coordinates'].str[0]
+            df['Latitude'] = df['location.value.coordinates'].str[1]
+            df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
             
         elif location == 'Birmingham':
 
@@ -365,7 +368,8 @@ def fetch(src, location, variable, units, start, end):
                 'id', 
                 variable+'.unit', 
                 variable+'.value', 
-                'dateObserved.value'
+                'dateObserved.value',
+                'location.value.coordinates'
                 ]]
 
             df.rename({
@@ -380,9 +384,9 @@ def fetch(src, location, variable, units, start, end):
             df['Units'] = units
             df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
             df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-            df['Longitude'] = np.nan
-            df['Latitude'] = np.nan
-            df = df.drop(['dateObserved.value'], axis='columns')
+            df['Longitude'] = df['location.value.coordinates'].str[0]
+            df['Latitude'] = df['location.value.coordinates'].str[1]
+            df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
 
 
     elif src == 'SUF': # Sheffield Urban Flows

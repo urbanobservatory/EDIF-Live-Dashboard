@@ -3,6 +3,7 @@ import pandas as pd
 
 import displayCard
 import displayGauge
+import displayMaps
 import layouts
 import run
 
@@ -109,7 +110,12 @@ def alertsTable(src, locations, variables):
     return df.to_dict('records')
 
 
-def map(src, location, variable, units):
-    data = run.run(src, location, variable, units)
-    layout = layouts.map(src, location, variable)
-    return dict(data=data['map_display'], layout=layout)
+def map(src, locations, variable, units):
+    l = []
+    for location in locations:
+        data = run.run(src, location, variable, units)
+        l.append(data['latest_readings'])
+    df = pd.concat(l)
+    display_maps = displayMaps.run(location, variable, units, df)
+    layout = layouts.map(src, locations, variable)
+    return dict(data=display_maps, layout=layout)

@@ -199,10 +199,10 @@ def update_graph_live(n):
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
     src      = 'UDX'
-    location = 'Newcastle'
+    locations = ['Newcastle', 'Manchester', 'Birmingham']
     variable = 'PM2.5'
     units    = 'μgm⁻³'
-    return figures.map(src, location, variable, units)
+    return figures.map(src, locations, variable, units)
 
 
 if __name__ == "__main__":

@@ -56,9 +56,10 @@ def graph(src, location, variable, units):
         font=dict(color="#ccccdc")
     )
 
-def map(src, location, variable):
+def map(src, locations, variable):
+    location = ', '.join(locations)
     return dict(
-        title = f'{variable} Map: {location}',
+        title = f'{variable} Latest: {location}',
         colorbar = True,
         autosize = True,
         paper_bgcolor='rgba(0,0,0,0)',
@@ -67,7 +68,10 @@ def map(src, location, variable):
         margin = dict(t=80, b=60, l=40, r=20),
         mapbox = dict(
             style = "carto-darkmatter", #"carto-positron"
-            bounds = dict(west=-1.8, east=-1.4, south=54.85, north=55.1)
+            # NEWCATSLE BOUNDS
+            # bounds = dict(west=-1.8, east=-1.4, south=54.85, north=55.1)
+            # England BOUNDS
+            bounds = dict(west=-6, east=2, south=52.2, north=55.2)
         )
     )
 

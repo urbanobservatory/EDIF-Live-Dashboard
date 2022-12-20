@@ -2,7 +2,7 @@
 
 import graphCustomisation
 
-def map(variable, df, units):
+def map(variable, units, df):
     return [dict(
         type = 'scattermapbox', #'scattergeo',
         locationmode = 'country names',
@@ -29,7 +29,7 @@ def map(variable, df, units):
             )
         ))]
 
-def run(location, variable, df, units):
+def run(location, variable, units, df):
     df['text'] = df['ID']+', '+df['Value'].astype(str)+units
     df, color = graphCustomisation.customise(df, variable, location)
-    return map(variable, df, units)
+    return map(variable, units, df)
