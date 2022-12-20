@@ -9,11 +9,6 @@
     font-size: 1;
 }
 
-.body {
-  background-color:#111217;
-  margin: 0;
-}
-
 .labels {
   text-align: center;
   color: #ccccdc;
@@ -171,8 +166,9 @@
     line-height: 1.6;
     font-weight: 400;
     font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: rgb(50, 50, 50); 
-    margin: 0 }
+    color: #111217; 
+    background-color: #111217;
+    margin: 20px 20px 0px 20px }
   
   
   /* Typography

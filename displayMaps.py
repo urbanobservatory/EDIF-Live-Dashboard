@@ -25,7 +25,8 @@ def map(variable, units, df):
             color = df['Value'],
             cmax = df['Value'].max(),
             colorbar=dict(
-                title=units
+                title=units,
+                orientation='h'
             )
         ))]
 

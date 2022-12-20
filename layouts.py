@@ -62,10 +62,11 @@ def map(src, locations, variable):
         title = f'{variable} Latest: {location}',
         colorbar = True,
         autosize = True,
+        height = 900,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ccccdc"),
-        margin = dict(t=80, b=60, l=40, r=20),
+        margin = dict(t=0, b=0, l=0, r=0),
         mapbox = dict(
             style = "carto-darkmatter", #"carto-positron"
             # NEWCATSLE BOUNDS
@@ -119,3 +120,6 @@ def indicators(locations, variables):
             }
         }
     )
+
+def table():
+    pass

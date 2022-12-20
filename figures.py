@@ -111,10 +111,14 @@ def alertsTable(src, locations, variables):
 
 
 def map(src, locations, variable, units):
+    #TODO: Make locations dissapear when not selected
     l = []
     for location in locations:
-        data = run.run(src, location, variable, units)
-        l.append(data['latest_readings'])
+        try:
+            data = run.run(src, location, variable, units)
+            l.append(data['latest_readings'])
+        except:
+            continue
     df = pd.concat(l)
     display_maps = displayMaps.run(location, variable, units, df)
     layout = layouts.map(src, locations, variable)
