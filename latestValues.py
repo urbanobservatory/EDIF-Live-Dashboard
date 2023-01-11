@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 latest_reading_threshold = int(os.getenv('latest_reading_threshold'))
 
-def run(variable, df, sensor_dfs, src):
+def run(sensor_dfs):
     ds_list = []
     for sensor_df in sensor_dfs:
         ds_list.append(sensor_df.loc[

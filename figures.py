@@ -1,64 +1,107 @@
 import plotly.graph_objects as go
 import pandas as pd
 
-import displayCard
-import displayGauge
-import displayMaps
 import layouts
 import run
+import graphCustomisation
+import allValues
 
-def indicators(src, locations, variables_a, variable_b, domain_a, domain_b, domain_c, units_b):
+def indicators(variable, df):
+
+    n_sources = df['Location'].nunique()
+    n_sensors = df['ID'].nunique()
+    n_records = len(df.index)
+    average = df["Value"].mean()
+
+    units = df['Units'].iloc[0]
+
     fig = go.Figure()
 
-    sensors, records, temperatures = 0, 0, []
+    fig.add_trace(
+        go.Indicator(
+            title = 'Data Sources',
+            mode = "number",
+            value = n_sources,
+            delta = {'position': "top", 'reference': 320},
+            domain = {'row': 0, 'column': 0}
+        )
+    )
 
-    location_names = []
-    for location in locations:
-        for variable_a in variables_a:
-            try:
-                data_a = run.run(src, location, variable_a)
-                if data_a['status'] == 'Offline':
-                    continue
-                if location not in location_names:
-                    location_names.append(location)
-                sensors += data_a['sensors']
-                records += data_a['records']
-            except:
-                continue
-    fig.add_trace(displayCard.run(location, sensors, domain_a, 'Active Sensors'))
-    fig.add_trace(displayCard.run(location, records, domain_c, 'Number of Records'))
+    fig.add_trace(
+        go.Indicator(
+            title = 'Active Streams',
+            mode = "number",
+            value = n_sensors,
+            delta = {'position': "top", 'reference': 320},
+            domain = {'row': 0, 'column': 1}
+        )
+    )
 
-    for location in locations:
-        try:
-            data_b = run.run(src, location, variable_b)
-            temperatures.append(round(data_b['latest_readings']['Value'].mean(), 1))
-        except:
-            continue
-    temperature = sum(temperatures) / len(temperatures)
-    display_gauge = displayGauge.run(src, location, variable_b, units_b, temperature, domain_b)
-    fig.add_trace(display_gauge[0])
+    fig.add_trace(
+        go.Indicator(
+            title = 'Number of Records',
+            mode = "number",
+            value = n_records,
+            delta = {'position': "top", 'reference': 320},
+            domain = {'row': 1, 'column': 0}
+        )
+    )
 
-    fig.update_layout(layouts.indicators(location_names, variables_a))
+    fig.add_trace(
+        go.Indicator(
+            title = 'Average Value',
+            mode = "number",
+            value = average,
+            # number = {'suffix': ' '+units},
+            delta = {'position': "top", 'reference': 320},
+            domain = {'row': 1, 'column': 1}
+        )
+    )
+
+    fig.update_layout(layouts.indicators(variable))
 
     return fig
 
 
-def pm25Graph(src, locations, variable, units):
+def scatter(variable, units, df):
+
+    df, colorscales = graphCustomisation.customise(df, variable)
+    units = df['Units'].iloc[0]
+
     fig = go.Figure()
 
-    location_names = []
-    for location in locations:
-        try:
-            data = run.run(src, location, variable, units)
-            if data['status'] == 'Offline':
-                continue
-            location_names.append(location)
-            for graph in data['display_graphs']:
-                fig.add_trace(graph)
-        except:
-            continue
+    # Lines also included if number of sensors below limit
+    if df['ID'].nunique() > 10:
+        fig.add_trace(
+            go.Scatter(
+                x=list(df['Datetime']),
+                y=list(df['Value']),
+                text=df['ID']+': '+df['Value'].astype(str)+' '+units,
+                mode='markers',
+                marker=dict(
+                    # marker_symbol='circle-open',
+                    color=df['Value'],
+                    # opacity=0.5,
+                    colorscale=colorscales[variable]
+                    # showscale=True
+                )
+            )
+        )
 
-    fig.update_layout(layouts.graph(src, location_names, variable, units))
+    else:
+        sensor_dfs = allValues.run(df)
+
+        for df in sensor_dfs:
+            fig.add_trace(
+                go.Scatter(
+                    x=list(df['Datetime']),
+                    y=list(df['Value']),
+                    text=df['ID']+', '+df['Value'].astype(str)+units,
+                    mode='lines+markers'
+                )
+            )
+
+    fig.update_layout(layouts.graph(variable, units))
 
     return fig
 
@@ -110,16 +153,36 @@ def alertsTable(src, locations, variables):
     return df.to_dict('records')
 
 
-def map(src, locations, variable, units):
-    #TODO: Make locations dissapear when not selected
-    l = []
-    for location in locations:
-        try:
-            data = run.run(src, location, variable, units)
-            l.append(data['latest_readings'])
-        except:
-            continue
-    df = pd.concat(l)
-    display_maps = displayMaps.run(location, variable, units, df)
-    layout = layouts.map(src, locations, variable)
-    return dict(data=display_maps, layout=layout)
+def map(variable, df):
+
+    units = df['Units'].iloc[0]
+    df['text'] = df['ID']+': '+df['Value'].astype(str)+' '+units
+    df, colorscales = graphCustomisation.customise(df, variable)
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scattermapbox(
+            lon = df['Longitude'],
+            lat = df['Latitude'],
+            text = df['text'],
+            mode = 'markers',
+            marker = go.scattermapbox.Marker(
+                size=15,
+                opacity=0.8,
+                symbol = 'circle',
+                colorscale = colorscales[variable], 
+                #cmin = 0,
+                color = df['Value'],
+                cmax = df['Value'].max(),
+                colorbar=dict(
+                    title=units,
+                    orientation='h'
+                )
+            )
+        )
+    )
+
+    fig.update_layout(layouts.map(variable))
+
+    return fig

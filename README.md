@@ -35,9 +35,10 @@ Access Port:
 
 ### To Add:
 - [x] Number of sensors online etc.
-- [ ] Map of all locations
+- [x] Map of all locations
 - [ ] Baseline historical data - monthly averages over the past n years
-- [x] Dropdown to switch between observatories
+- [x] Dropdown to switch between locations
+- [ ] Put logos and information in an information hover-over dialog box
 
 <br>
 

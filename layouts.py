@@ -1,18 +1,12 @@
 import plotly.graph_objects as go
 
-def graph(src, location, variable, units):
-    location = ', '.join(location)
+def graph(variable, units):
 
-    if src == 'UO' or src == 'UOFile':
-        period = ['day', 1, 3, 5, 'd']
-    elif src == 'UDX' or src == 'UDXFile':
-        period = ['minute', 20, 40, 60, 'm']
-    elif src == 'SUF':
-        period = ['hour', 1, 2, 3, 'h']
+    period = ['minute', 20, 40, 60, 'm']
 
     return go.Layout(
         title = dict(
-            text = f'{variable}: {location}',
+            text = f'{variable}',
             x = 0.5
         ),
         showlegend = False, 
@@ -56,11 +50,9 @@ def graph(src, location, variable, units):
         font=dict(color="#ccccdc")
     )
 
-def map(src, locations, variable):
-    location = ', '.join(locations)
-    return dict(
-        title = f'{variable} Latest: {location}',
-        colorbar = True,
+def map(variable):
+    return go.Layout(
+        title = f'{variable} Latest',
         autosize = True,
         height = 900,
         paper_bgcolor='rgba(0,0,0,0)',
@@ -94,14 +86,13 @@ def card():
         margin = dict(t=80, b=60, l=40, r=20)
     )
 
-def indicators(locations, variables):
-    l = ', '.join(locations)
-    v = ', '.join(variables)
+def indicators(variable):
     return go.Layout(
-        title = {
-            'text': f'Hourly Status: {l}',
-            'x': 0.5
-        },
+        # title = {
+        #     'text': f'{variable} Overview',
+        #     'x': 0.5,
+        #     'font_size': 30
+        # },
         autosize = True,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -115,7 +106,7 @@ def indicators(locations, variables):
         template = {
             'data' : {
                 'indicator': [{
-                    'mode' : "number+gauge"
+                    'mode' : "number"
                 }]
             }
         }

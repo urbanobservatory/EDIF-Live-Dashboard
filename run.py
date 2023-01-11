@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import getData
 import allValues
 import latestValues
-import displayGraphs
 import suspectReadings
 import indicators
 
@@ -19,11 +18,10 @@ def times(day_period):
     return start, end
 
 
-def run(src, location, variable, units='None'):
+def run(src, location, variable, df):
     start, end = times(day_period)
     data = {'start': start, 'end': end}
 
-    df = getData.fetch(src, location, variable, units, start, end)
     if df.empty:
         data.update({'status': 'Offline'})
         return data

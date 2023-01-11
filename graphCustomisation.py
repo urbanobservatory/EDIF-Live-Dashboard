@@ -7,7 +7,7 @@ load_dotenv()
 pm25_display_limit = int(os.getenv('pm25_display_limit'))
 temperature_display_limit = int(os.getenv('temperature_display_limit'))
 
-def customise(df, variable, location):
+def customise(df, variable):
     if variable == 'PM2.5':
         df = df[df['Value'] <= pm25_display_limit]
     elif variable == "Temperature":
@@ -15,13 +15,19 @@ def customise(df, variable, location):
     elif variable == 'Traffic Flow':
         df = df[df['Value'] != 0]
 
-    if location == 'Newcastle':
-        color = '#f44242'
-    elif location == "Manchester":
-        color = '#4254f5'
-    elif location == 'Birmingham':
-        color = '#47d65f'
-    else:
-        color = '#8a8888'
+    #Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd
+    colorscales = {
+        'PM2.5': 'reds',
+        'Traffic Flow': 'bluered',
+        'Black Carbon': 'Blackbody',
+        'Nitric Oxide': 'Viridis',
+        'Ozone': 'Blues',
+        'Nitrogen Dioxide': 'RdBu',
+        'PM1': 'reds',
+        'PM10': 'reds',
+        'Temperature': 'YlOrRd',
+        'Humidity': 'Jet',
+        'Pressure': 'YlGnBu'
+    }
 
-    return df, color
+    return df, colorscales

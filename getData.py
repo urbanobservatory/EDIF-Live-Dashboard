@@ -2,6 +2,7 @@
 
 import os
 import datetime
+from dateutil.relativedelta import relativedelta
 import requests
 import pandas as pd
 import json
@@ -33,17 +34,70 @@ def getUO(variable, start, end):
     df = df[df['data.'+variable].notna()]
     return df
 
-def getUDX(location, variable):
+def getUDX(location, variable, start, end):
     print('fetching UDX data...', location, variable, datetime.datetime.now())
-    if location == 'Birmingham':
-        response_API = requests.get(os.getenv(f'{location}_url'), 
-        headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')})
+    multiple_requests = False
+
+    if multiple_requests == True:
+        # Time format: '2023-01-09T06%3A00%3A00.000Z'
+        # Accumulate half-hours as UDX has a pagination limit of 1000
+        time = start
+        times = [start]
+        # 48 - the number of half-hours in one day
+        for i in range(0, 23):
+            time = times[-1]+relativedelta(minutes=60)
+            times.append(time)
+
+        dfs = []
+        for time in range(0, len(times)):
+            if time == len(times)-1:
+                break
+            start = times[time]
+            end = times[time+1]
+
+            start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
+            end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
+
+            if location == 'Birmingham':
+                response_API = requests.get(
+                    url=f"{os.getenv(f'{location}_url')}?start={start}&end={end}", 
+                    headers={
+                        "Content-Type":os.getenv('cont'), 
+                        "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')
+                    }
+                )
+            else:
+                response_API = requests.get(
+                    url=f"{os.getenv(f'{location}_{variable}_url')}?start={start}&end={end}",
+                    headers={
+                        "Content-Type":os.getenv('cont'), 
+                        "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')
+                    }
+                )
+
+            print(variable, 'status code: ', response_API.status_code)
+
+            try:
+                json_data = json.loads(response_API.text)
+                dfs.append(pd.json_normalize(json_data))
+            except:
+                continue
+
+        df = pd.concat(dfs, ignore_index=True)
+        # df.drop_duplicates - can't when lists are included
+        return df
+
     else:
-        response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
-        headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
-    print(variable, 'status code: ', response_API.status_code)
-    json_data = json.loads(response_API.text)
-    return pd.json_normalize(json_data)
+        print('fetching UDX data...', location, variable, datetime.datetime.now())
+        if location == 'Birmingham':
+            response_API = requests.get(os.getenv(f'{location}_url'), 
+            headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')})
+        else:
+            response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
+            headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
+        print(variable, 'status code: ', response_API.status_code)
+        json_data = json.loads(response_API.text)
+        return pd.json_normalize(json_data)
 
 def getSUF(location, variable, units, start, end):
     start = start.strftime("%Y-%m-%dT%H:%M:%S")
@@ -99,7 +153,7 @@ def getSUF(location, variable, units, start, end):
     return pd.concat(dfs)
 
 
-def fetch(src, location, variable, units, start, end):
+def fetch(src, location, variable, start, end):
 
     if src == 'UO':
 
@@ -153,7 +207,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'pm25'
                 units = 'μgm⁻³'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -179,7 +233,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'temperature'
                 units = '°C'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -205,7 +259,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'intensity'
                 units = 'Number of Vehicles'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -234,6 +288,7 @@ def fetch(src, location, variable, units, start, end):
             df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
             df['Longitude'] = df['location.value.coordinates'].str[0]
             df['Latitude'] = df['location.value.coordinates'].str[1]
+            df['Location'] = 'NewcastleUO'
             df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
 
         elif location == 'Manchester':
@@ -242,7 +297,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'pm25'
                 units = 'μgm⁻³'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -266,7 +321,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'intensity'
                 units = 'Number of Vehicles'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -292,7 +347,7 @@ def fetch(src, location, variable, units, start, end):
 
                 variable = 'bc'
                 units = 'ngm⁻³'
-                df = getUDX(location, variable)
+                df = getUDX(location, variable, start, end)
 
                 if df.empty:
                     return df
@@ -319,6 +374,7 @@ def fetch(src, location, variable, units, start, end):
             df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
             df['Longitude'] = df['location.value.coordinates'].str[0]
             df['Latitude'] = df['location.value.coordinates'].str[1]
+            df['Location'] = 'ManchesterUO'
             df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
             
         elif location == 'Birmingham':
@@ -359,7 +415,7 @@ def fetch(src, location, variable, units, start, end):
                 variable = 'temperature'
                 units = '°C'
 
-            df = getUDX(location, variable)
+            df = getUDX(location, variable, start, end)
 
             if df.empty:
                 return df
@@ -379,13 +435,14 @@ def fetch(src, location, variable, units, start, end):
                 'timestamp.value': 'Timestamp',
             }, axis='columns', inplace=True)
 
-            df['ID'] = df['ID'].str.split(":").str[3]
+            df['ID'] = df['ID'].str.split(":").str[5]
             df['Variable'] = variable
             df['Units'] = units
             df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
             df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
             df['Longitude'] = df['location.value.coordinates'].str[0]
             df['Latitude'] = df['location.value.coordinates'].str[1]
+            df['Location'] = 'BirminghamUO'
             df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
 
 
@@ -402,5 +459,6 @@ def fetch(src, location, variable, units, start, end):
 
     
     df = df[df['Value'].notna()]
+    df.sort_values(by='Datetime', inplace = True)
     
     return df
