@@ -6,13 +6,14 @@ import run
 import graphCustomisation
 import allValues
 
-def indicators(variable, df):
+def indicators(df):
 
     n_sources = df['Location'].nunique()
     n_sensors = df['ID'].nunique()
     n_records = len(df.index)
     average = df["Value"].mean()
 
+    variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
 
     fig = go.Figure()
@@ -66,10 +67,11 @@ def indicators(variable, df):
     return fig
 
 
-def scatter(variable, df):
+def scatter_all(df):
 
-    df, colorscales = graphCustomisation.customise(df, variable)
+    variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+    df, colorscales = graphCustomisation.customise(df, variable)
 
     fig = go.Figure()
 
@@ -103,7 +105,7 @@ def scatter(variable, df):
                 go.Scatter(
                     x=list(df['Datetime']),
                     y=list(df['Value']),
-                    text=df['ID']+', '+df['Value'].astype(str)+units,
+                    text=df['ID']+': '+df['Value'].astype(str)+units,
                     mode='lines+markers'
                 )
             )
@@ -111,6 +113,36 @@ def scatter(variable, df):
     fig.update_layout(
         layouts.graph(variable, units), 
         transition_duration=500
+    )
+
+    return fig
+
+
+def scatter_hover(df):
+
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+    df, colorscales = graphCustomisation.customise(df, variable)
+
+    fig = go.Figure()
+
+    sensor_dfs = allValues.run(df)
+
+    for df in sensor_dfs:
+        fig.add_trace(
+            go.Scatter(
+                x=list(df['Datetime']),
+                y=list(df['Value']),
+                text=df['ID']+': '+df['Value'].astype(str)+units,
+                mode='lines+markers',
+                marker=dict(
+                    color='#ccccdc'
+                )
+            )
+        )
+
+    fig.update_layout(
+        layouts.graph(variable, units)
     )
 
     return fig
@@ -143,8 +175,9 @@ def alertsTable(src, locations, variables):
     return df.to_dict('records')
 
 
-def map(variable, df, map_selection):
+def map(df, map_selection): #, map_relayout):
 
+    variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
     df['text'] = df['ID']+': '+df['Value'].astype(str)+' '+units
     df, colorscales = graphCustomisation.customise(df, variable)
@@ -175,7 +208,7 @@ def map(variable, df, map_selection):
     )
 
     fig.update_layout(
-        layouts.map(variable, map_selection),
+        layouts.map(variable, map_selection), #, map_relayout),
         transition_duration=500
     )
 

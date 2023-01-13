@@ -1,11 +1,10 @@
 import os
 import dash
 import datetime
-from dash import dcc, html
+from dash import dcc, html, ctx
 from dash.dependencies import Output, Input, State
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
-import flask
 import pandas as pd
 from flask_caching import Cache
 
@@ -17,21 +16,18 @@ import latestValues
 load_dotenv()
 update_frequency = int(os.getenv('update_frequency'))
 day_period = float(os.getenv('day_period'))
-previous_checklist_variable = None
-df = pd.DataFrame()
-previous_n = -1
 
 # APPLICATION
 app = dash.Dash(__name__)
-#server = app.server
+server = app.server
 
-# CACHE_CONFIG = {
-#     # try 'FileSystemCache' if you don't want to setup redis
-#     'CACHE_TYPE': 'RedisCache',
-#     'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
-# }
-# cache = Cache()
-# cache.init_app(app.server, config=CACHE_CONFIG)
+CACHE_CONFIG = {
+    # try 'FileSystemCache' if you don't want to setup redis
+    'CACHE_TYPE': 'RedisCache',
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+}
+cache = Cache()
+cache.init_app(app.server, config=CACHE_CONFIG)
 
 
 app.layout = html.Div([
@@ -64,49 +60,34 @@ app.layout = html.Div([
                         # }
                     )
                 )
-            ], className='dropDown'
-            )
-        ], className='four columns'
-        ),
+            ], className='dropDown')
+        ], className='four columns'),
         html.Div([
             html.Div(
                 html.H1('EDIF Live Dashboard'),
-                className="banner"
-            ),
-        ], className='four columns'
-        ),
+                className="banner"),
+        ], className='four columns'),
         html.Div([
             html.Div([
 
-            ], className='banner'
-        )
-        ], className='four columns'
-        )
-    ], className='row'
-    ),
+            ], className='banner')
+        ], className='four columns')
+    ], className='row'),
 
     html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    dcc.Graph(
-                        id='Map'
-                    )
-                ], className='twelve columns'
-                )
-            ], className='row'
-            )
-        ], className='four columns'
-        ),
+                    dcc.Graph(id='Map')
+                ], className='twelve columns')
+            ], className='row')
+        ], className='four columns'),
         html.Div([
             html.Div([
                 html.Div([
                     html.Div([
-                        dcc.Graph(
-                            id='Indicators'
-                        )
-                    ], className='six columns'
-                    ),
+                        dcc.Graph(id='Indicators')
+                    ], className='six columns'),
                     html.Div([
                         html.Div([
                             html.Label(
@@ -148,139 +129,154 @@ app.layout = html.Div([
                             style_data=dict(color="#ccccdc")
                         )
                         ], className='row')
-                    ], className='six columns'
-                    )
+                    ], className='six columns')
                 ])
-            ], className="row"
-            ),
+            ], className="row"),
             html.Div([
                 html.Div([
-                    dcc.Graph(
-                        id='Scatter'
-                    )
-                ], className='twelve columns'
-                )
-            ], className="row"
-            )
-        ], className="eight columns"
-        )
-    ], className="row"
-    ),
+                    dcc.Graph(id='Scatter All')
+                ], className='twelve columns')
+            ], className="row"),
+            html.Div([
+                html.Div([
+                    dcc.Graph(id='Scatter Hover')
+                ], className='six columns')
+            ], className="row")
+        ], className="eight columns")
+    ], className="row"),
+
     dcc.Interval(
         id='interval-component',
         interval=60000*update_frequency,
-        n_intervals=0
-    )
-], className="body"
-)
+        n_intervals=0),
+    dcc.Store(id='signal')
+
+], className="body")
 
 
 # CALLBACKS
-
-# @app.callback(Output('Suspect_table', 'data'),
-#               Input('interval-component', 'n_intervals'))
-# def update_graph_live(n):
-#     src       = 'UDX'
-#     location  = 'Newcastle'
-#     variables = ['PM2.5', 'Temperature', 'Traffic Flow']
-#     return figures.suspectTable(src, location, variables)
-
-
-# @app.callback(Output('Alerts_table', 'data'),
-#               Input('interval-component', 'n_intervals'))
-# def update_graph_live(n):
-#     src       = 'UDX'
-#     locations = ['Newcastle', 'Manchester', 'Birmingham']
-#     variables = ['PM2.5', 'Temperature', 'Traffic Flow', 'Black Carbon']
-#     return figures.alertsTable(src, locations, variables)
-
-
-@app.callback(
-    [
-        Output('Indicators', 'figure'),
-        Output('Scatter', 'figure'),
-        Output('Map', 'figure')#,
-        #Output('Suspect Table', 'data'),
-        #Output('Alerts Table', 'data')
-    ],
-    [
-        Input('interval-component', 'n_intervals'), 
-        Input('checklist', 'value'), 
-        Input('Map', 'selectedData')
-        #TODO: Add from-to time input
-        #TODO: Add refresh input button
-    ])
-def update_all(n, checklist_variable, map_selection):
-    global previous_checklist_variable
-    global df
-    global previous_n
-
-    print(previous_n)
-    print(n)
-
+@cache.memoize()
+def global_store(variable):
     src = 'UDX'
     locations = ['Newcastle', 'Manchester', 'Birmingham']
-    
-    # Start and end times
+
     start = datetime.datetime.now()-relativedelta(days=day_period)
     end   = datetime.datetime.now()
 
-    # Get DataFrame
-    if df.empty \
-    or n != previous_n \
-    or checklist_variable != previous_checklist_variable:
-        dfs = []
-        for location in locations:
-            try:
-                df = getData.fetch(src, location, checklist_variable, start, end)
-                dfs.append(df)
-            except:
-                continue
-        df = pd.concat(dfs)
+    dfs = []
+    for location in locations:
+        try:
+            df = getData.fetch(src, location, variable, start, end)
+            dfs.append(df)
+        except:
+            continue
 
-    # Get latest values
+    df = pd.concat(dfs)
+
+    return df
+
+
+@app.callback(
+    Output('signal', 'data'), 
+    [
+        Input('interval-component', 'n_intervals'),
+        Input('checklist', 'value')
+    ])
+def compute_value(n, variable):
+    global_store(variable)
+    return variable
+
+
+@app.callback(
+    Output('Map', 'figure'),
+    [
+        Input('signal', 'data'),
+        Input('Map', 'selectedData')#,
+        # Input('Map', 'relayoutData')
+    ])
+def update_map(variable, map_selection): #, map_relayout):
+    df = global_store(variable)
     sensor_dfs = allValues.run(df)
     latest_df = latestValues.run(sensor_dfs)
+    return figures.map(latest_df, map_selection) #, map_relayout)
 
-    # Get Map Selections DataFrame
+
+@app.callback(
+    Output('Scatter All', 'figure'),
+    [
+        Input('signal', 'data'),
+        Input('Map', 'selectedData')
+    ])
+def update_scatter_all(variable, map_selection):
+    df = global_store(variable)
+    triggered = ctx.triggered_id
     selected = []
-    if map_selection != None \
-    and checklist_variable == previous_checklist_variable:
+    if triggered == 'Map':
         for i in range(0, len(map_selection['points'])):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
-        display_df = df.loc[df['ID'].isin(selected)]
-    else:
-        display_df = df
+        df = df.loc[df['ID'].isin(selected)]
+    return figures.scatter_all(df)
 
-    previous_checklist_variable = checklist_variable
-    previous_n = n
 
-    return \
-        figures.indicators(checklist_variable, display_df), \
-        figures.scatter(checklist_variable, display_df), \
-        figures.map(checklist_variable, latest_df, map_selection)
+@app.callback(
+    Output('Scatter Hover', 'figure'),
+    [
+        Input('signal', 'data'), 
+        Input('Map', 'hoverData'),
+        Input('Scatter All', 'hoverData')
+    ])
+def update_scatter_hover(variable, map_hover, scatter_hover):
+    df = global_store(variable)
+    triggered = ctx.triggered_id
+    if triggered == 'signal':
+        df = df.sample()
+    elif triggered == 'Map':
+        id = map_hover['points'][0]['text'].split(':')[0]
+        df = df.loc[df['ID'].isin([id])]
+    elif triggered == 'Scatter All':
+        id = scatter_hover['points'][0]['text'].split(':')[0]
+        df = df.loc[df['ID'].isin([id])]
+    return figures.scatter_hover(df)
+
+
+@app.callback(
+    Output('Indicators', 'figure'),
+    [
+        Input('signal', 'data'), 
+        Input('Map', 'selectedData')
+    ])
+def update_indicators(variable, map_selection):
+    df = global_store(variable)
+    triggered = ctx.triggered_id
+    selected = []
+    if triggered == 'Map':
+        for i in range(0, len(map_selection['points'])):
+            id = map_selection['points'][i]['text'].split(':')[0]
+            selected.append(id)
+        df = df.loc[df['ID'].isin(selected)]
+    return figures.indicators(df)
 
 
 # For if CSS Stylesheet does not load
-css_directory = os.getcwd()
-stylesheets = ['stylesheet.css']
-static_css_route = '/static/'
+# css_directory = os.getcwd()
+# stylesheets = ['stylesheet.css']
+# static_css_route = '/static/'
 
-@app.server.route('{}<stylesheet>'.format(static_css_route))
-def serve_stylesheet(stylesheet):
-    if stylesheet not in stylesheets:
-        raise Exception(
-            '"{}" is excluded from the allowed static files'.format(
-                stylesheet
-            )
-        )
-    return flask.send_from_directory(css_directory, stylesheet)
+# @app.server.route('{}<stylesheet>'.format(static_css_route))
+# def serve_stylesheet(stylesheet):
+#     if stylesheet not in stylesheets:
+#         raise Exception(
+#             '"{}" is excluded from the allowed static files'.format(
+#                 stylesheet
+#             )
+#         )
+#     return flask.send_from_directory(css_directory, stylesheet)
 
-for stylesheet in stylesheets:
-    app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
+# for stylesheet in stylesheets:
+#     app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
     
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=True) #, processes=6, threaded=False)
+    app.run_server(debug=True, processes=6, threaded=False)

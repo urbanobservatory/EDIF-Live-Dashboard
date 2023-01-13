@@ -6,8 +6,6 @@ from dateutil.relativedelta import relativedelta
 import requests
 import pandas as pd
 import json
-import numpy as np
-import dateutil.parser
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -205,17 +203,17 @@ def fetch(src, location, variable, start, end):
 
             if variable == 'PM2.5':
 
-                variable = 'pm25'
+                variable_b = 'pm25'
                 units = 'μgm⁻³'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
                 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
                     'suspectReading.value',
                     'dateObserved.value',
                     'location.value.coordinates'
@@ -223,51 +221,51 @@ def fetch(src, location, variable, start, end):
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp',
                     'suspectReading.value': 'Suspect Reading'
                 }, axis='columns', inplace=True)
 
             elif variable == 'Temperature':
 
-                variable = 'temperature'
+                variable_b = 'temperature'
                 units = '°C'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
                 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
-                    variable+'.suspectReading',
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
+                    variable_b+'.suspectReading',
                     'dateObserved.value',
                     'location.value.coordinates'
                     ]]
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp',
-                    variable+'.suspectReading': 'Suspect Reading'
+                    variable_b+'.suspectReading': 'Suspect Reading'
                 }, axis='columns', inplace=True)
 
             elif variable == 'Traffic Flow':
 
-                variable = 'intensity'
+                variable_b = 'intensity'
                 units = 'Vehicles'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
                 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
                     'suspectReading.value',
                     'dateObserved.value',
                     'location.value.coordinates'
@@ -275,8 +273,8 @@ def fetch(src, location, variable, start, end):
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp',
                     'suspectReading.value': 'Suspect Reading'
                 }, axis='columns', inplace=True)
@@ -295,33 +293,33 @@ def fetch(src, location, variable, start, end):
 
             if variable == 'PM2.5':
 
-                variable = 'pm25'
+                variable_b = 'pm25'
                 units = 'μgm⁻³'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
                     'dateObserved.value',
                     'location.value.coordinates'
                     ]]
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp'
                 }, axis='columns', inplace=True)
 
             elif variable == 'Traffic Flow':
 
-                variable = 'intensity'
+                variable_b = 'intensity'
                 units = 'Vehicles'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
@@ -330,40 +328,40 @@ def fetch(src, location, variable, start, end):
 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
                     'dateObserved.value',
                     'location.value.coordinates'
                     ]]
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp'
                 }, axis='columns', inplace=True)
 
             elif variable == 'Black Carbon':
 
-                variable = 'bc'
+                variable_b = 'bc'
                 units = 'ngm⁻³'
-                df = getUDX(location, variable, start, end)
+                df = getUDX(location, variable_b, start, end)
 
                 if df.empty:
                     return df
 
                 df = df[[
                     'id', 
-                    variable+'.unit', 
-                    variable+'.value', 
+                    variable_b+'.unit', 
+                    variable_b+'.value', 
                     'dateObserved.value',
                     'location.value.coordinates'
                     ]]
 
                 df.rename({
                     'id': 'ID',
-                    variable+'.unit': 'Units',
-                    variable+'.value': 'Value',
+                    variable_b+'.unit': 'Units',
+                    variable_b+'.value': 'Value',
                     'timestamp.value': 'Timestamp'
                 }, axis='columns', inplace=True)
 
@@ -380,58 +378,58 @@ def fetch(src, location, variable, start, end):
         elif location == 'Birmingham':
 
             if variable == 'PM2.5':
-                variable = 'pm25'
+                variable_b = 'pm25'
                 units = 'μgm⁻³'
 
             elif variable == 'Nitric Oxide':
-                variable = 'no'
+                variable_b = 'no'
                 units = 'μgm⁻³'
 
             elif variable == 'Ozone':
-                variable = 'o3'
+                variable_b = 'o3'
                 units = 'μgm⁻³'
 
             elif variable == 'Nitrogen Dioxide':
-                variable = 'no2'
+                variable_b = 'no2'
                 units = 'μgm⁻³'
 
             elif variable == 'PM1':
-                variable = 'pm1'
+                variable_b = 'pm1'
                 units = 'μgm⁻³'
 
             elif variable == 'PM10':
-                variable = 'pm10'
+                variable_b = 'pm10'
                 units = 'μgm⁻³'
 
             elif variable == 'Humidity':
-                variable = 'humidity'
+                variable_b = 'humidity'
                 units = '%'
 
             elif variable == 'Pressure':
-                variable = 'pressure'
+                variable_b = 'pressure'
                 units = 'Pa'
 
             elif variable == 'Temperature':
-                variable = 'temperature'
+                variable_b = 'temperature'
                 units = '°C'
 
-            df = getUDX(location, variable, start, end)
+            df = getUDX(location, variable_b, start, end)
 
             if df.empty:
                 return df
 
             df = df[[
                 'id', 
-                variable+'.unit', 
-                variable+'.value', 
+                variable_b+'.unit', 
+                variable_b+'.value', 
                 'dateObserved.value',
                 'location.value.coordinates'
                 ]]
 
             df.rename({
                 'id': 'ID',
-                variable+'.unit': 'Units',
-                variable+'.value': 'Value',
+                variable_b+'.unit': 'Units',
+                variable_b+'.value': 'Value',
                 'timestamp.value': 'Timestamp',
             }, axis='columns', inplace=True)
 

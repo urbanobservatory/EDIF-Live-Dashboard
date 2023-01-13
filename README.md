@@ -2,7 +2,9 @@
 ## Installation and Run
 Install requirements:
 
-    pip install dash pandas plotly dotenv requests numpy Flask-Caching redis
+    sudo apt-get install redis-server
+
+    pip install dash pandas plotly dotenv requests numpy Flask-Caching redis boto3
 
 Run: 
     

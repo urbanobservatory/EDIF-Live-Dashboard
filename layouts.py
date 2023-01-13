@@ -51,24 +51,24 @@ def graph(variable, units):
         font=dict(color="#ccccdc")
     )
 
-def map(variable, map_selection):
+def map(variable, map_selection): #, map_relayout):
 
-    if map_selection == None:
-        map_bounds = {
-            'west': -6,
-            'north': 56,
-            'east': 2,
-            'south': 50
-        }
-        zoom = 6
-    else:
-        map_bounds = {
-            'west': map_selection['range']['mapbox'][0][0],
-            'north': map_selection['range']['mapbox'][0][1],
-            'east': map_selection['range']['mapbox'][1][0],
-            'south': map_selection['range']['mapbox'][1][1]
-        }
-        zoom = 10
+    # if map_selection == None:
+    map_bounds = {
+        'west': -6,
+        'north': 56,
+        'east': 2,
+        'south': 50
+    }
+    zoom = 6
+    # else:
+    #     map_bounds = {
+    #         'west': map_selection['range']['mapbox'][0][0],
+    #         'north': map_selection['range']['mapbox'][0][1],
+    #         'east': map_selection['range']['mapbox'][1][0],
+    #         'south': map_selection['range']['mapbox'][1][1]
+    #     }
+    #     zoom = 10
 
     mid_lat = (map_bounds['north']+map_bounds['south'])/2
     mid_lon = (map_bounds['east']+map_bounds['west'])/2
