@@ -6,12 +6,13 @@ def graph(variable, units):
 
     return go.Layout(
         title = dict(
-            text = f'{variable}',
+            text = f'{variable} Timeline',
             x = 0.5
         ),
+        height = 300,
         showlegend = False, 
         autosize = True,
-        margin = dict(t=80, b=60, l=40, r=20),
+        margin = dict(t=20, b=20, l=20, r=20),
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         xaxis = dict(
@@ -50,21 +51,52 @@ def graph(variable, units):
         font=dict(color="#ccccdc")
     )
 
-def map(variable):
+def map(variable, map_selection):
+
+    if map_selection == None:
+        map_bounds = {
+            'west': -6,
+            'north': 56,
+            'east': 2,
+            'south': 50
+        }
+        zoom = 6
+    else:
+        map_bounds = {
+            'west': map_selection['range']['mapbox'][0][0],
+            'north': map_selection['range']['mapbox'][0][1],
+            'east': map_selection['range']['mapbox'][1][0],
+            'south': map_selection['range']['mapbox'][1][1]
+        }
+        zoom = 10
+
+    mid_lat = (map_bounds['north']+map_bounds['south'])/2
+    mid_lon = (map_bounds['east']+map_bounds['west'])/2
+
     return go.Layout(
-        title = f'{variable} Latest',
+        title = dict(
+            text = f'{variable} Latest',
+            x = 0.5
+        ),
         autosize = True,
         height = 900,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ccccdc"),
-        margin = dict(t=0, b=0, l=0, r=0),
+        margin = dict(t=20, b=0, l=0, r=0),
         mapbox = dict(
             style = "carto-darkmatter", #"carto-positron"
             # NEWCATSLE BOUNDS
             # bounds = dict(west=-1.8, east=-1.4, south=54.85, north=55.1)
             # England BOUNDS
-            bounds = dict(west=-6, east=2, south=50, north=56)
+            # bounds = dict(
+            #     west = map_bounds['west'], 
+            #     east = map_bounds['east'], 
+            #     south = map_bounds['south'], 
+            #     north = map_bounds['north']
+            # ),
+            center = go.layout.mapbox.Center(lat=mid_lat, lon=mid_lon), 
+            zoom = zoom
         )
     )
 
@@ -93,11 +125,12 @@ def indicators(variable):
         #     'x': 0.5,
         #     'font_size': 30
         # },
+        height = 300,
         autosize = True,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ccccdc"),
-        # margin = dict(t=80, b=60, l=40, r=20),
+        margin = dict(t=40, b=0, l=20, r=20),
         grid = {
             'rows': 2, 
             'columns': 2, 

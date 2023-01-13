@@ -2,7 +2,7 @@
 ## Installation and Run
 Install requirements:
 
-    pip install dash pandas plotly dotenv requests numpy
+    pip install dash pandas plotly dotenv requests numpy Flask-Caching redis
 
 Run: 
     
@@ -39,6 +39,7 @@ Access Port:
 - [ ] Baseline historical data - monthly averages over the past n years
 - [x] Dropdown to switch between locations
 - [ ] Put logos and information in an information hover-over dialog box
+- [ ] Min and Max values within indicators, also with sensor names and timess
 
 <br>
 

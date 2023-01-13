@@ -58,12 +58,15 @@ def indicators(variable, df):
         )
     )
 
-    fig.update_layout(layouts.indicators(variable))
+    fig.update_layout(
+        layouts.indicators(variable),
+        transition_duration=500
+    )
 
     return fig
 
 
-def scatter(variable, units, df):
+def scatter(variable, df):
 
     df, colorscales = graphCustomisation.customise(df, variable)
     units = df['Units'].iloc[0]
@@ -82,8 +85,12 @@ def scatter(variable, units, df):
                     # marker_symbol='circle-open',
                     color=df['Value'],
                     # opacity=0.5,
-                    colorscale=colorscales[variable]
-                    # showscale=True
+                    colorscale=colorscales[variable],
+                    showscale=False,
+                    colorbar=dict(
+                        title=units,
+                        orientation='v'
+                    )
                 )
             )
         )
@@ -101,27 +108,10 @@ def scatter(variable, units, df):
                 )
             )
 
-    fig.update_layout(layouts.graph(variable, units))
-
-    return fig
-
-
-def trafficFlowGraph(src, locations, variable, units):
-    fig = go.Figure()
-
-    location_names = []
-    for location in locations:
-        try:
-            data = run.run(src, location, variable, units)
-            if data['status'] == 'Offline':
-                continue
-            location_names.append(location)
-            for graph in data['display_graphs']:
-                fig.add_trace(graph)
-        except:
-            continue
-
-    fig.update_layout(layouts.graph(src, location_names, variable, units))
+    fig.update_layout(
+        layouts.graph(variable, units), 
+        transition_duration=500
+    )
 
     return fig
 
@@ -153,7 +143,7 @@ def alertsTable(src, locations, variables):
     return df.to_dict('records')
 
 
-def map(variable, df):
+def map(variable, df, map_selection):
 
     units = df['Units'].iloc[0]
     df['text'] = df['ID']+': '+df['Value'].astype(str)+' '+units
@@ -173,6 +163,7 @@ def map(variable, df):
                 symbol = 'circle',
                 colorscale = colorscales[variable], 
                 #cmin = 0,
+                showscale = True,
                 color = df['Value'],
                 cmax = df['Value'].max(),
                 colorbar=dict(
@@ -183,6 +174,9 @@ def map(variable, df):
         )
     )
 
-    fig.update_layout(layouts.map(variable))
+    fig.update_layout(
+        layouts.map(variable, map_selection),
+        transition_duration=500
+    )
 
     return fig

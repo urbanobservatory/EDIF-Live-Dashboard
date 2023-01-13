@@ -171,7 +171,7 @@ def fetch(src, location, variable, start, end):
 
         elif variable == 'Traffic Flow':
             variable = 'Plates Matching'
-            units = 'Number of Vehicles'
+            units = 'Vehicles'
             df = getUO(variable, start, end)
             if df.empty:
                 return df
@@ -258,7 +258,7 @@ def fetch(src, location, variable, start, end):
             elif variable == 'Traffic Flow':
 
                 variable = 'intensity'
-                units = 'Number of Vehicles'
+                units = 'Vehicles'
                 df = getUDX(location, variable, start, end)
 
                 if df.empty:
@@ -320,7 +320,7 @@ def fetch(src, location, variable, start, end):
             elif variable == 'Traffic Flow':
 
                 variable = 'intensity'
-                units = 'Number of Vehicles'
+                units = 'Vehicles'
                 df = getUDX(location, variable, start, end)
 
                 if df.empty:

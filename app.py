@@ -4,11 +4,12 @@ import datetime
 from dash import dcc, html
 from dash.dependencies import Output, Input, State
 from dateutil.relativedelta import relativedelta
-import figures
 from dotenv import load_dotenv
 import flask
 import pandas as pd
+from flask_caching import Cache
 
+import figures
 import getData
 import allValues
 import latestValues
@@ -17,21 +18,25 @@ load_dotenv()
 update_frequency = int(os.getenv('update_frequency'))
 day_period = float(os.getenv('day_period'))
 previous_checklist_variable = None
-    
+df = pd.DataFrame()
+previous_n = -1
 
 # APPLICATION
 app = dash.Dash(__name__)
+#server = app.server
+
+# CACHE_CONFIG = {
+#     # try 'FileSystemCache' if you don't want to setup redis
+#     'CACHE_TYPE': 'RedisCache',
+#     'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+# }
+# cache = Cache()
+# cache.init_app(app.server, config=CACHE_CONFIG)
+
 
 app.layout = html.Div([
 
     html.Div([
-        html.Div([
-            html.Div(
-                html.H1('EDIF Live Dashboard'),
-                className="banner"
-            ),
-        ], className='four columns'
-        ),
         html.Div([
             html.Div([
                 html.Div(
@@ -64,6 +69,13 @@ app.layout = html.Div([
         ], className='four columns'
         ),
         html.Div([
+            html.Div(
+                html.H1('EDIF Live Dashboard'),
+                className="banner"
+            ),
+        ], className='four columns'
+        ),
+        html.Div([
             html.Div([
 
             ], className='banner'
@@ -74,6 +86,18 @@ app.layout = html.Div([
     ),
 
     html.Div([
+        html.Div([
+            html.Div([
+                html.Div([
+                    dcc.Graph(
+                        id='Map'
+                    )
+                ], className='twelve columns'
+                )
+            ], className='row'
+            )
+        ], className='four columns'
+        ),
         html.Div([
             html.Div([
                 html.Div([
@@ -95,7 +119,7 @@ app.layout = html.Div([
                                 id='Suspect Table',
                                 page_size=12,
                                 style_table={
-                                    'height': '210.6px', 
+                                    'height': '200px', 
                                     'width': '550px',
                                     'overflowY': 'auto'
                                     },
@@ -112,7 +136,7 @@ app.layout = html.Div([
                             id='Alerts Table',
                             page_size=12,
                             style_table={
-                                'height': '210.6px', 
+                                'height': '100px', 
                                 'width': '550px',
                                 'overflowY': 'auto'
                                 },
@@ -139,18 +163,6 @@ app.layout = html.Div([
             ], className="row"
             )
         ], className="eight columns"
-        ),
-        html.Div([
-            html.Div([
-                html.Div([
-                    dcc.Graph(
-                        id='Map'
-                    )
-                ], className='twelve columns'
-                )
-            ], className='row'
-            )
-        ], className='four columns'
         )
     ], className="row"
     ),
@@ -200,9 +212,13 @@ app.layout = html.Div([
     ])
 def update_all(n, checklist_variable, map_selection):
     global previous_checklist_variable
+    global df
+    global previous_n
+
+    print(previous_n)
+    print(n)
 
     src = 'UDX'
-    units = 'hello'
     locations = ['Newcastle', 'Manchester', 'Birmingham']
     
     # Start and end times
@@ -210,37 +226,40 @@ def update_all(n, checklist_variable, map_selection):
     end   = datetime.datetime.now()
 
     # Get DataFrame
-    dfs = []
-    for location in locations:
-        try:
-            df = getData.fetch(src, location, checklist_variable, start, end)
-            dfs.append(df)
-        except:
-            continue
-    df = pd.concat(dfs)
+    if df.empty \
+    or n != previous_n \
+    or checklist_variable != previous_checklist_variable:
+        dfs = []
+        for location in locations:
+            try:
+                df = getData.fetch(src, location, checklist_variable, start, end)
+                dfs.append(df)
+            except:
+                continue
+        df = pd.concat(dfs)
 
     # Get latest values
     sensor_dfs = allValues.run(df)
     latest_df = latestValues.run(sensor_dfs)
 
-    # Reset map_selection if new variable is selected
-    if previous_checklist_variable != checklist_variable:
-        map_selection = None
-
     # Get Map Selections DataFrame
     selected = []
-    if map_selection != None:
+    if map_selection != None \
+    and checklist_variable == previous_checklist_variable:
         for i in range(0, len(map_selection['points'])):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        display_df = df.loc[df['ID'].isin(selected)]
+    else:
+        display_df = df
 
     previous_checklist_variable = checklist_variable
+    previous_n = n
 
     return \
-        figures.indicators(checklist_variable, df), \
-        figures.scatter(checklist_variable, units, df), \
-        figures.map(checklist_variable, latest_df)
+        figures.indicators(checklist_variable, display_df), \
+        figures.scatter(checklist_variable, display_df), \
+        figures.map(checklist_variable, latest_df, map_selection)
 
 
 # For if CSS Stylesheet does not load
@@ -264,4 +283,4 @@ for stylesheet in stylesheets:
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True) #, processes=6, threaded=False)
