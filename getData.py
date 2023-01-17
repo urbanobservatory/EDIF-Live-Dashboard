@@ -32,70 +32,90 @@ def getUO(variable, start, end):
     df = df[df['data.'+variable].notna()]
     return df
 
-def getUDX(location, variable, start, end):
-    print('fetching UDX data...', location, variable, datetime.datetime.now())
-    multiple_requests = False
+# def getUDX(location, variable, start, end):
+#     print('fetching UDX data...', location, variable, datetime.datetime.now())
+#     multiple_requests = False
 
-    if multiple_requests == True:
-        # Time format: '2023-01-09T06%3A00%3A00.000Z'
-        # Accumulate half-hours as UDX has a pagination limit of 1000
-        time = start
-        times = [start]
-        # 48 - the number of half-hours in one day
-        for i in range(0, 23):
-            time = times[-1]+relativedelta(minutes=60)
-            times.append(time)
+#     start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
+#     end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
 
-        dfs = []
-        for time in range(0, len(times)):
-            if time == len(times)-1:
-                break
-            start = times[time]
-            end = times[time+1]
+#     print('fetching UDX data...', location, variable, start, end)
 
-            start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
-            end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
+#     if multiple_requests == True:
+#         # Time format: '2023-01-09T06%3A00%3A00.000Z'
+#         # Accumulate half-hours as UDX has a pagination limit of 1000
+#         time = start
+#         times = [start]
+#         # 48 - the number of half-hours in one day
+#         for i in range(0, 23):
+#             time = times[-1]+relativedelta(minutes=60)
+#             times.append(time)
 
-            if location == 'Birmingham':
-                response_API = requests.get(
-                    url=f"{os.getenv(f'{location}_url')}?start={start}&end={end}", 
-                    headers={
-                        "Content-Type":os.getenv('cont'), 
-                        "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')
-                    }
-                )
-            else:
-                response_API = requests.get(
-                    url=f"{os.getenv(f'{location}_{variable}_url')}?start={start}&end={end}",
-                    headers={
-                        "Content-Type":os.getenv('cont'), 
-                        "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')
-                    }
-                )
+#         dfs = []
+#         for time in range(0, len(times)):
+#             if time == len(times)-1:
+#                 break
+#             start = times[time]
+#             end = times[time+1]
 
-            print(variable, 'status code: ', response_API.status_code)
+#             if location == 'Birmingham':
+#                 response_API = requests.get(
+#                     url=f"{os.getenv(f'{location}_url')}?start={start}&end={end}", 
+#                     headers={
+#                         "Content-Type":os.getenv('cont'), 
+#                         "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')
+#                     }
+#                 )
+#             else:
+#                 response_API = requests.get(
+#                     url=f"{os.getenv(f'{location}_{variable}_url')}?start={start}&end={end}",
+#                     headers={
+#                         "Content-Type":os.getenv('cont'), 
+#                         "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')
+#                     }
+#                 )
 
-            try:
-                json_data = json.loads(response_API.text)
-                dfs.append(pd.json_normalize(json_data))
-            except:
-                continue
+#             print(variable, 'status code: ', response_API.status_code)
 
-        df = pd.concat(dfs, ignore_index=True)
-        # df.drop_duplicates - can't when lists are included
-        return df
+#             try:
+#                 json_data = json.loads(response_API.text)
+#                 dfs.append(pd.json_normalize(json_data))
+#             except:
+#                 continue
 
-    else:
-        print('fetching UDX data...', location, variable, datetime.datetime.now())
-        if location == 'Birmingham':
-            response_API = requests.get(os.getenv(f'{location}_url'), 
-            headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')})
-        else:
-            response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
-            headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
-        print(variable, 'status code: ', response_API.status_code)
-        json_data = json.loads(response_API.text)
-        return pd.json_normalize(json_data)
+#         df = pd.concat(dfs, ignore_index=True)
+#         # df.drop_duplicates - can't when lists are included
+#         return df
+
+#     else:
+        
+#         # if location == 'Birmingham':
+#         #     response_API = requests.get(os.getenv(f'{location}_url'), 
+#         #     headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')})
+#         # else:
+#         #     response_API = requests.get(os.getenv(f'{location}_{variable}_url'), 
+#         #     headers={"Content-Type":os.getenv('cont'), "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')})
+
+#         if location == 'Birmingham':
+#                 response_API = requests.get(
+#                     url=f"{os.getenv(f'{location}_url')}?start={start}&end={end}", 
+#                     headers={
+#                         "Content-Type":os.getenv('cont'), 
+#                         "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_key')
+#                     }
+#                 )
+#         else:
+#             response_API = requests.get(
+#                 url=f"{os.getenv(f'{location}_{variable}_url')}?start={start}&end={end}",
+#                 headers={
+#                     "Content-Type":os.getenv('cont'), 
+#                     "Authorization":os.getenv(f'{location}_auth')+' '+os.getenv(f'{location}_{variable}_key')
+#                 }
+#             )
+                
+#         print(variable, 'status code: ', response_API.status_code)
+#         json_data = json.loads(response_API.text)
+#         return pd.json_normalize(json_data)
 
 def getSUF(location, variable, units, start, end):
     start = start.strftime("%Y-%m-%dT%H:%M:%S")
@@ -197,251 +217,251 @@ def fetch(src, location, variable, start, end):
         df = df.iloc[::int(os.getenv('thin_data_by_factor_of')), :]
 
 
-    elif src == 'UDX':
+    # elif src == 'UDX':
 
-        if location == 'Newcastle':
+    #     if location == 'Newcastle':
 
-            if variable == 'PM2.5':
+    #         if variable == 'PM2.5':
 
-                variable_b = 'pm25'
-                units = 'μgm⁻³'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'pm25'
+    #             units = 'μgm⁻³'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
                 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    'suspectReading.value',
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 'suspectReading.value',
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp',
-                    'suspectReading.value': 'Suspect Reading'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp',
+    #                 'suspectReading.value': 'Suspect Reading'
+    #             }, axis='columns', inplace=True)
 
-            elif variable == 'Temperature':
+    #         elif variable == 'Temperature':
 
-                variable_b = 'temperature'
-                units = '°C'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'temperature'
+    #             units = '°C'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
                 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    variable_b+'.suspectReading',
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 variable_b+'.suspectReading',
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp',
-                    variable_b+'.suspectReading': 'Suspect Reading'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp',
+    #                 variable_b+'.suspectReading': 'Suspect Reading'
+    #             }, axis='columns', inplace=True)
 
-            elif variable == 'Traffic Flow':
+    #         elif variable == 'Traffic Flow':
 
-                variable_b = 'intensity'
-                units = 'Vehicles'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'intensity'
+    #             units = 'Vehicles'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
                 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    'suspectReading.value',
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 'suspectReading.value',
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp',
-                    'suspectReading.value': 'Suspect Reading'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp',
+    #                 'suspectReading.value': 'Suspect Reading'
+    #             }, axis='columns', inplace=True)
 
-            df['ID'] = df['ID'].str.split(":").str[3]
-            df['Variable'] = variable
-            df['Units'] = units
-            df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
-            df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-            df['Longitude'] = df['location.value.coordinates'].str[0]
-            df['Latitude'] = df['location.value.coordinates'].str[1]
-            df['Location'] = 'NewcastleUO'
-            df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
+    #         df['ID'] = df['ID'].str.split(":").str[3]
+    #         df['Variable'] = variable
+    #         df['Units'] = units
+    #         df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
+    #         df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
+    #         df['Longitude'] = df['location.value.coordinates'].str[0]
+    #         df['Latitude'] = df['location.value.coordinates'].str[1]
+    #         df['Location'] = 'NewcastleUO'
+    #         df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
 
-        elif location == 'Manchester':
+    #     elif location == 'Manchester':
 
-            if variable == 'PM2.5':
+    #         if variable == 'PM2.5':
 
-                variable_b = 'pm25'
-                units = 'μgm⁻³'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'pm25'
+    #             units = 'μgm⁻³'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp'
+    #             }, axis='columns', inplace=True)
 
-            elif variable == 'Traffic Flow':
+    #         elif variable == 'Traffic Flow':
 
-                variable_b = 'intensity'
-                units = 'Vehicles'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'intensity'
+    #             units = 'Vehicles'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
 
-                print(df)
+    #             print(df)
 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp'
+    #             }, axis='columns', inplace=True)
 
-            elif variable == 'Black Carbon':
+    #         elif variable == 'Black Carbon':
 
-                variable_b = 'bc'
-                units = 'ngm⁻³'
-                df = getUDX(location, variable_b, start, end)
+    #             variable_b = 'bc'
+    #             units = 'ngm⁻³'
+    #             df = getUDX(location, variable_b, start, end)
 
-                if df.empty:
-                    return df
+    #             if df.empty:
+    #                 return df
 
-                df = df[[
-                    'id', 
-                    variable_b+'.unit', 
-                    variable_b+'.value', 
-                    'dateObserved.value',
-                    'location.value.coordinates'
-                    ]]
+    #             df = df[[
+    #                 'id', 
+    #                 variable_b+'.unit', 
+    #                 variable_b+'.value', 
+    #                 'dateObserved.value',
+    #                 'location.value.coordinates'
+    #                 ]]
 
-                df.rename({
-                    'id': 'ID',
-                    variable_b+'.unit': 'Units',
-                    variable_b+'.value': 'Value',
-                    'timestamp.value': 'Timestamp'
-                }, axis='columns', inplace=True)
+    #             df.rename({
+    #                 'id': 'ID',
+    #                 variable_b+'.unit': 'Units',
+    #                 variable_b+'.value': 'Value',
+    #                 'timestamp.value': 'Timestamp'
+    #             }, axis='columns', inplace=True)
 
-            df['ID'] = df['ID'].str.split(":").str[3]
-            df['Variable'] = variable
-            df['Units'] = units
-            df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
-            df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-            df['Longitude'] = df['location.value.coordinates'].str[0]
-            df['Latitude'] = df['location.value.coordinates'].str[1]
-            df['Location'] = 'ManchesterUO'
-            df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
+    #         df['ID'] = df['ID'].str.split(":").str[3]
+    #         df['Variable'] = variable
+    #         df['Units'] = units
+    #         df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
+    #         df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
+    #         df['Longitude'] = df['location.value.coordinates'].str[0]
+    #         df['Latitude'] = df['location.value.coordinates'].str[1]
+    #         df['Location'] = 'ManchesterUO'
+    #         df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
             
-        elif location == 'Birmingham':
+    #     elif location == 'Birmingham':
 
-            if variable == 'PM2.5':
-                variable_b = 'pm25'
-                units = 'μgm⁻³'
+    #         if variable == 'PM2.5':
+    #             variable_b = 'pm25'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'Nitric Oxide':
-                variable_b = 'no'
-                units = 'μgm⁻³'
+    #         elif variable == 'Nitric Oxide':
+    #             variable_b = 'no'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'Ozone':
-                variable_b = 'o3'
-                units = 'μgm⁻³'
+    #         elif variable == 'Ozone':
+    #             variable_b = 'o3'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'Nitrogen Dioxide':
-                variable_b = 'no2'
-                units = 'μgm⁻³'
+    #         elif variable == 'Nitrogen Dioxide':
+    #             variable_b = 'no2'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'PM1':
-                variable_b = 'pm1'
-                units = 'μgm⁻³'
+    #         elif variable == 'PM1':
+    #             variable_b = 'pm1'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'PM10':
-                variable_b = 'pm10'
-                units = 'μgm⁻³'
+    #         elif variable == 'PM10':
+    #             variable_b = 'pm10'
+    #             units = 'μgm⁻³'
 
-            elif variable == 'Humidity':
-                variable_b = 'humidity'
-                units = '%'
+    #         elif variable == 'Humidity':
+    #             variable_b = 'humidity'
+    #             units = '%'
 
-            elif variable == 'Pressure':
-                variable_b = 'pressure'
-                units = 'Pa'
+    #         elif variable == 'Pressure':
+    #             variable_b = 'pressure'
+    #             units = 'Pa'
 
-            elif variable == 'Temperature':
-                variable_b = 'temperature'
-                units = '°C'
+    #         elif variable == 'Temperature':
+    #             variable_b = 'temperature'
+    #             units = '°C'
 
-            df = getUDX(location, variable_b, start, end)
+    #         df = getUDX(location, variable_b, start, end)
 
-            if df.empty:
-                return df
+    #         if df.empty:
+    #             return df
 
-            df = df[[
-                'id', 
-                variable_b+'.unit', 
-                variable_b+'.value', 
-                'dateObserved.value',
-                'location.value.coordinates'
-                ]]
+    #         df = df[[
+    #             'id', 
+    #             variable_b+'.unit', 
+    #             variable_b+'.value', 
+    #             'dateObserved.value',
+    #             'location.value.coordinates'
+    #             ]]
 
-            df.rename({
-                'id': 'ID',
-                variable_b+'.unit': 'Units',
-                variable_b+'.value': 'Value',
-                'timestamp.value': 'Timestamp',
-            }, axis='columns', inplace=True)
+    #         df.rename({
+    #             'id': 'ID',
+    #             variable_b+'.unit': 'Units',
+    #             variable_b+'.value': 'Value',
+    #             'timestamp.value': 'Timestamp',
+    #         }, axis='columns', inplace=True)
 
-            df['ID'] = df['ID'].str.split(":").str[5]
-            df['Variable'] = variable
-            df['Units'] = units
-            df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
-            df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-            df['Longitude'] = df['location.value.coordinates'].str[0]
-            df['Latitude'] = df['location.value.coordinates'].str[1]
-            df['Location'] = 'BirminghamUO'
-            df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
+    #         df['ID'] = df['ID'].str.split(":").str[5]
+    #         df['Variable'] = variable
+    #         df['Units'] = units
+    #         df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
+    #         df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
+    #         df['Longitude'] = df['location.value.coordinates'].str[0]
+    #         df['Latitude'] = df['location.value.coordinates'].str[1]
+    #         df['Location'] = 'BirminghamUO'
+    #         df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
 
 
     elif src == 'SUF': # Sheffield Urban Flows

@@ -1,6 +1,6 @@
 import os
 import dash
-import datetime
+from datetime import datetime
 from dash import dcc, html, ctx
 from dash.dependencies import Output, Input, State
 from dateutil.relativedelta import relativedelta
@@ -9,7 +9,7 @@ import pandas as pd
 from flask_caching import Cache
 
 import figures
-import getData
+import getUDX
 import allValues
 import latestValues
 
@@ -33,6 +33,11 @@ cache.init_app(app.server, config=CACHE_CONFIG)
 app.layout = html.Div([
 
     html.Div([
+        html.Div([
+            html.Div(
+                html.H1('EDIF Live Dashboard'),
+                className="banner"),
+        ], className='four columns'),
         html.Div([
             html.Div([
                 html.Div(
@@ -63,87 +68,107 @@ app.layout = html.Div([
             ], className='dropDown')
         ], className='four columns'),
         html.Div([
-            html.Div(
-                html.H1('EDIF Live Dashboard'),
-                className="banner"),
-        ], className='four columns'),
+            html.Div([
+                dcc.DatePickerRange(
+                    id='date-picker-range',
+                    month_format='Do-MMM-Y')
+            ], className='banner')
+        ], className='three columns'),
         html.Div([
             html.Div([
-
+                html.Button(
+                    'Refresh',
+                    id='Refresh Button',
+                    n_clicks = 0)
             ], className='banner')
-        ], className='four columns')
+        ], className='one column')
+    ], className='row'),
+
+    html.Div([
+        html.Div([
+        ], className='divider')
     ], className='row'),
 
     html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    dcc.Graph(id='Map')
-                ], className='twelve columns')
-            ], className='row')
-        ], className='four columns'),
-        html.Div([
-            html.Div([
-                html.Div([
                     html.Div([
                         dcc.Graph(id='Indicators')
-                    ], className='six columns'),
-                    html.Div([
-                        html.Div([
-                            html.Label(
-                                children=[
-                                    html.Span('Suspect Reading Logs', className='labels')
-                                ]
-                            ),
-                            #TODO: Create layout for datatable
-                            dash.dash_table.DataTable(
-                                id='Suspect Table',
-                                page_size=12,
-                                style_table={
-                                    'height': '200px', 
-                                    'width': '550px',
-                                    'overflowY': 'auto'
-                                    },
-                                style_as_list_view=True,
-                                style_cell=dict(backgroundColor='#111217'),
-                                style_header=dict(backgroundColor='#181b1f',
-                                                fontWeight='bold',
-                                                color='#ccccdc'),
-                                style_data=dict(color="#ccccdc")
-                            )
-                        ], className='row'),
-                        html.Div([
-                            dash.dash_table.DataTable(
-                            id='Alerts Table',
-                            page_size=12,
-                            style_table={
-                                'height': '100px', 
-                                'width': '550px',
-                                'overflowY': 'auto'
-                                },
-                            style_as_list_view=True,
-                            style_cell=dict(backgroundColor='#111217', textAlign='center'),
-                            style_header=dict(backgroundColor='#181b1f',
-                                            fontWeight='bold',
-                                            color='#ccccdc'),
-                            style_data=dict(color="#ccccdc")
-                        )
-                        ], className='row')
-                    ], className='six columns')
+                    ], className='twelve columns')
                 ])
             ], className="row"),
             html.Div([
                 html.Div([
                     dcc.Graph(id='Scatter All')
-                ], className='twelve columns')
+                ], className='twelve columns'),
             ], className="row"),
             html.Div([
                 html.Div([
                     dcc.Graph(id='Scatter Hover')
+                ], className='six columns'),
+                html.Div([
+                    dcc.Graph(id='Histogram')
                 ], className='six columns')
-            ], className="row")
-        ], className="eight columns")
+            ], className='row')
+        ], className="eight columns"),
+        html.Div([
+            html.Div([
+                html.Div([
+                    dcc.Graph(id='Map')
+                ], className='twelve columns')
+            ], className='row')
+        ], className='four columns')
     ], className="row"),
+
+    html.Div([
+        html.Div([
+        ], className='divider')
+    ], className='row'),
+
+    html.Div([
+        html.Div([
+            html.Label(
+                children=[
+                    html.Span('Stream Health', className='labels')
+                ]
+            ),
+            dash.dash_table.DataTable(
+                id='Health Table',
+                page_size=12,
+                style_table={
+                    'overflowY': 'auto'},
+                style_as_list_view=True,
+                style_cell=dict(backgroundColor='#111217', textAlign='center'),
+                style_header=dict(backgroundColor='#181b1f',
+                                fontWeight='bold',
+                                color='#ccccdc'),
+                style_data=dict(color="#ccccdc")
+            )
+        ], className='four columns'),
+        html.Div([
+            html.Label(
+                children=[
+                    html.Span('Suspect Reading Logs', className='labels')
+                ]
+            ),
+            #TODO: Create layout for datatable
+            dash.dash_table.DataTable(
+                id='Suspect Table',
+                page_size=12,
+                style_table={
+                    'overflowY': 'auto'
+                    },
+                style_as_list_view=True,
+                style_cell=dict(backgroundColor='#111217'),
+                style_header=dict(backgroundColor='#181b1f',
+                                fontWeight='bold',
+                                color='#ccccdc'),
+                style_data=dict(color="#ccccdc")
+            )
+        ], className='eight columns')
+    ], className='row'),
+    
 
     dcc.Interval(
         id='interval-component',
@@ -156,17 +181,21 @@ app.layout = html.Div([
 
 # CALLBACKS
 @cache.memoize()
-def global_store(variable):
-    src = 'UDX'
+def global_store(variable, start_date=None, end_date=None):
     locations = ['Newcastle', 'Manchester', 'Birmingham']
 
-    start = datetime.datetime.now()-relativedelta(days=day_period)
-    end   = datetime.datetime.now()
+    if start_date != None and end_date != None:
+        start = datetime.strptime(start_date, '%Y-%m-%d')
+        end = datetime.strptime(end_date, '%Y-%m-%d')
+        print(start, end)
+    else:
+        start = datetime.now()-relativedelta(days=day_period)
+        end   = datetime.now()
 
     dfs = []
     for location in locations:
         try:
-            df = getData.fetch(src, location, variable, start, end)
+            df = getUDX.run(location, variable, start, end)
             dfs.append(df)
         except:
             continue
@@ -180,9 +209,10 @@ def global_store(variable):
     Output('signal', 'data'), 
     [
         Input('interval-component', 'n_intervals'),
-        Input('checklist', 'value')
+        Input('checklist', 'value'),
+        Input('Refresh Button', 'n_clicks')
     ])
-def compute_value(n, variable):
+def compute_value(intervals, variable, clicks):
     global_store(variable)
     return variable
 
@@ -191,11 +221,13 @@ def compute_value(n, variable):
     Output('Map', 'figure'),
     [
         Input('signal', 'data'),
-        Input('Map', 'selectedData')#,
+        Input('Map', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')#,
         # Input('Map', 'relayoutData')
     ])
-def update_map(variable, map_selection): #, map_relayout):
-    df = global_store(variable)
+def update_map(variable, map_selection, start_date, end_date): #, map_relayout):
+    df = global_store(variable, start_date, end_date)
     sensor_dfs = allValues.run(df)
     latest_df = latestValues.run(sensor_dfs)
     return figures.map(latest_df, map_selection) #, map_relayout)
@@ -205,13 +237,14 @@ def update_map(variable, map_selection): #, map_relayout):
     Output('Scatter All', 'figure'),
     [
         Input('signal', 'data'),
-        Input('Map', 'selectedData')
+        Input('Map', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
     ])
-def update_scatter_all(variable, map_selection):
-    df = global_store(variable)
-    triggered = ctx.triggered_id
+def update_scatter_all(variable, map_selection, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
     selected = []
-    if triggered == 'Map':
+    if 'Map' == ctx.triggered_id:
         for i in range(0, len(map_selection['points'])):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
@@ -224,17 +257,18 @@ def update_scatter_all(variable, map_selection):
     [
         Input('signal', 'data'), 
         Input('Map', 'hoverData'),
-        Input('Scatter All', 'hoverData')
+        Input('Scatter All', 'hoverData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
     ])
-def update_scatter_hover(variable, map_hover, scatter_hover):
-    df = global_store(variable)
-    triggered = ctx.triggered_id
-    if triggered == 'signal':
+def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
+    if 'signal' == ctx.triggered_id:
         df = df.sample()
-    elif triggered == 'Map':
+    elif 'Map' == ctx.triggered_id:
         id = map_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
-    elif triggered == 'Scatter All':
+    elif 'Scatter All' == ctx.triggered_id:
         id = scatter_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
     return figures.scatter_hover(df)
@@ -244,18 +278,68 @@ def update_scatter_hover(variable, map_hover, scatter_hover):
     Output('Indicators', 'figure'),
     [
         Input('signal', 'data'), 
-        Input('Map', 'selectedData')
+        Input('Map', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
     ])
-def update_indicators(variable, map_selection):
-    df = global_store(variable)
-    triggered = ctx.triggered_id
+def update_indicators(variable, map_selection, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
     selected = []
-    if triggered == 'Map':
+    if 'Map' == ctx.triggered_id:
         for i in range(0, len(map_selection['points'])):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
         df = df.loc[df['ID'].isin(selected)]
     return figures.indicators(df)
+
+
+@app.callback(
+    Output('Histogram', 'figure'),
+    [
+        Input('signal', 'data'), 
+        Input('Map', 'selectedData'),
+        Input('Scatter All', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_histogram(variable, map_selection, scatter_selection, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
+    selected = []
+    if 'Map' == ctx.triggered_id:
+        for i in range(0, len(map_selection['points'])):
+            id = map_selection['points'][i]['text'].split(':')[0]
+            selected.append(id)
+        df = df.loc[df['ID'].isin(selected)]
+    if 'Scatter All' == ctx.triggered_id:
+        for i in range(0, len(scatter_selection['points'])):
+            id = scatter_selection['points'][i]['text'].split(':')[0]
+            selected.append(id)
+        df = df.loc[df['ID'].isin(selected)]
+    return figures.histogram(df)
+
+
+@app.callback(
+    Output('Suspect Table', 'data'),
+    [
+        Input('signal', 'data'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_suspect_table(variable, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
+    return figures.suspectTable(df)
+
+
+@app.callback(
+    Output('Health Table', 'data'),
+    [
+        Input('signal', 'data'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_health_table(variable, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
+    return figures.healthTable(df)
 
 
 # For if CSS Stylesheet does not load

@@ -41,7 +41,7 @@ Access Port:
 - [ ] Baseline historical data - monthly averages over the past n years
 - [x] Dropdown to switch between locations
 - [ ] Put logos and information in an information hover-over dialog box
-- [ ] Min and Max values within indicators, also with sensor names and timess
+- [x] Min and Max values within indicators, also with sensor names and times
 
 <br>
 

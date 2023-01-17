@@ -1,8 +1,8 @@
 .banner {
     height: 50px;
     width: 100%;
-    background-color: #181b1f;
-    border-radius: 10px;
+    /* background-color: #181b1f;
+    border-radius: 10px; */
     text-align: center;
     color: #ccccdc;
     padding: 10px;
@@ -22,13 +22,12 @@
 .labels {
   text-align: center;
   color: #ccccdc;
-  width: 550px;
   display: inline-block;
-  font-size: 1.2em;
+  font-size: 2em;
 }
 
 .footer {
-  margin: 0px, -100px, 10px;
+  margin: 0px -100px 10px;
   background-color: #ccccdc;
   border-radius: 2px;
   padding: 10px;
@@ -42,10 +41,10 @@
   display: inline;
 }
 
-.Select-control {
+/* .Select-control {
   background-color: rgb(25, 25, 25);
   color:white;
-}
+} */
 
 .Select-menu-outer {
   background-color: rgb(25, 25, 25);
@@ -54,6 +53,11 @@
 
 .Select-value-label {
   color: white;
+}
+
+.divider {
+  border-top: 3px solid #bbb;
+  margin: 20px 20px 20px 0px;
 }
 
 /* Table of contents

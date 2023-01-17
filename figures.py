@@ -2,16 +2,14 @@ import plotly.graph_objects as go
 import pandas as pd
 
 import layouts
-import run
 import graphCustomisation
 import allValues
+import mapping
 
 def indicators(df):
 
-    n_sources = df['Location'].nunique()
-    n_sensors = df['ID'].nunique()
-    n_records = len(df.index)
-    average = df["Value"].mean()
+    min_row = df[df.Value == df.Value.min()]
+    max_row = df[df.Value == df.Value.max()]
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
@@ -22,7 +20,7 @@ def indicators(df):
         go.Indicator(
             title = 'Data Sources',
             mode = "number",
-            value = n_sources,
+            value = df['Location'].nunique(),
             delta = {'position': "top", 'reference': 320},
             domain = {'row': 0, 'column': 0}
         )
@@ -32,7 +30,7 @@ def indicators(df):
         go.Indicator(
             title = 'Active Streams',
             mode = "number",
-            value = n_sensors,
+            value = df['ID'].nunique(),
             delta = {'position': "top", 'reference': 320},
             domain = {'row': 0, 'column': 1}
         )
@@ -42,9 +40,9 @@ def indicators(df):
         go.Indicator(
             title = 'Number of Records',
             mode = "number",
-            value = n_records,
+            value = len(df.index),
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 0}
+            domain = {'row': 0, 'column': 2}
         )
     )
 
@@ -52,10 +50,31 @@ def indicators(df):
         go.Indicator(
             title = 'Average Value',
             mode = "number",
-            value = average,
+            value = df['Value'].mean(),
             # number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
+            domain = {'row': 1, 'column': 0}
+        )
+    )
+
+    fig.add_trace(
+        go.Indicator(
+            title = 'Minimum Value',
+            mode = "number",
+            value = min_row['Value'].iloc[0],
+            # number = {'suffix': min_row['ID'].iloc[0]},
+            delta = {'position': "top", 'reference': 320},
             domain = {'row': 1, 'column': 1}
+        )
+    )
+
+    fig.add_trace(
+        go.Indicator(
+            title = 'Maximum Value',
+            mode = "number",
+            value = max_row['Value'].iloc[0],
+            delta = {'position': "top", 'reference': 320},
+            domain = {'row': 1, 'column': 2}
         )
     )
 
@@ -136,7 +155,7 @@ def scatter_hover(df):
                 text=df['ID']+': '+df['Value'].astype(str)+units,
                 mode='lines+markers',
                 marker=dict(
-                    color='#ccccdc'
+                    color='#00CC96'
                 )
             )
         )
@@ -148,30 +167,65 @@ def scatter_hover(df):
     return fig
 
 
-def suspectTable(src, location, variables):
-    l = []
-    for variable in variables:
-        d = run.run(src, location, variable)
-        l.append(d['suspect_dataframe'])
-    df = pd.concat(l)
-    df = df.drop_duplicates(subset=['ID', 'Datetime'], keep='last')
-    df = df.loc[:, ["ID", "Datetime", "Variable", "Value", "Units"]]  
+def histogram(df):
+
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Histogram(
+            x = df['Value'],
+            # opacity=0.7,
+            marker_color='#00CC96' #'indianred'
+        )
+    )
+
+    fig.update_layout(
+        layouts.histogram(variable, units),
+        transition_duration=500,
+    )
+
+    return fig
+
+
+def suspectTable(df):
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    if 'Suspect Reading' in df:
+        df = df.loc[df['Suspect Reading'] == True]
+
+    if 'Suspect Reading' not in df or df.empty:
+        df = pd.DataFrame.from_dict({"ID":['None'], "Datetime":['-'], "Variable":[variable], "Value":['-'], "Units":[units]})
+    
     return df.to_dict('records')
 
 
-def alertsTable(src, locations, variables):
+def healthTable(df):
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    source_map = mapping.sources()
+    sources = []
+
+    for source in source_map:
+        if variable in source_map[source]:
+            sources.append(source)
+
+    min_date = df['Datetime'].min()
+    max_date = df['Datetime'].max()
+
     l = []
-    for location in locations:
-        for variable in variables:
-            try:
-                d = run.run(src, location, variable)
-                if d['status'] == 'Offline':
-                    l.append(f'{location} {variable} Stream is Offline')
-            except:
-                continue
-    if len(l) == 0:
-        l.append('No Alerts')
-    df = pd.DataFrame({'Alerts':l})
+    for source in sources:
+        if df['Location'].str.contains(source).any():
+            l.append(f'{source} {variable} Stream is Online')
+        else:
+            l.append(f'{source} {variable} Stream is Offline')
+
+    df = pd.DataFrame({f'Alerts for {min_date} - {max_date}':l})
+
     return df.to_dict('records')
 
 

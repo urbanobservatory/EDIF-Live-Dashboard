@@ -12,36 +12,65 @@ def graph(variable, units):
         height = 300,
         showlegend = False, 
         autosize = True,
-        margin = dict(t=20, b=20, l=20, r=20),
+        margin = dict(t=60, b=20, l=20, r=20),
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         xaxis = dict(
             gridwidth=1, 
             gridcolor='#2e2f30',
             zerolinecolor='#2e2f30',
-            rangeselector=dict(
-                bgcolor='#111217',
-                buttons=list([
-                    dict(label="All",
-                        step="all"),
-                    dict(count=period[3],
-                        label=str(period[3])+" "+period[4],
-                        step=period[0],
-                        stepmode="backward"),
-                    dict(count=period[2],
-                        label=str(period[2])+" "+period[4],
-                        step=period[0],
-                        stepmode="backward"),
-                    dict(count=period[1],
-                        label=str(period[1])+" "+period[4],
-                        step=period[0],
-                        stepmode="backward")
-                ])
-            ), # rangeslider=dict(visible=True),
-        type="date"
+            type="date"
+            # rangeselector=dict(
+            #     bgcolor='#111217',
+            #     buttons=list([
+            #         dict(label="All",
+            #             step="all"),
+            #         dict(count=period[3],
+            #             label=str(period[3])+" "+period[4],
+            #             step=period[0],
+            #             stepmode="backward"),
+            #         dict(count=period[2],
+            #             label=str(period[2])+" "+period[4],
+            #             step=period[0],
+            #             stepmode="backward"),
+            #         dict(count=period[1],
+            #             label=str(period[1])+" "+period[4],
+            #             step=period[0],
+            #             stepmode="backward")
+            #     ])
+            # ), # rangeslider=dict(visible=True)
         ),
         yaxis = dict(
             title = units,
+            gridwidth=1, 
+            gridcolor='#2e2f30',
+            zerolinecolor='#2e2f30'
+        ),
+        paper_bgcolor='#181b1f',
+        plot_bgcolor='#181b1f',
+        font=dict(color="#ccccdc")
+    )
+
+def histogram(variable, units):
+    return go.Layout(
+        title = dict(
+            text = f'{variable} Histogram',
+            x = 0.5
+        ),
+        height = 300,
+        showlegend = False, 
+        autosize = True,
+        margin = dict(t=60, b=20, l=20, r=20),
+        hovermode = 'closest',
+        hoverlabel = dict(namelength=-1),
+        xaxis = dict(
+            title = units,
+            gridwidth=1, 
+            gridcolor='#2e2f30',
+            zerolinecolor='#2e2f30'
+        ),
+        yaxis = dict(
+            title = 'Instances',
             gridwidth=1, 
             gridcolor='#2e2f30',
             zerolinecolor='#2e2f30'
@@ -130,10 +159,10 @@ def indicators(variable):
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ccccdc"),
-        margin = dict(t=40, b=0, l=20, r=20),
+        # margin = dict(t=40, b=0, l=20, r=20),
         grid = {
             'rows': 2, 
-            'columns': 2, 
+            'columns': 3, 
             'pattern': "independent"
         },
         template = {
