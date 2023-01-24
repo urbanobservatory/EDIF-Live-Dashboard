@@ -9,7 +9,7 @@ import pandas as pd
 from flask_caching import Cache
 
 import figures
-import getUDX
+import getData
 import allValues
 import latestValues
 
@@ -44,25 +44,22 @@ app.layout = html.Div([
                     dcc.Dropdown(
                         id='checklist',
                         options=[
+                            'PM1',
+                            'PM10',
                             'PM2.5',
+                            'PM4',
                             'Traffic Flow',
                             'Black Carbon',
                             'Nitric Oxide',
                             'Ozone',
                             'Nitrogen Dioxide',
-                            'PM1',
-                            'PM10',
+                            'Sulfur Dioxide',
                             'Temperature',
                             'Humidity',
                             'Pressure'
                         ],
                         value='PM2.5',
                         clearable=False
-                        # style={
-                        #     'color': '#ccccdc', 
-                        #     'font-size': 20,
-                        #     'text-align': 'center'
-                        # }
                     )
                 )
             ], className='dropDown')
@@ -134,16 +131,33 @@ app.layout = html.Div([
                 ]
             ),
             dash.dash_table.DataTable(
-                id='Health Table',
-                page_size=12,
-                style_table={
+                id = 'Health Table',
+                page_size = 12,
+                style_table = {
                     'overflowY': 'auto'},
-                style_as_list_view=True,
-                style_cell=dict(backgroundColor='#111217', textAlign='center'),
-                style_header=dict(backgroundColor='#181b1f',
-                                fontWeight='bold',
-                                color='#ccccdc'),
-                style_data=dict(color="#ccccdc")
+                style_as_list_view = True,
+                style_cell = {
+                    'backgroundColor': '#111217', 
+                    'textAlign': 'center'},
+                style_header = {
+                    'backgroundColor': '#181b1f',
+                    'fontWeight': 'bold',
+                    'color': '#ccccdc'},
+                style_data_conditional = [
+                    {
+                        'if': {
+                            'filter_query': "{Alert} contains 'Online'"
+                        },
+                        'backgroundColor': '#00cc96'
+                    },
+                    {
+                        'if': {
+                            'filter_query': "{Alert} contains 'Offline'"
+                        },
+                        'backgroundColor': '#ef553b'
+                    }
+                    
+                ]
             )
         ], className='four columns'),
         html.Div([
@@ -152,19 +166,19 @@ app.layout = html.Div([
                     html.Span('Suspect Reading Logs', className='labels')
                 ]
             ),
-            #TODO: Create layout for datatable
             dash.dash_table.DataTable(
-                id='Suspect Table',
-                page_size=12,
-                style_table={
-                    'overflowY': 'auto'
-                    },
-                style_as_list_view=True,
-                style_cell=dict(backgroundColor='#111217'),
-                style_header=dict(backgroundColor='#181b1f',
-                                fontWeight='bold',
-                                color='#ccccdc'),
-                style_data=dict(color="#ccccdc")
+                id = 'Suspect Table',
+                page_size = 12,
+                style_table = {
+                    'overflowY': 'auto'},
+                style_as_list_view = True,
+                style_cell = {
+                    'backgroundColor': '#111217'},
+                style_header = {
+                    'backgroundColor': '#181b1f',
+                    'fontWeight': 'bold',
+                    'color': '#ccccdc'},
+                style_data = {'color': "#ccccdc"}
             )
         ], className='eight columns')
     ], className='row'),
@@ -182,7 +196,6 @@ app.layout = html.Div([
 # CALLBACKS
 @cache.memoize()
 def global_store(variable, start_date=None, end_date=None):
-    locations = ['Newcastle', 'Manchester', 'Birmingham']
 
     if start_date != None and end_date != None:
         start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -192,15 +205,17 @@ def global_store(variable, start_date=None, end_date=None):
         start = datetime.now()-relativedelta(days=day_period)
         end   = datetime.now()
 
-    dfs = []
-    for location in locations:
-        try:
-            df = getUDX.run(location, variable, start, end)
-            dfs.append(df)
-        except:
-            continue
+    df = getData.run(variable, start, end)
 
-    df = pd.concat(dfs)
+    # dfs = []
+    # for source in UDXsources:
+    #     try:
+    #         df = getUDX.run(source, variable, start, end)
+    #         dfs.append(df)
+    #     except:
+    #         continue
+
+    # df = pd.concat(dfs)
 
     return df
 

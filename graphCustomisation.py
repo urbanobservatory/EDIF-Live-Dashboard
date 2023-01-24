@@ -15,19 +15,7 @@ def customise(df, variable):
     elif variable == 'Traffic Flow':
         df = df[df['Value'] != 0]
 
-    #Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd
-    colorscales = {
-        'PM2.5': 'reds',
-        'Traffic Flow': 'bluered',
-        'Black Carbon': 'Blackbody',
-        'Nitric Oxide': 'Viridis',
-        'Ozone': 'Blues',
-        'Nitrogen Dioxide': 'RdBu',
-        'PM1': 'reds',
-        'PM10': 'reds',
-        'Temperature': 'YlOrRd',
-        'Humidity': 'Jet',
-        'Pressure': 'YlGnBu'
-    }
+    if variable != 'Temperature':
+        df = df[df['Value'] >= 0]
 
-    return df, colorscales
+    return df

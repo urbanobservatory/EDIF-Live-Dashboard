@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import time
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -8,73 +8,94 @@ import mapping
 
 def indicators(df):
 
-    min_row = df[df.Value == df.Value.min()]
-    max_row = df[df.Value == df.Value.max()]
-
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
+
+    min_row = df[df.Value == df.Value.min()]
+    max_row = df[df.Value == df.Value.max()]
 
     fig = go.Figure()
 
     fig.add_trace(
         go.Indicator(
-            title = 'Data Sources',
+            title = {
+                'text': 'Data Sources',
+                'align': 'left'},
             mode = "number",
-            value = df['Location'].nunique(),
+            value = df['Source'].nunique(),
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 0, 'column': 0}
+            domain = {'row': 0, 'column': 0},
+            align = 'left'
         )
     )
 
     fig.add_trace(
         go.Indicator(
-            title = 'Active Streams',
+            title = {
+                'text': 'Active Streams',
+                'align': 'left'},
             mode = "number",
             value = df['ID'].nunique(),
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 0, 'column': 1}
+            domain = {'row': 0, 'column': 1},
+            align = 'left'
         )
     )
 
     fig.add_trace(
         go.Indicator(
-            title = 'Number of Records',
+            title = {
+                'text': 'Number of Records',
+                'align': 'left'},
             mode = "number",
             value = len(df.index),
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 0, 'column': 2}
+            domain = {'row': 0, 'column': 2},
+            align = 'left'
         )
     )
 
     fig.add_trace(
         go.Indicator(
-            title = 'Average Value',
+            title = {
+                'text': 'Average Value',
+                'align': 'left'},
             mode = "number",
             value = df['Value'].mean(),
-            # number = {'suffix': ' '+units},
+            number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 0}
+            domain = {'row': 1, 'column': 0},
+            align = 'left'
         )
     )
 
     fig.add_trace(
         go.Indicator(
-            title = 'Minimum Value',
+            title = {
+                'text': 'Minimum Value',
+                'align': 'left'},
             mode = "number",
             value = min_row['Value'].iloc[0],
-            # number = {'suffix': min_row['ID'].iloc[0]},
+            number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 1}
+            domain = {'row': 1, 'column': 1},
+            align = 'left'
         )
     )
 
     fig.add_trace(
         go.Indicator(
-            title = 'Maximum Value',
+            title = {
+                'text': 'Maximum Value',
+                'align': 'left'},
             mode = "number",
             value = max_row['Value'].iloc[0],
+            number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 2}
+            domain = {'row': 1, 'column': 2},
+            align = 'left'
         )
     )
 
@@ -90,7 +111,11 @@ def scatter_all(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
-    df, colorscales = graphCustomisation.customise(df, variable)
+
+    df = graphCustomisation.customise(df, variable)
+
+    variable_map = mapping.variables()
+    colorscale = variable_map[variable]['colorscale']
 
     fig = go.Figure()
 
@@ -98,21 +123,21 @@ def scatter_all(df):
     if df['ID'].nunique() > 10:
         fig.add_trace(
             go.Scatter(
-                x=list(df['Datetime']),
-                y=list(df['Value']),
-                text=df['ID']+': '+df['Value'].astype(str)+' '+units,
-                mode='markers',
-                marker=dict(
-                    # marker_symbol='circle-open',
-                    color=df['Value'],
-                    # opacity=0.5,
-                    colorscale=colorscales[variable],
-                    showscale=False,
-                    colorbar=dict(
-                        title=units,
-                        orientation='v'
-                    )
-                )
+                x = list(df['Datetime']),
+                y = list(df['Value']),
+                text = df['ID']+': '+df['Value'].astype(str)+' '+units,
+                mode ='markers',
+                marker = {
+                    # 'marker_symbol': 'circle-open',
+                    'color': df['Value'],
+                    # 'opacity': 0.5,
+                    'colorscale': colorscale,
+                    'showscale': False,
+                    'colorbar': {
+                        'title': units,
+                        'orientation': 'v'
+                    }
+                }
             )
         )
 
@@ -141,7 +166,11 @@ def scatter_hover(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
-    df, colorscales = graphCustomisation.customise(df, variable)
+
+    df = graphCustomisation.customise(df, variable)
+
+    variable_map = mapping.variables()
+    colorscale = variable_map[variable]['colorscale']
 
     fig = go.Figure()
 
@@ -150,13 +179,13 @@ def scatter_hover(df):
     for df in sensor_dfs:
         fig.add_trace(
             go.Scatter(
-                x=list(df['Datetime']),
-                y=list(df['Value']),
-                text=df['ID']+': '+df['Value'].astype(str)+units,
-                mode='lines+markers',
-                marker=dict(
-                    color='#00CC96'
-                )
+                x = list(df['Datetime']),
+                y = list(df['Value']),
+                text = df['ID']+': '+df['Value'].astype(str)+units,
+                mode = 'lines+markers',
+                marker = {
+                    'color': '#00CC96'
+                }
             )
         )
 
@@ -171,6 +200,8 @@ def histogram(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
 
     fig = go.Figure()
 
@@ -207,24 +238,27 @@ def healthTable(df):
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
 
-    source_map = mapping.sources()
+    source_map = mapping.UDXsources()
     sources = []
 
-    for source in source_map:
-        if variable in source_map[source]:
-            sources.append(source)
+    for organisation in source_map:
+        for source in source_map[organisation]:
+            for stream in source_map[organisation][source]:
+                if variable in source_map[organisation][source][stream]:
+                    sources.append(source)
 
     min_date = df['Datetime'].min()
     max_date = df['Datetime'].max()
 
     l = []
     for source in sources:
-        if df['Location'].str.contains(source).any():
+        if df['Source'].str.contains(source).any():
             l.append(f'{source} {variable} Stream is Online')
         else:
             l.append(f'{source} {variable} Stream is Offline')
 
-    df = pd.DataFrame({f'Alerts for {min_date} - {max_date}':l})
+    # df = pd.DataFrame({f'Alerts for {min_date} - {max_date}':l})
+    df = pd.DataFrame({'Alert': l})
 
     return df.to_dict('records')
 
@@ -233,8 +267,14 @@ def map(df, map_selection): #, map_relayout):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
+
     df['text'] = df['ID']+': '+df['Value'].astype(str)+' '+units
-    df, colorscales = graphCustomisation.customise(df, variable)
+    df = graphCustomisation.customise(df, variable)
+
+    variable_map = mapping.variables()
+    colorscale = variable_map[variable]['colorscale']
 
     fig = go.Figure()
 
@@ -248,15 +288,15 @@ def map(df, map_selection): #, map_relayout):
                 size=15,
                 opacity=0.8,
                 symbol = 'circle',
-                colorscale = colorscales[variable], 
+                colorscale = colorscale, 
                 #cmin = 0,
                 showscale = True,
                 color = df['Value'],
                 cmax = df['Value'].max(),
-                colorbar=dict(
-                    title=units,
-                    orientation='h'
-                )
+                colorbar = {
+                    'title': units,
+                    'orientation': 'h'
+                }
             )
         )
     )
