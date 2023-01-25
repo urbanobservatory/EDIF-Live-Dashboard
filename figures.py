@@ -120,7 +120,7 @@ def scatter_all(df):
     fig = go.Figure()
 
     # Lines also included if number of sensors below limit
-    if df['ID'].nunique() > 10:
+    if df['ID'].nunique() > 5:
         fig.add_trace(
             go.Scatter(
                 x = list(df['Datetime']),

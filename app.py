@@ -35,7 +35,7 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             html.Div(
-                html.H1('EDIF Live Dashboard'),
+                html.H1('EDIF - Live Dashboard Demo'),
                 className="banner"),
         ], className='four columns'),
         html.Div([
@@ -45,9 +45,9 @@ app.layout = html.Div([
                         id='checklist',
                         options=[
                             'PM1',
-                            'PM10',
                             'PM2.5',
                             'PM4',
+                            'PM10',
                             'Traffic Flow',
                             'Black Carbon',
                             'Nitric Oxide',
@@ -207,16 +207,6 @@ def global_store(variable, start_date=None, end_date=None):
 
     df = getData.run(variable, start, end)
 
-    # dfs = []
-    # for source in UDXsources:
-    #     try:
-    #         df = getUDX.run(source, variable, start, end)
-    #         dfs.append(df)
-    #     except:
-    #         continue
-
-    # df = pd.concat(dfs)
-
     return df
 
 
@@ -279,7 +269,9 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
 def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_date):
     df = global_store(variable, start_date, end_date)
     if 'signal' == ctx.triggered_id:
-        df = df.sample()
+        random_df = df.sample().reset_index()
+        random_id = random_df['ID'].iloc[0]
+        df = df.loc[df['ID'] == random_id]
     elif 'Map' == ctx.triggered_id:
         id = map_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
