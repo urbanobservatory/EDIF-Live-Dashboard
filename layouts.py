@@ -19,7 +19,7 @@ elif theme == 'dark':
         'map': 'carto-darkmatter'
     }
 
-def graph(variable, units):
+def scatterAll(variable, units):
 
     period = ['minute', 20, 40, 60, 'm']
 
@@ -67,8 +67,45 @@ def graph(variable, units):
         ),
         paper_bgcolor=theme['background_frame'],
         plot_bgcolor=theme['background_frame'],
+        font = {
+            'color': theme['text']
+        }
+    )
+
+
+def scatterHover(variable, units):
+
+    period = ['minute', 20, 40, 60, 'm']
+
+    return go.Layout(
+        title = dict(
+            text = f'{variable} Timeline',
+            x = 0.5
+        ),
+        height = 300,
+        showlegend = False, 
+        autosize = True,
+        margin = dict(t=60, b=20, l=20, r=20),
+        hovermode = 'closest',
+        hoverlabel = dict(namelength=-1),
+        xaxis = dict(
+            gridwidth=1, 
+            gridcolor=theme['gridlines'],
+            zerolinecolor=theme['gridlines'],
+            type="date",
+            rangeslider=dict(visible=True)
+        ),
+        yaxis = dict(
+            title = units,
+            gridwidth=1, 
+            gridcolor=theme['gridlines'],
+            zerolinecolor=theme['gridlines']
+        ),
+        paper_bgcolor=theme['background_frame'],
+        plot_bgcolor=theme['background_frame'],
         font=dict(color=theme['text'])
     )
+
 
 def histogram(variable, units):
     return go.Layout(
@@ -86,7 +123,7 @@ def histogram(variable, units):
             title = units,
             gridwidth=1, 
             gridcolor=theme['gridlines'],
-            zerolinecolor=theme['gridlines'],
+            zerolinecolor=theme['gridlines']
         ),
         yaxis = dict(
             title = 'Instances',
@@ -173,14 +210,16 @@ def indicators(variable):
         #     'x': 0.5,
         #     'font_size': 30
         # },
-        height = 300,
+        height = 150,
         autosize = True,
         paper_bgcolor=theme['background_body'],
         plot_bgcolor=theme['background_body'],
-        font=dict(color=theme['text']),
-        margin = dict(t=60, b=30, l=30, r=30),
+        font = {
+            'color': theme['text']
+        },
+        margin = dict(t=40, b=40, l=30, r=30),
         grid = {
-            'rows': 2, 
+            'rows': 1, 
             'columns': 3, 
             'pattern': "independent"
         },

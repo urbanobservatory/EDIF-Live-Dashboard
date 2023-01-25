@@ -6,7 +6,9 @@ import graphCustomisation
 import allValues
 import mapping
 
-def indicators(df):
+align_position = 'left'
+
+def indicatorsA(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
@@ -22,12 +24,12 @@ def indicators(df):
         go.Indicator(
             title = {
                 'text': 'Data Sources',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = df['Source'].nunique(),
             delta = {'position': "top", 'reference': 320},
             domain = {'row': 0, 'column': 0},
-            align = 'left'
+            align = align_position
         )
     )
 
@@ -35,12 +37,12 @@ def indicators(df):
         go.Indicator(
             title = {
                 'text': 'Active Streams',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = df['ID'].nunique(),
             delta = {'position': "top", 'reference': 320},
             domain = {'row': 0, 'column': 1},
-            align = 'left'
+            align = align_position
         )
     )
 
@@ -48,26 +50,46 @@ def indicators(df):
         go.Indicator(
             title = {
                 'text': 'Number of Records',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = len(df.index),
             delta = {'position': "top", 'reference': 320},
             domain = {'row': 0, 'column': 2},
-            align = 'left'
+            align = align_position
         )
     )
+
+    fig.update_layout(
+        layouts.indicators(variable),
+        transition_duration=500
+    )
+
+    return fig
+
+
+def indicatorsB(df):
+
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
+
+    min_row = df[df.Value == df.Value.min()]
+    max_row = df[df.Value == df.Value.max()]
+
+    fig = go.Figure()
 
     fig.add_trace(
         go.Indicator(
             title = {
                 'text': 'Average Value',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = df['Value'].mean(),
             number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 0},
-            align = 'left'
+            domain = {'row': 0, 'column': 0},
+            align = align_position
         )
     )
 
@@ -75,13 +97,13 @@ def indicators(df):
         go.Indicator(
             title = {
                 'text': 'Minimum Value',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = min_row['Value'].iloc[0],
             number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 1},
-            align = 'left'
+            domain = {'row': 0, 'column': 1},
+            align = align_position
         )
     )
 
@@ -89,13 +111,13 @@ def indicators(df):
         go.Indicator(
             title = {
                 'text': 'Maximum Value',
-                'align': 'left'},
+                'align': align_position},
             mode = "number",
             value = max_row['Value'].iloc[0],
             number = {'suffix': ' '+units},
             delta = {'position': "top", 'reference': 320},
-            domain = {'row': 1, 'column': 2},
-            align = 'left'
+            domain = {'row': 0, 'column': 2},
+            align = align_position
         )
     )
 
@@ -155,7 +177,7 @@ def scatter_all(df):
             )
 
     fig.update_layout(
-        layouts.graph(variable, units), 
+        layouts.scatterAll(variable, units), 
         transition_duration=500
     )
 
@@ -190,7 +212,7 @@ def scatter_hover(df):
         )
 
     fig.update_layout(
-        layouts.graph(variable, units)
+        layouts.scatterHover(variable, units)
     )
 
     return fig

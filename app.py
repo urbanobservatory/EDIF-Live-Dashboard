@@ -3,6 +3,7 @@ import dash
 from datetime import datetime
 from dash import dcc, html, ctx
 from dash.dependencies import Output, Input, State
+from dash.exceptions import PreventUpdate
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 import pandas as pd
@@ -91,7 +92,14 @@ app.layout = html.Div([
             html.Div([
                 html.Div([
                     html.Div([
-                        dcc.Graph(id='Indicators')
+                        dcc.Graph(id='Indicators A')
+                    ], className='twelve columns')
+                ])
+            ], className="row"),
+            html.Div([
+                html.Div([
+                    html.Div([
+                        dcc.Graph(id='Indicators B')
                     ], className='twelve columns')
                 ])
             ], className="row"),
@@ -268,7 +276,9 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
     ])
 def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_date):
     df = global_store(variable, start_date, end_date)
-    if 'signal' == ctx.triggered_id:
+    if 'date-picker-range' == ctx.triggered_id:
+        raise PreventUpdate
+    elif 'signal' == ctx.triggered_id:
         random_df = df.sample().reset_index()
         random_id = random_df['ID'].iloc[0]
         df = df.loc[df['ID'] == random_id]
@@ -282,7 +292,7 @@ def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_dat
 
 
 @app.callback(
-    Output('Indicators', 'figure'),
+    Output('Indicators A', 'figure'),
     [
         Input('signal', 'data'), 
         Input('Map', 'selectedData'),
@@ -297,7 +307,26 @@ def update_indicators(variable, map_selection, start_date, end_date):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
         df = df.loc[df['ID'].isin(selected)]
-    return figures.indicators(df)
+    return figures.indicatorsA(df)
+
+
+@app.callback(
+    Output('Indicators B', 'figure'),
+    [
+        Input('signal', 'data'), 
+        Input('Map', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_indicators(variable, map_selection, start_date, end_date):
+    df = global_store(variable, start_date, end_date)
+    selected = []
+    if 'Map' == ctx.triggered_id:
+        for i in range(0, len(map_selection['points'])):
+            id = map_selection['points'][i]['text'].split(':')[0]
+            selected.append(id)
+        df = df.loc[df['ID'].isin(selected)]
+    return figures.indicatorsB(df)
 
 
 @app.callback(
