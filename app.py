@@ -4,6 +4,7 @@ from datetime import datetime
 from dash import dcc, html, ctx
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
+import dash_bootstrap_components as dbc
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 import pandas as pd
@@ -32,6 +33,25 @@ cache.init_app(app.server, config=CACHE_CONFIG)
 
 
 app.layout = html.Div([
+
+    html.Div([
+        dbc.Modal([
+            dbc.ModalHeader(dbc.ModalTitle("Information")),
+            dbc.ModalBody("Info coming soon. Please report any bugs to daniel.bell2@ncl.ac.uk"),
+            dbc.ModalFooter(
+                dbc.Button(
+                    "Close",
+                    id="close-centered",
+                    className="ms-auto",
+                    n_clicks=0
+                )
+            ),
+        ],
+        id="modal-centered",
+        centered=True,
+        is_open=False
+        )
+    ], className='modal'),
 
     html.Div([
         html.Div(
@@ -72,6 +92,14 @@ app.layout = html.Div([
                 html.Button(
                     'Refresh',
                     id='Refresh Button',
+                    n_clicks = 0)
+            ], className='refresh')
+        ], className='refreshBox'),
+        html.Div([
+            html.Div([
+                html.Button(
+                    'Info',
+                    id='Info Button',
                     n_clicks = 0)
             ], className='refresh')
         ], className='refreshBox')
@@ -396,6 +424,18 @@ def update_suspect_table(variable, start_date, end_date):
 def update_health_table(variable, start_date, end_date):
     df = global_store(variable, start_date, end_date)
     return figures.healthTable(df)
+
+
+
+@app.callback(
+    Output("modal-centered", "is_open"),
+    [Input("Info Button", "n_clicks"), Input("close-centered", "n_clicks")],
+    [State("modal-centered", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
 
 
 # For if CSS Stylesheet does not load

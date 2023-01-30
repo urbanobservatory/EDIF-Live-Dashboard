@@ -4,7 +4,7 @@ Install requirements:
 
     sudo apt-get install redis-server
 
-    pip install dash pandas plotly dotenv requests numpy Flask-Caching redis boto3
+    pip install dash pandas plotly dotenv requests numpy Flask-Caching redis boto3 dash-bootstrap-components
 
 Run: 
     
