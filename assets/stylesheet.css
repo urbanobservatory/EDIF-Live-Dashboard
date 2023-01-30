@@ -1,22 +1,138 @@
 .banner {
-    height: 50px;
-    width: 100%;
-    /* background-color: #181b1f;
-    border-radius: 10px; */
-    text-align: center;
-    color: #ccccdc;
-    padding: 10px;
-    font-size: 1;
+  height: 100px;
+  width: 100%;
+  /* color: #ccccdc; */
+  font-size: 1;
+}
+
+.title {
+  float: left;
+  height: 100px;
+  width: 32.3333%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 0;
+}
+
+.dropDownBox {
+  float: left;
+  height: 100px;
+  width: 32.3333%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #000000;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 1%;
 }
 
 .dropDown {
-  height: 50px;
-  width: 100%;
-  background-color: #111217;
+  text-align: center;
+  font-size: 1;
+  padding: 30px;
+}
+
+.calendarBox {
+  float: left;
+  height: 100px;
+  width: 24.2499%;
+  background-color: #181b1f;
+  border-radius: 5px;
   text-align: center;
   color: #000000;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 1%;
+}
+
+.calendar {
+  text-align: center;
+  font-size: 1;
+  padding: 30px;
+}
+
+.refreshBox {
+  float: left;
+  height: 100px;
+  width: 8.0833%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #000000;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 1%;
+}
+
+.refresh {
+  text-align: center;
+  font-size: 1;
+  padding: 30px 0 0 0;
+}
+
+.graph {
+  height: 300px;
+  width: 100%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
   padding: 10px;
   font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+}
+
+.table {
+  width: 100%;
+  border-radius: 5px;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+}
+
+.histogram {
+  height: 300px;
+  width: 100%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
+  padding: 10px;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 8%;
+}
+
+.map {
+  height: 988px;
+  width: 100%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
+  padding: 10px;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 8%;
+}
+
+.healthTable {
+  width: 100%;
+  text-align: left;
+  font-size: 1;
+  margin: 0 0 0 4%;
+}
+
+.suspectTable {
+  width: 100%;
+  text-align: left;
+  color: #ccccdc;
+  font-size: 1;
+  margin: 0 0 0 4%;
 }
 
 .labels {
@@ -26,7 +142,7 @@
   font-size: 2em;
 }
 
-.footer {
+/* .footer {
   margin: 0px -100px 10px;
   background-color: #ccccdc;
   border-radius: 2px;
@@ -34,17 +150,17 @@
   width: 100%;
   float: left;
   display: flex;
-}
+} */
 
-.img {
+/* .img {
   margin: 0px 65px 0px 0px;
   display: inline;
-}
+} */
 
 /* .Select-control {
   background-color: rgb(25, 25, 25);
-  color:white;
-} */
+  color:#ccccdc;
+}
 
 .Select-menu-outer {
   background-color: rgb(25, 25, 25);
@@ -53,11 +169,16 @@
 
 .Select-value-label {
   color: white;
-}
+} */
 
 .divider {
   border-top: 3px solid #bbb;
   margin: 20px 20px 20px 0px;
+}
+
+.DateRangePickerInput {
+  background-color: #181b1f;
+  border-color: #181b1f;
 }
 
 /* Table of contents
@@ -92,7 +213,7 @@
 
 .Select {
     z-index: 1002;
-}*/
+} */
 
 
 /* Grid
@@ -123,8 +244,8 @@
       width: 88%; }
     .column,
     .columns {
-      margin-left:  1%; 
-      margin-right: 1.5%; }
+      margin-left:  0%; 
+      margin-right: 0%; }
     .column:first-child,
     .columns:first-child {
       margin-left: 0; }
@@ -197,7 +318,7 @@
     font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #111217; 
     background-color: #111217;
-    margin: 20px 0px 20px 20px }
+    margin: 20px 20px 20px 20px }
   
   
   /* Typography
@@ -206,7 +327,7 @@
     margin-top: 0;
     margin-bottom: 0;
     font-weight: 300; }
-  h1 { font-size: 4.5rem; line-height: 1.2;  letter-spacing: -.1rem; margin-bottom: 2rem; }
+  h1 { font-size: 4.5rem; line-height: 2.4;  letter-spacing: -.1rem; margin-bottom: 2rem; }
   h2 { font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; margin-bottom: 1.8rem; margin-top: 1.8rem;}
   h3 { font-size: 3.0rem; line-height: 1.3;  letter-spacing: -.1rem; margin-bottom: 1.5rem; margin-top: 1.5rem;}
   h4 { font-size: 2.6rem; line-height: 1.35; letter-spacing: -.08rem; margin-bottom: 1.2rem; margin-top: 1.2rem;}

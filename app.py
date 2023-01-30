@@ -34,93 +34,107 @@ cache.init_app(app.server, config=CACHE_CONFIG)
 app.layout = html.Div([
 
     html.Div([
-        html.Div([
-            html.Div(
-                html.H1('EDIF - Live Dashboard Demo'),
-                className="banner"),
-        ], className='four columns'),
+        html.Div(
+            html.H1('EDIF - Live Dashboard Demo'),
+            className="title"),
         html.Div([
             html.Div([
-                html.Div(
-                    dcc.Dropdown(
-                        id='checklist',
-                        options=[
-                            'PM1',
-                            'PM2.5',
-                            'PM4',
-                            'PM10',
-                            'Traffic Flow',
-                            'Black Carbon',
-                            'Nitric Oxide',
-                            'Ozone',
-                            'Nitrogen Dioxide',
-                            'Sulfur Dioxide',
-                            'Temperature',
-                            'Humidity',
-                            'Pressure'
-                        ],
-                        value='PM2.5',
-                        clearable=False
-                    )
-                )
+                dcc.Dropdown(
+                    id='checklist',
+                    options=[
+                        'PM1',
+                        'PM2.5',
+                        'PM4',
+                        'PM10',
+                        'Traffic Flow',
+                        'Black Carbon',
+                        'Nitric Oxide',
+                        'Ozone',
+                        'Nitrogen Dioxide',
+                        'Sulfur Dioxide',
+                        'Temperature',
+                        'Humidity',
+                        'Pressure'
+                    ],
+                    value='PM2.5',
+                    clearable=False)
             ], className='dropDown')
-        ], className='four columns'),
+        ], className='dropDownBox'),
         html.Div([
             html.Div([
                 dcc.DatePickerRange(
                     id='date-picker-range',
                     month_format='Do-MMM-Y')
-            ], className='banner')
-        ], className='three columns'),
+            ], className='calendar')
+        ], className='calendarBox'),
         html.Div([
             html.Div([
                 html.Button(
                     'Refresh',
                     id='Refresh Button',
                     n_clicks = 0)
-            ], className='banner')
-        ], className='one column')
-    ], className='row'),
+            ], className='refresh')
+        ], className='refreshBox')
+    ], className='banner'),
+
+    # html.Div([
+    #     html.Div([
+    #     ], className='divider')
+    # ], className='row'),
+
+    html.Br(),
 
     html.Div([
         html.Div([
-        ], className='divider')
-    ], className='row'),
 
-    html.Div([
-        html.Div([
             html.Div([
                 html.Div([
                     html.Div([
-                        dcc.Graph(id='Indicators A')
-                    ], className='twelve columns')
-                ])
-            ], className="row"),
+                        html.Div([
+                            dcc.Graph(id='Indicators A')
+                        ], className='twelve columns')
+                    ])
+                ], className="row"),
+
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Graph(id='Indicators B')
+                        ], className='twelve columns')
+                    ])
+                ], className="row")
+            ], className='graph'),
+
+            html.Br(),
             html.Div([
                 html.Div([
                     html.Div([
-                        dcc.Graph(id='Indicators B')
-                    ], className='twelve columns')
-                ])
-            ], className="row"),
-            html.Div([
-                html.Div([
-                    dcc.Graph(id='Scatter All')
+                        dcc.Graph(id='Scatter All')
+                    ], className='graph')
                 ], className='twelve columns'),
             ], className="row"),
+
+            html.Br(),
             html.Div([
                 html.Div([
-                    dcc.Graph(id='Scatter Hover')
+                    html.Div([
+                        dcc.Graph(id='Scatter Hover')
+                    ], className='graph')
                 ], className='six columns'),
                 html.Div([
-                    dcc.Graph(id='Histogram')
+                    html.Div([
+                        dcc.Graph(id='Histogram')
+                    ], className='histogram')
                 ], className='six columns')
             ], className='row')
+
         ], className="eight columns"),
         html.Div([
             html.Div([
                 html.Div([
-                    dcc.Graph(id='Map')
+                    html.Div([
+                        dcc.Graph(id='Map')
+                    ], className='map')
                 ], className='twelve columns')
             ], className='row')
         ], className='four columns')
@@ -133,62 +147,68 @@ app.layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Label(
-                children=[
-                    html.Span('Stream Health', className='labels')
-                ]
-            ),
-            dash.dash_table.DataTable(
-                id = 'Health Table',
-                page_size = 12,
-                style_table = {
-                    'overflowY': 'auto'},
-                style_as_list_view = True,
-                style_cell = {
-                    'backgroundColor': '#111217', 
-                    'textAlign': 'center'},
-                style_header = {
-                    'backgroundColor': '#181b1f',
-                    'fontWeight': 'bold',
-                    'color': '#ccccdc'},
-                style_data_conditional = [
-                    {
-                        'if': {
-                            'filter_query': "{Alert} contains 'Online'"
-                        },
-                        'backgroundColor': '#00cc96'
-                    },
-                    {
-                        'if': {
-                            'filter_query': "{Alert} contains 'Offline'"
-                        },
-                        'backgroundColor': '#ef553b'
-                    }
-                    
-                ]
-            )
-        ], className='four columns'),
-        html.Div([
-            html.Label(
-                children=[
-                    html.Span('Suspect Reading Logs', className='labels')
-                ]
-            ),
-            dash.dash_table.DataTable(
-                id = 'Suspect Table',
-                page_size = 12,
-                style_table = {
-                    'overflowY': 'auto'},
-                style_as_list_view = True,
-                style_cell = {
-                    'backgroundColor': '#111217'},
-                style_header = {
-                    'backgroundColor': '#181b1f',
-                    'fontWeight': 'bold',
-                    'color': '#ccccdc'},
-                style_data = {'color': "#ccccdc"}
-            )
-        ], className='eight columns')
+            html.Div([
+                html.Div([
+                    html.Label(
+                        children=[
+                            html.Span('Stream Health', className='labels')
+                        ]
+                    ),
+                    dash.dash_table.DataTable(
+                        id = 'Health Table',
+                        page_size = 12,
+                        style_table = {
+                            'overflowY': 'auto'},
+                        style_as_list_view = True,
+                        style_cell = {
+                            'backgroundColor': '#111217', 
+                            'textAlign': 'center'},
+                        style_header = {
+                            'backgroundColor': '#181b1f',
+                            'fontWeight': 'bold',
+                            'color': '#ccccdc'},
+                        style_data_conditional = [
+                            {
+                                'if': {
+                                    'filter_query': "{Alert} contains 'Online'"
+                                },
+                                'backgroundColor': '#00cc96'
+                            },
+                            {
+                                'if': {
+                                    'filter_query': "{Alert} contains 'Offline'"
+                                },
+                                'backgroundColor': '#ef553b'
+                            }
+                            
+                        ]
+                    )
+                ], className='healthTable')
+            ], className='four columns'),
+            html.Div([
+                html.Div([
+                    html.Label(
+                        children=[
+                            html.Span('Suspect Reading Logs', className='labels')
+                        ]),
+                    dash.dash_table.DataTable(
+                        id = 'Suspect Table',
+                        page_size = 12,
+                        style_table = {
+                            'overflowY': 'auto'},
+                        style_as_list_view = True,
+                        style_cell = {
+                            'backgroundColor': '#111217'},
+                        style_header = {
+                            'backgroundColor': '#181b1f',
+                            'fontWeight': 'bold',
+                            'color': '#ccccdc'},
+                        style_data = {'color': "#ccccdc"}
+                    )
+                ], className='suspectTable')
+            ], className='eight columns')
+        ], className='table')
+        
     ], className='row'),
     
 

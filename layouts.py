@@ -14,7 +14,7 @@ elif theme == 'dark':
     theme = {
         'text': '#ccccdc',
         'background_body': '#111217',
-        'background_frame': '#111217', #'#181b1f',
+        'background_frame': '#181b1f',
         'gridlines': '#2e2f30',
         'map': 'carto-darkmatter'
     }
@@ -164,7 +164,7 @@ def map(variable, map_selection): #, map_relayout):
             x = 0.5
         ),
         autosize = True,
-        height = 900,
+        height = 980,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color=theme['text']),
@@ -212,8 +212,8 @@ def indicators(variable):
         # },
         height = 150,
         autosize = True,
-        paper_bgcolor=theme['background_body'],
-        plot_bgcolor=theme['background_body'],
+        paper_bgcolor=theme['background_frame'],
+        plot_bgcolor=theme['background_frame'],
         font = {
             'color': theme['text']
         },
