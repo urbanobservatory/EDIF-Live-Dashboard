@@ -7,7 +7,6 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
-import pandas as pd
 from flask_caching import Cache
 
 import figures

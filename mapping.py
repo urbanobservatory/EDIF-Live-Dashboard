@@ -22,7 +22,7 @@ def variables():
         },
         'Traffic Flow': {
             'request-variable': 'intensity',
-            'units': 'Vehicles',
+            'units': 'vehicles/min',
             'colorscale': 'bluered'
         },
         'Black Carbon': {
@@ -32,7 +32,7 @@ def variables():
         },
         'Nitric Oxide': {
             'request-variable': 'no',
-            'units': 'μgm⁻³',
+            'units': 'ppb',
             'colorscale': 'Viridis'
         },
         'Ozone': {
