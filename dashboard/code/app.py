@@ -1,3 +1,4 @@
+import json
 import os
 import dash
 from datetime import datetime
@@ -8,15 +9,19 @@ import dash_bootstrap_components as dbc
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 from flask_caching import Cache
+from pathlib import Path
 
 import figures
 import getData
 import allValues
 import latestValues
+import json
 
-load_dotenv()
-update_frequency = int(os.getenv('update_frequency'))
-day_period = float(os.getenv('day_period'))
+
+env_vars = json.load(open('/code/env.json'))
+
+update_frequency = int(env_vars['update_frequency'])
+day_period = float(env_vars['update_frequency'])
 
 # APPLICATION
 app = dash.Dash(__name__)
@@ -25,7 +30,7 @@ server = app.server
 CACHE_CONFIG = {
     # try 'FileSystemCache' if you don't want to setup redis
     'CACHE_TYPE': 'RedisCache',
-    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+    'CACHE_REDIS_URL':  'redis://edif-cache:6379'
 }
 cache = Cache()
 cache.init_app(app.server, config=CACHE_CONFIG)
@@ -458,4 +463,4 @@ def toggle_modal(n1, n2, is_open):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=True, processes=6, threaded=False)
+    app.run_server(debug=False, processes=6, threaded=False,host='0.0.0.0',port=80)

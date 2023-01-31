@@ -1,9 +1,11 @@
 import os
 import pandas as pd
-from dotenv import load_dotenv
 
-load_dotenv()
-latest_reading_threshold = int(os.getenv('latest_reading_threshold'))
+import json
+
+
+env_vars = json.load(open('/code/env.json'))
+latest_reading_threshold = int(env_vars['latest_reading_threshold'])
 
 def run(sensor_dfs):
     ds_list = []

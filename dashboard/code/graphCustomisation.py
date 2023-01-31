@@ -1,11 +1,12 @@
 # Returns custom graph info based on variable
 
-import os
-from dotenv import load_dotenv
+import json
 
-load_dotenv()
-pm25_display_limit = int(os.getenv('pm25_display_limit'))
-temperature_display_limit = int(os.getenv('temperature_display_limit'))
+
+env_vars = json.load(open('/code/env.json'))
+
+pm25_display_limit = int(env_vars['pm25_display_limit'])
+temperature_display_limit = int(env_vars['temperature_display_limit'])
 
 def customise(df, variable):
     if variable == 'PM2.5':

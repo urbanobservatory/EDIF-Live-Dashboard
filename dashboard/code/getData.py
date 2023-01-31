@@ -4,39 +4,44 @@ from dateutil.relativedelta import relativedelta
 import requests
 import pandas as pd
 import json
+import json
 
+
+env_vars = json.load(open('/code/env.json'))
 import mapping
 
 def run(variable, start, end):
-
+    print(variable,flush=True)
     variable_map = mapping.variables()
     requestVariable = variable_map[variable]['request-variable']
     units = variable_map[variable]['units']
 
     source_map = mapping.UDXsources()
-
+    print(source_map)
     dfs = []
     for organisation in source_map:
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
                 if variable in source_map[organisation][source][stream]:
-                    try:
 
-                        df = request(organisation, source, stream, requestVariable, start, end)
+                    df = request(organisation, source, stream, requestVariable, start, end)
 
-                        if source == 'Newcastle-UO':
-                            df = selectNewcastle(requestVariable, df)
-                        else:
-                            df = select(requestVariable, df)
+                    if source == 'Newcastle-UO':
+                        df = selectNewcastle(requestVariable, df)
+                    else:
+                        df = select(requestVariable, df)
 
-                        df = format(organisation, source, stream, variable, units, df)
+                    df = format(organisation, source, stream, variable, units, df)
 
-                        dfs.append(df)
+                    dfs.append(df)
 
-                    except:
-                        continue
 
-    df = pd.concat(dfs)
+
+
+
+
+    if dfs:
+        df = pd.concat(dfs)
 
     return df
 
@@ -50,26 +55,27 @@ def request(organisation, source, stream, variable, start, end):
 
     if source == 'Zephyr' and stream == 'PM2.5':
         response_API = requests.get(
-            url=f"{os.getenv(f'{source}_url')}?start={start}&end={end}", 
+            url=f"{env_vars[f'{source}_url']}?start={start}&end={end}",
             headers={
-                "Content-Type":os.getenv('cont'), 
-                "Authorization":os.getenv(f'{source}_auth')+' '+os.getenv(f'{source}_key')
+                "Content-Type":env_vars['cont'],
+                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_key']
             }
         )
     elif source == 'Sheffield-UF' and variable != 'intensity':
         response_API = requests.get(
-            url=f"{os.getenv(f'{source}_aq_url')}?start={start}&end={end}", 
+            url=f"{env_vars[f'{source}_aq_url']}?start={start}&end={end}",
             headers={
-                "Content-Type":os.getenv('cont'), 
-                "Authorization":os.getenv(f'{source}_auth')+' '+os.getenv(f'{source}_aq_key')
+                "Content-Type":env_vars['cont'],
+                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_aq_key']
             }
         )
     else:
+
         response_API = requests.get(
-            url=f"{os.getenv(f'{source}_{variable}_url')}?start={start}&end={end}",
+            url=f"{env_vars[f'{source}_{variable}_url']}?start={start}&end={end}",
             headers={
-                "Content-Type":os.getenv('cont'), 
-                "Authorization":os.getenv(f'{source}_auth')+' '+os.getenv(f'{source}_{variable}_key')
+                "Content-Type":env_vars['cont'],
+                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_{variable}_key']
             }
         )
             
