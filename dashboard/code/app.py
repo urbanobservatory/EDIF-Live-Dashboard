@@ -7,7 +7,6 @@ from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from dateutil.relativedelta import relativedelta
-from dotenv import load_dotenv
 from flask_caching import Cache
 from pathlib import Path
 
@@ -15,7 +14,6 @@ import figures
 import getData
 import allValues
 import latestValues
-import json
 
 
 env_vars = json.load(open('/code/env.json'))

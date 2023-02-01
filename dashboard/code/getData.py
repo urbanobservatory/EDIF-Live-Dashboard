@@ -4,11 +4,9 @@ from dateutil.relativedelta import relativedelta
 import requests
 import pandas as pd
 import json
-import json
-
+import mapping
 
 env_vars = json.load(open('/code/env.json'))
-import mapping
 
 def run(variable, start, end):
     print(variable,flush=True)
@@ -23,22 +21,21 @@ def run(variable, start, end):
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
                 if variable in source_map[organisation][source][stream]:
+                    try:
 
-                    df = request(organisation, source, stream, requestVariable, start, end)
+                        df = request(organisation, source, stream, requestVariable, start, end)
 
-                    if source == 'Newcastle-UO':
-                        df = selectNewcastle(requestVariable, df)
-                    else:
-                        df = select(requestVariable, df)
+                        if source == 'Newcastle-UO':
+                            df = selectNewcastle(requestVariable, df)
+                        else:
+                            df = select(requestVariable, df)
 
-                    df = format(organisation, source, stream, variable, units, df)
+                        df = format(organisation, source, stream, variable, units, df)
 
-                    dfs.append(df)
-
-
-
-
-
+                        dfs.append(df)
+                    
+                    except:
+                        continue
 
     if dfs:
         df = pd.concat(dfs)

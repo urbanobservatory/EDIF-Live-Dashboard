@@ -308,7 +308,7 @@ def map(df, map_selection): #, map_relayout):
             mode = 'markers',
             marker = go.scattermapbox.Marker(
                 size=15,
-                opacity=0.8,
+                opacity=0.6,
                 symbol = 'circle',
                 colorscale = colorscale, 
                 #cmin = 0,
