@@ -1,7 +1,7 @@
 import json
-import os
 import dash
-from datetime import datetime
+import pandas as pd
+from datetime import date, datetime, timedelta
 from dash import dcc, html, ctx
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
@@ -26,12 +26,35 @@ app = dash.Dash(__name__)
 server = app.server
 
 CACHE_CONFIG = {
-    # try 'FileSystemCache' if you don't want to setup redis
     'CACHE_TYPE': 'RedisCache',
     'CACHE_REDIS_URL':  'redis://edif-cache:6379'
 }
 cache = Cache()
 cache.init_app(app.server, config=CACHE_CONFIG)
+
+
+# def get_days(start_date, end_date):
+#     print('start_date', start_date, type(start_date))
+#     print('end_date', end_date, type(end_date))
+
+#     days = []
+
+#     start_date = date(
+#         int(start_date.split('-')[0]),
+#         int(start_date.split('-')[1]),
+#         int(start_date.split('-')[2]))
+#     end_date = date(
+#         int(end_date.split('-')[0]),
+#         int(end_date.split('-')[1]),
+#         int(end_date.split('-')[2]))
+
+#     delta = end_date - start_date
+
+#     for i in range(delta.days + 1):
+#         day = start_date + timedelta(days=i)
+#         days.append(day)
+
+#     return days
 
 
 app.layout = html.Div([
@@ -56,9 +79,14 @@ app.layout = html.Div([
     ], className='modal'),
 
     html.Div([
-        html.Div(
-            html.H1('EDIF - Live Dashboard Demo'),
-            className="title"),
+        html.Div([
+            html.Img(
+                id='DTlogo',
+                src='/assets/thumbnail_image006_inverted_201x100.png')
+        ], className='logo'),
+        html.Div([
+            html.H1('Live Dashboard Demo')
+        ], className="title"),
         html.Div([
             html.Div([
                 dcc.Dropdown(
@@ -106,11 +134,6 @@ app.layout = html.Div([
             ], className='refresh')
         ], className='refreshBox')
     ], className='banner'),
-
-    # html.Div([
-    #     html.Div([
-    #     ], className='divider')
-    # ], className='row'),
 
     html.Br(),
 
@@ -241,7 +264,6 @@ app.layout = html.Div([
         
     ], className='row'),
     
-
     dcc.Interval(
         id='interval-component',
         interval=60000*update_frequency,
@@ -254,6 +276,20 @@ app.layout = html.Div([
 # CALLBACKS
 @cache.memoize()
 def global_store(variable, start_date=None, end_date=None):
+
+    # start = datetime.strptime(day, '%Y-%m-%d')
+    # end = datetime.strptime(day, '%Y-%m-%d') + timedelta(hours=23, minutes=59, seconds=59)
+
+    # if start_date != None and end_date == None \
+    # or start_date == None and end_date != None:
+    #     raise PreventUpdate
+
+    # elif start_date != None and end_date != None:        
+    #     start = datetime.strptime(start_date, '%Y-%m-%d')
+    #     end = datetime.strptime(end_date, '%Y-%m-%d') 
+    #     end = end + timedelta(hours=23, minutes=59, seconds=59)
+    #     print('start', start)
+    #     print('end', end)
 
     if start_date != None and end_date != None:
         start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -308,10 +344,34 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
     df = global_store(variable, start_date, end_date)
     selected = []
     if 'Map' == ctx.triggered_id:
+        # selected = []
         for i in range(0, len(map_selection['points'])):
             id = map_selection['points'][i]['text'].split(':')[0]
             selected.append(id)
         df = df.loc[df['ID'].isin(selected)]
+
+    # else:
+    #     dfs = []
+
+    #     if 'date-picker-range' == ctx.triggered_id:
+    #         print('start_date', start_date, type(start_date))
+    #         print('end_date', end_date, type(end_date))
+    #         days = get_days(start_date, end_date)
+
+    #     else:
+    #         start_date = datetime.today()-relativedelta(days=day_period)
+    #         start_date = start_date.strftime('%Y-%m-%d')
+    #         end_date = datetime.today().strftime('%Y-%m-%d')
+    #         # print('start_date', start_date, type(start_date))
+    #         # print('end_date', end_date, type(end_date))
+    #         # start_date = start_date.strftime('%Y-%m-%d')
+            
+    #         days = get_days(start_date, end_date)
+
+    #     for day in days:
+    #         dfs.append(global_store(variable, day))
+    #     df = pd.concat(dfs)
+
     return figures.scatter_all(df)
 
 
@@ -461,4 +521,4 @@ def toggle_modal(n1, n2, is_open):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=False, processes=6, threaded=False,host='0.0.0.0',port=80)
+    app.run_server(debug=False, processes=6, threaded=False, host='0.0.0.0', port=80)
