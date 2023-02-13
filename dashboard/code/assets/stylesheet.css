@@ -112,6 +112,32 @@
   margin: 0 0 0 8%;
 }
 
+.hover {
+  height: 300px;
+  width: 100%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
+  padding: 10px;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 0%;
+}
+
+.boxplot {
+  height: 300px;
+  width: 100%;
+  background-color: #181b1f;
+  border-radius: 5px;
+  text-align: center;
+  color: #ccccdc;
+  padding: 10px;
+  font-size: 1;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+  margin: 0 0 0 12%;
+}
+
 .map {
   height: 988px;
   width: 100%;

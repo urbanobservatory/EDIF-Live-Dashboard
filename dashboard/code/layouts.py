@@ -107,6 +107,59 @@ def scatterHover(variable, units):
     )
 
 
+def surface():
+    return go.Layout(
+        title = dict(
+            text = '3D Scatter',
+            x = 0.5
+        ),
+        height = 300,
+        showlegend = False, 
+        autosize = True,
+        margin = dict(t=60, b=20, l=20, r=20),
+        hovermode = 'closest',
+        hoverlabel = dict(namelength=-1),
+        scene = {
+            'xaxis_title': 'Time',
+            'yaxis_title': 'Traffic Value',
+            'zaxis_title': 'Variable Value'
+        },
+        paper_bgcolor=theme['background_frame'],
+        plot_bgcolor=theme['background_frame'],
+        font=dict(color=theme['text'])
+    )
+
+
+def boxplot(variable, units):
+    return go.Layout(
+        title = dict(
+            text = f'{variable} Box Plot',
+            x = 0.5
+        ),
+        height = 300,
+        showlegend = False, 
+        autosize = True,
+        margin = dict(t=60, b=20, l=20, r=20),
+        hovermode = 'closest',
+        hoverlabel = dict(namelength=-1),
+        xaxis = dict(
+            title = 'Source',
+            gridwidth=1, 
+            gridcolor=theme['gridlines'],
+            zerolinecolor=theme['gridlines']
+        ),
+        yaxis = dict(
+            title = units,
+            gridwidth=1, 
+            gridcolor=theme['gridlines'],
+            zerolinecolor=theme['gridlines']
+        ),
+        paper_bgcolor=theme['background_frame'],
+        plot_bgcolor=theme['background_frame'],
+        font=dict(color=theme['text'])
+    )
+
+
 def histogram(variable, units):
     return go.Layout(
         title = dict(

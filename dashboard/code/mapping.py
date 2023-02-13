@@ -97,7 +97,10 @@ def UDXsources():
                     'Sulfur Dioxide'
                 ],
                 'Traffic-Flow': ['Traffic Flow'],
-                'Weather': []
+                'Weather': [
+                    'Temperature',
+                    'Humidity'
+                ]
             }
         },
         'Manchester Urban Observatory': {

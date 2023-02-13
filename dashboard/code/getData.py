@@ -9,17 +9,18 @@ import mapping
 env_vars = json.load(open('/code/env.json'))
 
 def run(variable, start, end):
-    print(variable,flush=True)
+
     variable_map = mapping.variables()
     requestVariable = variable_map[variable]['request-variable']
     units = variable_map[variable]['units']
 
     source_map = mapping.UDXsources()
-    print(source_map)
+
     dfs = []
     for organisation in source_map:
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
+
                 if variable in source_map[organisation][source][stream]:
                     try:
 
@@ -34,7 +35,9 @@ def run(variable, start, end):
 
                         dfs.append(df)
                     
-                    except:
+                    except Exception as e:
+                        print(f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}', flush=True)
+                        print(e, flush=True)
                         continue
 
     if dfs:
@@ -50,31 +53,13 @@ def request(organisation, source, stream, variable, start, end):
 
     print('fetching UDX data...', organisation, source, stream, variable, start, end)
 
-    if source == 'Zephyr' and stream == 'PM2.5':
-        response_API = requests.get(
-            url=f"{env_vars[f'{source}_url']}?start={start}&end={end}",
-            headers={
-                "Content-Type":env_vars['cont'],
-                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_key']
-            }
-        )
-    elif source == 'Sheffield-UF' and variable != 'intensity':
-        response_API = requests.get(
-            url=f"{env_vars[f'{source}_aq_url']}?start={start}&end={end}",
-            headers={
-                "Content-Type":env_vars['cont'],
-                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_aq_key']
-            }
-        )
-    else:
-
-        response_API = requests.get(
-            url=f"{env_vars[f'{source}_{variable}_url']}?start={start}&end={end}",
-            headers={
-                "Content-Type":env_vars['cont'],
-                "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_{variable}_key']
-            }
-        )
+    response_API = requests.get(
+        url=f"{env_vars[f'{source}_{stream}_url']}?start={start}&end={end}",
+        headers={
+            "Content-Type":env_vars['cont'],
+            "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_{stream}_key']
+        }
+    )
             
     print(variable, 'status code: ', response_API.status_code)
     json_data = json.loads(response_API.text)
@@ -156,7 +141,7 @@ def format(organisation, source, stream, variable, units, df):
 
     df['Organisation'] = organisation
     df['Source'] = source
-    df['Steam'] = stream
+    df['Stream'] = stream
     df['Variable'] = variable
     df['Units'] = units
 

@@ -218,6 +218,66 @@ def scatter_hover(df):
     return fig
 
 
+def scatter3D(df):
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter3d(
+            x = df['Period'],
+            y = df['Traffic_Flow_values'],
+            z = df['Variable_values'],
+            mode = 'lines+markers',
+            marker = {
+                'size': 5,
+                # 'marker_symbol': 'circle-open',
+                'color': df['Variable_values'],
+                # 'opacity': 0.5,
+                'showscale': True,
+                # 'colorbar': {
+                #     #'title': units,
+                #     'orientation': 'v'
+                # }
+            }
+        )
+    )
+    
+    fig.update_layout(
+        layouts.surface()
+    )
+
+    return fig
+
+
+def boxPlot(df):
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
+
+    fig = go.Figure()
+
+    sources = df['Source'].unique()
+
+    for source in sources:
+        df2 = df.loc[df['Source'] == source]
+
+        fig.add_trace(
+            go.Box(
+                y = df2['Value'],
+                name = source,
+                boxpoints = False,
+            )
+        )
+
+    fig.update_layout(
+        layouts.boxplot(variable, units),
+        transition_duration=500,
+    )
+    
+    return fig
+
+
 def histogram(df):
 
     variable = df['Variable'].iloc[0]

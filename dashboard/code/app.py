@@ -8,8 +8,8 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 from dateutil.relativedelta import relativedelta
 from flask_caching import Cache
-from pathlib import Path
 
+import htmlLayout
 import figures
 import getData
 import allValues
@@ -56,226 +56,29 @@ cache.init_app(app.server, config=CACHE_CONFIG)
 
 #     return days
 
+def hourly_averages(df, hours):
+    averages = []
+    for h in range(0, len(hours)-1):
+        start = hours[h]
+        end = hours[h+1]
+        mask = (df['Datetime'] > start) & (df['Datetime'] <= end)
+        df2 = df.loc[mask]
+        averages.append(df2['Value'].mean())
+    return averages
 
-app.layout = html.Div([
+def select(df, item_selection):
+    selected = []
+    for i in range(0, len(item_selection['points'])):
+        id = item_selection['points'][i]['text'].split(':')[0]
+        selected.append(id)
+    return df.loc[df['ID'].isin(selected)]
 
-    html.Div([
-        dbc.Modal([
-            dbc.ModalHeader(dbc.ModalTitle("Information")),
-            dbc.ModalBody("Info coming soon. Please report any bugs to daniel.bell2@ncl.ac.uk"),
-            dbc.ModalFooter(
-                dbc.Button(
-                    "Close",
-                    id="close-centered",
-                    className="ms-auto",
-                    n_clicks=0
-                )
-            ),
-        ],
-        id="modal-centered",
-        centered=True,
-        is_open=False
-        )
-    ], className='modal'),
-
-    html.Div([
-        html.Div([
-            html.Img(
-                id='DTlogo',
-                src='/assets/thumbnail_image006_inverted_201x100.png')
-        ], className='logo'),
-        html.Div([
-            html.H1('Live Dashboard Demo')
-        ], className="title"),
-        html.Div([
-            html.Div([
-                dcc.Dropdown(
-                    id='checklist',
-                    options=[
-                        'PM1',
-                        'PM2.5',
-                        'PM4',
-                        'PM10',
-                        'Traffic Flow',
-                        'Black Carbon',
-                        'Nitric Oxide',
-                        'Ozone',
-                        'Nitrogen Dioxide',
-                        'Sulfur Dioxide',
-                        'Temperature',
-                        'Humidity',
-                        'Pressure'
-                    ],
-                    value='PM2.5',
-                    clearable=False)
-            ], className='dropDown')
-        ], className='dropDownBox'),
-        html.Div([
-            html.Div([
-                dcc.DatePickerRange(
-                    id='date-picker-range',
-                    month_format='Do-MMM-Y')
-            ], className='calendar')
-        ], className='calendarBox'),
-        html.Div([
-            html.Div([
-                html.Button(
-                    'Refresh',
-                    id='Refresh Button',
-                    n_clicks = 0)
-            ], className='refresh')
-        ], className='refreshBox'),
-        html.Div([
-            html.Div([
-                html.Button(
-                    'Info',
-                    id='Info Button',
-                    n_clicks = 0)
-            ], className='refresh')
-        ], className='refreshBox')
-    ], className='banner'),
-
-    html.Br(),
-
-    html.Div([
-        html.Div([
-
-            html.Div([
-                html.Div([
-                    html.Div([
-                        html.Div([
-                            dcc.Graph(id='Indicators A')
-                        ], className='twelve columns')
-                    ])
-                ], className="row"),
-
-                html.Div([
-                    html.Div([
-                        html.Div([
-                            dcc.Graph(id='Indicators B')
-                        ], className='twelve columns')
-                    ])
-                ], className="row")
-            ], className='graph'),
-
-            html.Br(),
-            html.Div([
-                html.Div([
-                    html.Div([
-                        dcc.Graph(id='Scatter All')
-                    ], className='graph')
-                ], className='twelve columns'),
-            ], className="row"),
-
-            html.Br(),
-            html.Div([
-                html.Div([
-                    html.Div([
-                        dcc.Graph(id='Scatter Hover')
-                    ], className='graph')
-                ], className='six columns'),
-                html.Div([
-                    html.Div([
-                        dcc.Graph(id='Histogram')
-                    ], className='histogram')
-                ], className='six columns')
-            ], className='row')
-
-        ], className="eight columns"),
-        html.Div([
-            html.Div([
-                html.Div([
-                    html.Div([
-                        dcc.Graph(id='Map')
-                    ], className='map')
-                ], className='twelve columns')
-            ], className='row')
-        ], className='four columns')
-    ], className="row"),
-
-    html.Div([
-        html.Div([
-        ], className='divider')
-    ], className='row'),
-
-    html.Div([
-        html.Div([
-            html.Div([
-                html.Div([
-                    html.Label(
-                        children=[
-                            html.Span('Stream Health', className='labels')
-                        ]
-                    ),
-                    dash.dash_table.DataTable(
-                        id = 'Health Table',
-                        page_size = 12,
-                        style_table = {
-                            'overflowY': 'auto'},
-                        style_as_list_view = True,
-                        style_cell = {
-                            'backgroundColor': '#111217', 
-                            'textAlign': 'center'},
-                        style_header = {
-                            'backgroundColor': '#181b1f',
-                            'fontWeight': 'bold',
-                            'color': '#ccccdc'},
-                        style_data_conditional = [
-                            {
-                                'if': {
-                                    'filter_query': "{Alert} contains 'Online'"
-                                },
-                                'backgroundColor': '#00cc96'
-                            },
-                            {
-                                'if': {
-                                    'filter_query': "{Alert} contains 'Offline'"
-                                },
-                                'backgroundColor': '#ef553b'
-                            }
-                            
-                        ]
-                    )
-                ], className='healthTable')
-            ], className='four columns'),
-            html.Div([
-                html.Div([
-                    html.Label(
-                        children=[
-                            html.Span('Suspect Reading Logs', className='labels')
-                        ]),
-                    dash.dash_table.DataTable(
-                        id = 'Suspect Table',
-                        page_size = 12,
-                        style_table = {
-                            'overflowY': 'auto'},
-                        style_as_list_view = True,
-                        style_cell = {
-                            'backgroundColor': '#111217'},
-                        style_header = {
-                            'backgroundColor': '#181b1f',
-                            'fontWeight': 'bold',
-                            'color': '#ccccdc'},
-                        style_data = {'color': "#ccccdc"}
-                    )
-                ], className='suspectTable')
-            ], className='eight columns')
-        ], className='table')
-        
-    ], className='row'),
-    
-    dcc.Interval(
-        id='interval-component',
-        interval=60000*update_frequency,
-        n_intervals=0),
-    dcc.Store(id='signal')
-
-], className="body")
+app.layout = htmlLayout.layout()
 
 
 # CALLBACKS
 @cache.memoize()
-def global_store(variable, start_date=None, end_date=None):
+def day_store(variable, start_date=None, end_date=None):
 
     # start = datetime.strptime(day, '%Y-%m-%d')
     # end = datetime.strptime(day, '%Y-%m-%d') + timedelta(hours=23, minutes=59, seconds=59)
@@ -294,7 +97,6 @@ def global_store(variable, start_date=None, end_date=None):
     if start_date != None and end_date != None:
         start = datetime.strptime(start_date, '%Y-%m-%d')
         end = datetime.strptime(end_date, '%Y-%m-%d')
-        print(start, end)
     else:
         start = datetime.now()-relativedelta(days=day_period)
         end   = datetime.now()
@@ -302,6 +104,11 @@ def global_store(variable, start_date=None, end_date=None):
     df = getData.run(variable, start, end)
 
     return df
+
+
+@cache.memoize()
+def hour_store(variable, day):
+    pass
 
 
 @app.callback(
@@ -312,7 +119,7 @@ def global_store(variable, start_date=None, end_date=None):
         Input('Refresh Button', 'n_clicks')
     ])
 def compute_value(intervals, variable, clicks):
-    global_store(variable)
+    day_store(variable)
     return variable
 
 
@@ -326,7 +133,7 @@ def compute_value(intervals, variable, clicks):
         # Input('Map', 'relayoutData')
     ])
 def update_map(variable, map_selection, start_date, end_date): #, map_relayout):
-    df = global_store(variable, start_date, end_date)
+    df = day_store(variable, start_date, end_date)
     sensor_dfs = allValues.run(df)
     latest_df = latestValues.run(sensor_dfs)
     return figures.map(latest_df, map_selection) #, map_relayout)
@@ -341,14 +148,9 @@ def update_map(variable, map_selection, start_date, end_date): #, map_relayout):
         Input('date-picker-range', 'end_date')
     ])
 def update_scatter_all(variable, map_selection, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
-    selected = []
+    df = day_store(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        # selected = []
-        for i in range(0, len(map_selection['points'])):
-            id = map_selection['points'][i]['text'].split(':')[0]
-            selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        df = select(df, map_selection)
 
     # else:
     #     dfs = []
@@ -369,7 +171,7 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
     #         days = get_days(start_date, end_date)
 
     #     for day in days:
-    #         dfs.append(global_store(variable, day))
+    #         dfs.append(day_store(variable, day))
     #     df = pd.concat(dfs)
 
     return figures.scatter_all(df)
@@ -385,7 +187,7 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
+    df = day_store(variable, start_date, end_date)
     if 'date-picker-range' == ctx.triggered_id:
         raise PreventUpdate
     elif 'signal' == ctx.triggered_id:
@@ -410,13 +212,9 @@ def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_dat
         Input('date-picker-range', 'end_date')
     ])
 def update_indicators(variable, map_selection, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
-    selected = []
+    df = day_store(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        for i in range(0, len(map_selection['points'])):
-            id = map_selection['points'][i]['text'].split(':')[0]
-            selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        df = select(df, map_selection)
     return figures.indicatorsA(df)
 
 
@@ -429,14 +227,60 @@ def update_indicators(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_indicators(variable, map_selection, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
-    selected = []
+    df = day_store(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        for i in range(0, len(map_selection['points'])):
-            id = map_selection['points'][i]['text'].split(':')[0]
-            selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        df = select(df, map_selection)
     return figures.indicatorsB(df)
+
+
+# @app.callback(
+#     Output('Scatter3D', 'figure'),
+#     [
+#         Input('signal', 'data'),
+#         Input('date-picker-range', 'start_date'),
+#         Input('date-picker-range', 'end_date')
+#     ])
+# def update_3Dsurface(variable, start_date, end_date):
+#     if start_date == None and end_date == None:
+#         start_date = datetime.now()-relativedelta(days=day_period)
+#         end_date   = datetime.now()
+#         start_date = start_date.strftime("%Y-%m-%d")
+#         end_date = end_date.strftime("%Y-%m-%d")
+
+#     df1 = day_store(variable, start_date, end_date)
+#     df2 = day_store('Traffic Flow', start_date, end_date)
+
+#     period = pd.date_range(start_date, end_date, freq='D')
+#     variable_averages = hourly_averages(df1, period)
+#     traffic_averages = hourly_averages(df2, period)
+
+#     period = period.delete(len(period)-1)
+#     period = [str(x) for x in period]
+
+#     df = pd.DataFrame({
+#         'Period': period,
+#         'Variable_values': variable_averages,
+#         'Traffic_Flow_values': traffic_averages
+#         })
+#     df = df.fillna(0)
+
+#     return figures.scatter3D(df)
+
+
+@app.callback(
+    Output('BoxPlot', 'figure'),
+    [
+        Input('signal', 'data'), 
+        Input('Map', 'selectedData'),
+        Input('Scatter All', 'selectedData'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_boxplot(variable, map_selection, scatter_selection, start_date, end_date):
+    df = day_store(variable, start_date, end_date)
+    if 'Map' == ctx.triggered_id:
+        df = select(df, map_selection)
+    return figures.boxPlot(df)
 
 
 @app.callback(
@@ -449,18 +293,11 @@ def update_indicators(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_histogram(variable, map_selection, scatter_selection, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
-    selected = []
+    df = day_store(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        for i in range(0, len(map_selection['points'])):
-            id = map_selection['points'][i]['text'].split(':')[0]
-            selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        df = select(df, map_selection)
     if 'Scatter All' == ctx.triggered_id:
-        for i in range(0, len(scatter_selection['points'])):
-            id = scatter_selection['points'][i]['text'].split(':')[0]
-            selected.append(id)
-        df = df.loc[df['ID'].isin(selected)]
+        df = select(df, scatter_selection)
     return figures.histogram(df)
 
 
@@ -472,7 +309,7 @@ def update_histogram(variable, map_selection, scatter_selection, start_date, end
         Input('date-picker-range', 'end_date')
     ])
 def update_suspect_table(variable, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
+    df = day_store(variable, start_date, end_date)
     return figures.suspectTable(df)
 
 
@@ -484,7 +321,7 @@ def update_suspect_table(variable, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_health_table(variable, start_date, end_date):
-    df = global_store(variable, start_date, end_date)
+    df = day_store(variable, start_date, end_date)
     return figures.healthTable(df)
 
 
@@ -498,25 +335,6 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
-
-
-# For if CSS Stylesheet does not load
-# css_directory = os.getcwd()
-# stylesheets = ['stylesheet.css']
-# static_css_route = '/static/'
-
-# @app.server.route('{}<stylesheet>'.format(static_css_route))
-# def serve_stylesheet(stylesheet):
-#     if stylesheet not in stylesheets:
-#         raise Exception(
-#             '"{}" is excluded from the allowed static files'.format(
-#                 stylesheet
-#             )
-#         )
-#     return flask.send_from_directory(css_directory, stylesheet)
-
-# for stylesheet in stylesheets:
-#     app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
     
 
 # Run App
