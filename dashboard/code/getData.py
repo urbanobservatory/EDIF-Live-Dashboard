@@ -15,16 +15,18 @@ def run(variable, start, end):
 
     dfs = []
     for organisation in source_map:
+        print(organisation)
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
 
                 if variable in source_map[organisation][source][stream]:
+
                     try:
                         if source == 'Cranfield':
                             df = requestCranfield(organisation, source, stream, requestVariable, start, end)
                         else:
                             df = request(organisation, source, stream, requestVariable, start, end)
-
+                        print(df)
                         if source == 'Newcastle-UO':
                             df = selectNewcastle(requestVariable, df)
                         else:
