@@ -23,8 +23,10 @@ def run(variable, start, end):
 
                 if variable in source_map[organisation][source][stream]:
                     try:
-
-                        df = request(organisation, source, stream, requestVariable, start, end)
+                        if source == 'Cranfield':
+                            df = requestCranfield(organisation, source, stream, requestVariable, start, end)
+                        else:
+                            df = request(organisation, source, stream, requestVariable, start, end)
 
                         if source == 'Newcastle-UO':
                             df = selectNewcastle(requestVariable, df)
@@ -65,6 +67,9 @@ def request(organisation, source, stream, variable, start, end):
     json_data = json.loads(response_API.text)
     return pd.json_normalize(json_data)
 
+
+def requestCranfield(organisation, source, stream, variable, start, end):
+    print(organisation, source, stream, variable, start, end)
 
 def selectNewcastle(variable, df):
             
