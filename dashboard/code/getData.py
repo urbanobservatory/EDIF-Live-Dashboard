@@ -22,20 +22,23 @@ def run(variable, start, end):
                 if variable in source_map[organisation][source][stream]:
 
                     try:
-                        if source == 'Cranfield':
-                            continue
-                            df = requestCranfield(organisation, source, stream, requestVariable, start, end)
+                        if organisation == 'Cranfield':
+
+                            df = requestCranfield(organisation, source, stream, requestVariable, start, end,units)
+                            print(df)
+                            if len(df) > 0:
+                                print('adding')
+                                dfs.append(df)
                         else:
                             df = request(organisation, source, stream, requestVariable, start, end)
-                        print(df)
-                        if source == 'Newcastle-UO':
-                            df = selectNewcastle(requestVariable, df)
-                        else:
-                            df = select(requestVariable, df)
+                            if source == 'Newcastle-UO':
+                                df = selectNewcastle(requestVariable, df)
+                            else:
+                                df = select(requestVariable, df)
 
-                        df = format(organisation, source, stream, variable, units, df)
+                            df = format(organisation, source, stream, variable, units, df)
 
-                        dfs.append(df)
+                            dfs.append(df)
                     
                     except Exception as e:
                         print(f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}', flush=True)
@@ -44,7 +47,8 @@ def run(variable, start, end):
 
     if dfs:
         df = pd.concat(dfs)
-
+    print(df)
+    df.to_csv('/csvs/mega.csv')
     return df
 
 
@@ -68,8 +72,60 @@ def request(organisation, source, stream, variable, start, end):
     return pd.json_normalize(json_data)
 
 
-def requestCranfield(organisation, source, stream, variable, start, end):
-    print(organisation, source, stream, variable, start, end)
+def requestCranfield(organisation, source, stream, variable, start, end,units):
+
+    """
+	ID	Value	Suspect Reading	Datetime	Timestamp	Longitude	Latitude	Organisation	Source	Stream	Variable	Units
+789	PER_AIRMON_MESH1913150	22.99	False	2023-02-14 12:33:00	1676377980000	-1.704298	55.000748	Newcastle Urban Observatory	Newcastle-UO	PM2.5	PM2.5	μgm⁻³
+ """
+    import datetime
+
+    var_lookup = {'pm25':'PM2.5','pm10':'PM10','co':'CO','no':'NO'}
+    if variable not in var_lookup.keys():
+        print(variable)
+        return pd.DataFrame([])
+    url = "https://api.airmonitors.net/3.5/GET/4ed8059b-C/8cac-fef6-jRSq-AS04-N8u7-6R8y-539d-b388/stations"
+    r = requests.get(url)
+    print(start,end)
+    station_json = r.json()
+    for stat in station_json:
+        url = "https://api.airmonitors.net/3.5/GET/4ed8059b-C/8cac-fef6-jRSq-AS04-N8u7-6R8y-539d-b388/stationdata/{StartTimestamp}/{EndTimestamp}/{UniqueId}"
+        data_url = url.format(
+            StartTimestamp=start.strftime('%Y%m%dT%H%M%S'),
+            EndTimestamp=end.strftime('%Y%m%dT%H%M%S'),
+            UniqueId=stat["UniqueId"]
+        )
+
+        r = requests.get(data_url)
+
+        try:
+            data_json = r.json()
+        except:
+            continue
+        pandas_row = []
+        for row in data_json:
+            dt = datetime.datetime.strptime(row['TETimestamp'].split('+')[0],'%Y-%m-%dT%H:%M:%S')
+
+            for channel in row['Channels']:
+                if channel['SensorLabel'] == var_lookup[variable]:
+                    value = channel['Scaled']
+                    row_str = f"""{stat["UniqueId"]},{value},False,{dt},{pd.to_datetime(dt).value / 10**6},{row['Longitude']},{row['Latitude']},{organisation},{source},{stream},{var_lookup[variable]},{units}''"""
+
+
+                    pandas_row.append(row_str.split(','))
+
+        print(data_url)
+    if pandas_row:
+        headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
+            ",")
+
+
+        frame = pd.DataFrame(pandas_row,columns=headers)
+        frame['Value'] = pd.to_numeric(frame['Value'])
+        frame['Timestamp'] = pd.to_numeric(frame['Value'])
+        frame['Datetime'] = pd.to_datetime(frame['Datetime'])
+        frame.to_csv('/csvs/cran.csv')
+        return frame
 
 def selectNewcastle(variable, df):
             

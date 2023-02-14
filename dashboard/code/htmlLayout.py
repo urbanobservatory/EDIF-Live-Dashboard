@@ -55,7 +55,7 @@ def layout():
                             'Sulfur Dioxide',
                             'Temperature',
                             'Humidity',
-                            'Pressure'
+                            #'Pressure'
                         ],
                         value='PM2.5',
                         clearable=False)
