@@ -23,6 +23,7 @@ def run(variable, start, end):
 
                     try:
                         if source == 'Cranfield':
+                            continue
                             df = requestCranfield(organisation, source, stream, requestVariable, start, end)
                         else:
                             df = request(organisation, source, stream, requestVariable, start, end)
