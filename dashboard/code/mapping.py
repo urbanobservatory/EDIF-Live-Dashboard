@@ -6,12 +6,12 @@ def variables():
             'colorscale': 'reds'
         },
         'Humidity': {
-            'request-variable': 'humidity',
+            'request-variable': 'relativeHumidity',
             'units': '%',
             'colorscale': 'Jet'
         },
         'Pressure': {
-            'request-variable': 'pressure',
+            'request-variable': 'atmosphericPressure',
             'units': 'Pa',
             'colorscale': 'YlGnBu'
         },
@@ -126,5 +126,22 @@ def UDXsources():
             },
             'BCC': {},
             'TfWM': {}
+        },
+        'Cranfield': {
+            'Air-Quality': {
+                'Air-Quality': [
+                    'Pressure',
+                    'CO',
+                    'Humidity',
+                    'NO',
+                    'NO2',
+                    'NOx',
+                    'O3',
+                    'PM10',
+                    'PM2.5',
+                    'PM4',
+                    'Temperature'
+                ]
+            }
         }
     }
