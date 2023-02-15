@@ -183,10 +183,11 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
         Input('signal', 'data'), 
         Input('Map', 'hoverData'),
         Input('Scatter All', 'hoverData'),
+        Input('Scatter3D', 'hoverData'),
         Input('date-picker-range', 'start_date'),
         Input('date-picker-range', 'end_date')
     ])
-def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_date):
+def update_scatter_hover(variable, map_hover, scatter_hover, scatter3d_hover, start_date, end_date):
     df = day_store(variable, start_date, end_date)
     if 'date-picker-range' == ctx.triggered_id:
         raise PreventUpdate
@@ -199,6 +200,9 @@ def update_scatter_hover(variable, map_hover, scatter_hover, start_date, end_dat
         df = df.loc[df['ID'].isin([id])]
     elif 'Scatter All' == ctx.triggered_id:
         id = scatter_hover['points'][0]['text'].split(':')[0]
+        df = df.loc[df['ID'].isin([id])]
+    elif 'Scatter3D' == ctx.triggered_id:
+        id = scatter3d_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
     return figures.scatter_hover(df)
 
@@ -233,38 +237,40 @@ def update_indicators(variable, map_selection, start_date, end_date):
     return figures.indicatorsB(df)
 
 
-# @app.callback(
-#     Output('Scatter3D', 'figure'),
-#     [
-#         Input('signal', 'data'),
-#         Input('date-picker-range', 'start_date'),
-#         Input('date-picker-range', 'end_date')
-#     ])
-# def update_3Dsurface(variable, start_date, end_date):
-#     if start_date == None and end_date == None:
-#         start_date = datetime.now()-relativedelta(days=day_period)
-#         end_date   = datetime.now()
-#         start_date = start_date.strftime("%Y-%m-%d")
-#         end_date = end_date.strftime("%Y-%m-%d")
+@app.callback(
+    Output('Scatter3D', 'figure'),
+    [
+        Input('signal', 'data'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date')
+    ])
+def update_3Dscatter(variable, start_date, end_date):
+    df = day_store(variable, start_date, end_date)
 
-#     df1 = day_store(variable, start_date, end_date)
-#     df2 = day_store('Traffic Flow', start_date, end_date)
+    # if start_date == None and end_date == None:
+    #     start_date = datetime.now()-relativedelta(days=day_period)
+    #     end_date   = datetime.now()
+    #     start_date = start_date.strftime("%Y-%m-%d")
+    #     end_date = end_date.strftime("%Y-%m-%d")
 
-#     period = pd.date_range(start_date, end_date, freq='D')
-#     variable_averages = hourly_averages(df1, period)
-#     traffic_averages = hourly_averages(df2, period)
+    # df1 = day_store(variable, start_date, end_date)
+    # df2 = day_store('Traffic Flow', start_date, end_date)
 
-#     period = period.delete(len(period)-1)
-#     period = [str(x) for x in period]
+    # period = pd.date_range(start_date, end_date, freq='D')
+    # variable_averages = hourly_averages(df1, period)
+    # traffic_averages = hourly_averages(df2, period)
 
-#     df = pd.DataFrame({
-#         'Period': period,
-#         'Variable_values': variable_averages,
-#         'Traffic_Flow_values': traffic_averages
-#         })
-#     df = df.fillna(0)
+    # period = period.delete(len(period)-1)
+    # period = [str(x) for x in period]
 
-#     return figures.scatter3D(df)
+    # df = pd.DataFrame({
+    #     'Period': period,
+    #     'Variable_values': variable_averages,
+    #     'Traffic_Flow_values': traffic_averages
+    #     })
+    # df = df.fillna(0)
+
+    return figures.scatter3D(df)
 
 
 @app.callback(
@@ -339,4 +345,4 @@ def toggle_modal(n1, n2, is_open):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=False, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(debug=True, processes=6, threaded=False, host='0.0.0.0', port=80)

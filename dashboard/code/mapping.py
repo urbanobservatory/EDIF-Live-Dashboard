@@ -111,7 +111,7 @@ def UDXsources():
             }
         },
         'Birmingham Urban Observatory': {
-            'Zephyr': {
+            'Birmingham-Zephyrs': {
                 'PM2.5': [
                     'Temperature',
                     'Traffic Flow',
@@ -128,7 +128,7 @@ def UDXsources():
             'TfWM': {}
         },
         'Cranfield': {
-            'Air-Quality': {
+            'Cranfield': {
                 'Air-Quality': [
                     'Pressure',
                     'CO',

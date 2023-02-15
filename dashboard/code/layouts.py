@@ -82,7 +82,7 @@ def scatterHover(variable, units):
             text = f'{variable} Timeline',
             x = 0.5
         ),
-        height = 300,
+        height = 270,
         showlegend = False, 
         autosize = True,
         margin = dict(t=60, b=20, l=20, r=20),
@@ -107,22 +107,40 @@ def scatterHover(variable, units):
     )
 
 
-def surface():
+def scatter3d(variable, units):
     return go.Layout(
         title = dict(
-            text = '3D Scatter',
+            text = f'{variable} 3D Scatter',
             x = 0.5
         ),
-        height = 300,
+        height = 600,
         showlegend = False, 
         autosize = True,
         margin = dict(t=60, b=20, l=20, r=20),
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         scene = {
-            'xaxis_title': 'Time',
-            'yaxis_title': 'Traffic Value',
-            'zaxis_title': 'Variable Value'
+            'xaxis': {
+                'title': '', #'Date',
+                'backgroundcolor': theme['background_frame'],
+                'gridcolor': theme['gridlines'],
+                'showbackground': True,
+                'zerolinecolor': theme['gridlines']
+            },
+            'yaxis': {
+                'title': '', #'Source',
+                'backgroundcolor': theme['background_frame'],
+                'gridcolor': theme['gridlines'],
+                'showbackground': True,
+                'zerolinecolor': theme['gridlines']
+            },
+            'zaxis': {
+                'title': units,
+                'backgroundcolor': theme['background_frame'],
+                'gridcolor': theme['gridlines'],
+                'showbackground': True,
+                'zerolinecolor': theme['gridlines']
+            }
         },
         paper_bgcolor=theme['background_frame'],
         plot_bgcolor=theme['background_frame'],
@@ -166,7 +184,7 @@ def histogram(variable, units):
             text = f'{variable} Histogram',
             x = 0.5
         ),
-        height = 300,
+        height = 270,
         showlegend = False, 
         autosize = True,
         margin = dict(t=60, b=20, l=20, r=20),
@@ -217,7 +235,7 @@ def map(variable, map_selection): #, map_relayout):
             x = 0.5
         ),
         autosize = True,
-        height = 980,
+        height = 1280,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color=theme['text']),
