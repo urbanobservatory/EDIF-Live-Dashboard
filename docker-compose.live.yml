@@ -16,8 +16,6 @@ services:
       - mini-web
 
     restart: on-failure
-    ports:
-      - 8080:80
     volumes:
       - .env:/env/.env
       - ./cached/:/cached/
