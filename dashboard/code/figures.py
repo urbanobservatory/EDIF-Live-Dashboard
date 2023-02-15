@@ -174,7 +174,7 @@ def scatter_all(df):
                 go.Scatter(
                     x=list(df['Datetime']),
                     y=list(df['Value']),
-                    text=df['ID']+': '+df['Value'].astype(str)+units,
+                    text=df['ID'].astype(str)+': '+df['Value'].astype(str)+units,
                     mode='lines+markers'
                 )
             )
