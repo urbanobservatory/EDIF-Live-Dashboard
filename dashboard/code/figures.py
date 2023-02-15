@@ -4,7 +4,7 @@ import pandas as pd
 import layouts
 import graphCustomisation
 import allValues
-import mapping
+from dash_data import mapping
 
 align_position = 'left'
 
@@ -133,6 +133,9 @@ def scatter_all(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+    if units == None:
+        units = ''
+
 
     df = graphCustomisation.customise(df, variable)
 
@@ -147,7 +150,7 @@ def scatter_all(df):
             go.Scatter(
                 x = list(df['Datetime']),
                 y = list(df['Value']),
-                text = df['ID']+': '+df['Value'].astype(str)+' '+units,
+                text = df['ID'].astype(str)+': '+df['Value'].astype(str)+' '+units,
                 mode ='markers',
                 marker = {
                     # 'marker_symbol': 'circle-open',
@@ -185,9 +188,12 @@ def scatter_all(df):
 
 
 def scatter_hover(df):
-
-    variable = df['Variable'].iloc[0]
-    units = df['Units'].iloc[0]
+    variable = ''
+    if len(df['Variable']) > 0:
+        variable = df['Variable'].iloc[0]
+    units = ''
+    if len(df['Units']) > 0:
+        units = df['Units'].iloc[0]
 
     df = graphCustomisation.customise(df, variable)
 
@@ -203,7 +209,7 @@ def scatter_hover(df):
             go.Scatter(
                 x = list(df['Datetime']),
                 y = list(df['Value']),
-                text = df['ID']+': '+df['Value'].astype(str)+units,
+                text = df['ID'].astype(str)+': '+df['Value'].astype(str)+units,
                 mode = 'lines+markers',
                 marker = {
                     'color': '#ccccdc' #'#00CC96'
@@ -236,7 +242,7 @@ def scatter3D(df):
                 x = df2['Datetime'],
                 y = df2['Source'],
                 z = df2['Value'],
-                text = df['ID']+': '+df['Value'].astype(str)+' '+units,
+                text = df['ID'].astype(str)+': '+df['Value'].astype(str)+' '+units,
                 mode = 'markers',
                 marker = {
                     'size': 2
@@ -374,7 +380,7 @@ def map(df, map_selection): #, map_relayout):
 
     df = graphCustomisation.customise(df, variable)
 
-    df['text'] = df['ID']+': '+df['Value'].astype(str)+' '+units
+    df['text'] = df['ID'].astype(str)+': '+df['Value'].astype(str)+' '+units
     df = graphCustomisation.customise(df, variable)
 
     variable_map = mapping.variables()

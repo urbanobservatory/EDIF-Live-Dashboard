@@ -11,11 +11,11 @@ from flask_caching import Cache
 
 import htmlLayout
 import figures
-import getData
+from dash_data import getData
 import allValues
 import latestValues
-
-
+import math
+import os
 env_vars = json.load(open('/code/env.json'))
 
 update_frequency = int(env_vars['update_frequency'])
@@ -77,7 +77,6 @@ app.layout = htmlLayout.layout()
 
 
 # CALLBACKS
-@cache.memoize()
 def day_store(variable, start_date=None, end_date=None):
 
     # start = datetime.strptime(day, '%Y-%m-%d')
@@ -93,16 +92,23 @@ def day_store(variable, start_date=None, end_date=None):
     #     end = end + timedelta(hours=23, minutes=59, seconds=59)
     #     print('start', start)
     #     print('end', end)
-
+    TD = timedelta(minutes=30)
     if start_date != None and end_date != None:
         start = datetime.strptime(start_date, '%Y-%m-%d')
         end = datetime.strptime(end_date, '%Y-%m-%d')
     else:
         start = datetime.now()-relativedelta(days=day_period)
         end   = datetime.now()
+    start = datetime.min + math.floor((start - datetime.min ).total_seconds()/TD.total_seconds())*TD
+    end = datetime.min + math.ceil((end - datetime.min ).total_seconds()/TD.total_seconds())*TD
+    frame_path =  f'all-{start}-{end}-{variable}.csv'
+    if os.path.exists(frame_path):
+        df = pd.read_csv(frame_path,index_col=False)
+        df['Datetime'] = pd.to_datetime(df['Datetime'])
 
-    df = getData.run(variable, start, end)
-
+    else:
+        df = getData.run(variable, start, end)
+        df.to_csv(frame_path)
     return df
 
 

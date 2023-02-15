@@ -1,41 +1,101 @@
+import os.path
+
 import requests
 import pandas as pd
 import json
-import mapping
-
+from .mapping import UDXsources, variables, unit_lookup
+import datetime
+import math
 env_vars = json.load(open('/code/env.json'))
 
-def run(variable, start, end):
+TD = datetime.timedelta(minutes=30)
 
-    variable_map = mapping.variables()
+def cache_all_data(start,end,variable,frame):
+
+    steps = math.ceil((end - start).total_seconds() / TD.total_seconds())
+
+    for i in range(steps):
+        end_step = start + (i + 1) * TD
+        start_step = start + (i) * TD
+
+        if start+(i+1)*TD > datetime.datetime.now():
+            continue
+        df = frame[frame['Datetime'] >= start_step]
+        df = df[df['Datetime']< end_step]
+
+        df.to_csv('/cached/' + '-'.join([variable, str(start_step), str(end_step)]) + '.csv')
+
+def load_cached(start,end,variable):
+    steps = math.ceil((end - start).total_seconds() / TD.total_seconds())
+
+    frames = []
+    missing_steps = []
+    for i in range(steps):
+        end_step = start + (i + 1) * TD
+        start_step = start + (i) * TD
+        f_name  = '/cached/' + '-'.join([variable, str(start_step), str(end_step)]) + '.csv'
+        if os.path.exists(f_name):
+            frames.append(pd.read_csv(f_name,index_col=False))
+        else:
+            missing_steps.append((start_step,end_step))
+
+    if len(missing_steps) > 3:
+        return False, pd.DataFrame()
+    else:
+        for start_step,end_step in missing_steps:
+            df = pull_data(variable,start_step,end_step)
+            frames.append(df)
+    if frames:
+        frame = pd.concat(frames)
+        frame['Datetime'] = pd.to_datetime(frame['Datetime'])
+        return True,frame
+    return False,pd.DataFrame()
+def run(variable, start, end):
+    print('RUN',variable, start, end)
+    got_cache,c_frame = load_cached(start, end, variable)
+    if got_cache:
+        print(c_frame)
+        cache_all_data(start,end,variable,c_frame)
+        return c_frame
+    df = pull_data(variable, start, end)
+    try:
+        if len(df)> 0:
+            cache_all_data(start, end, variable, df)
+    except:
+        pass
+    return df
+
+
+def pull_data(variable, start, end):
+    source_map = UDXsources()
+    dfs = []
+    variable_map = variables()
+
     requestVariable = variable_map[variable]['request-variable']
     units = variable_map[variable]['units']
-
-    source_map = mapping.UDXsources()
-
-    dfs = []
     for organisation in source_map:
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
 
                 if variable in source_map[organisation][source][stream]:
-
                     try:
                         if organisation == 'Cranfield':
 
-                            df = requestCranfield(organisation, source, stream, requestVariable, start, end,units)
-
+                            df = requestCranfield(organisation, source, stream, requestVariable, start, end, units)
                             if len(df) > 0:
+
                                 print('adding')
                                 dfs.append(df)
                         elif organisation == 'Newcastle Urban Observatory':
-                            df = get_uo_data(organisation, source, stream, requestVariable, start, end,units)
+
+                            df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
 
                             if len(df) > 0:
-                                print(df )
+                                print(df)
                                 print('adding')
                                 dfs.append(df)
                         else:
+
                             df = request(organisation, source, stream, requestVariable, start, end)
                             if source == 'Newcastle-UO':
                                 df = selectNewcastle(requestVariable, df)
@@ -43,20 +103,17 @@ def run(variable, start, end):
                                 df = select(requestVariable, df)
 
                             df = format(organisation, source, stream, variable, units, df)
-
                             dfs.append(df)
-                    
+
                     except Exception as e:
-                        print(f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}', flush=True)
+                        print(
+                            f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}',
+                            flush=True)
                         print(e, flush=True)
                         continue
-
     if dfs:
         df = pd.concat(dfs)
-    df.to_csv('/csvs/mega.csv')
-    return df
-
-
+        return df
 def request(organisation, source, stream, variable, start, end):
 
     start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
@@ -79,7 +136,7 @@ def request(organisation, source, stream, variable, start, end):
 
 def get_uo_data(organisation, source, stream, variable, start, end,units):
 
-    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates In'}
+    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates%20In','temperature':'Temperature',}
 
     headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
         ",")
@@ -97,15 +154,18 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
     df['Source'] = source
     df['Stream'] = stream
     df['Units'] = units
-    df['Variable'] = mapping.unit_lookup()[variable]
+    df['Variable'] = unit_lookup()[variable]
     df = df[headers]
     df = df.sort_values(by=['Timestamp'])
     thinned_frames = []
     for sensor_name,frame in df.groupby('ID'):
         thinned_frames.append(frame.iloc[::10, :])
-    df = pd.concat(thinned_frames)
-    df = df.sort_values(by=['Timestamp'])
-    return df
+    if thinned_frames:
+        df = pd.concat(thinned_frames)
+        df = df.sort_values(by=['Timestamp'])
+        return df
+    else:
+        return pd.DataFrame([])
 
 def requestCranfield(organisation, source, stream, variable, start, end,units):
 
@@ -158,7 +218,6 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
         frame['Datetime'] = pd.to_datetime(frame['Datetime'])
         frame['Timestamp'] = frame['Datetime'].astype(int) / 10 ** 6
 
-        frame.to_csv('/csvs/cran.csv')
         return frame
     return pd.DataFrame([])
 

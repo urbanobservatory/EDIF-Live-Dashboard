@@ -11,4 +11,14 @@ services:
       - 8080:80
     volumes:
       - .env:/env/.env
-      - ./dummy_csvs:/csvs/
+      - ./cached/:/cached/
+      - ./python_lib:/usr/local/lib/python3.9/site-packages/dash_data
+
+  edif-cacher:
+    build: python_cacher
+
+    restart: on-failure
+    volumes:
+      - .env:/env/.env
+      - ./cached/:/cached/
+      - ./python_lib:/usr/local/lib/python3.9/site-packages/dash_data
