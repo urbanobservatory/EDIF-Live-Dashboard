@@ -10,11 +10,11 @@ def variables():
             'units': '%',
             'colorscale': 'Jet'
         },
-        # 'Pressure': {
-        #     'request-variable': 'atmosphericPressure',
-        #     'units': 'Pa',
-        #     'colorscale': 'YlGnBu'
-        # },
+         'Pressure': {
+             'request-variable': 'atmosphericPressure',
+             'units': 'Pa',
+             'colorscale': 'YlGnBu'
+         },
         'PM2.5': {
             'request-variable': 'pm25',
             'units': 'μgm⁻³',
@@ -67,6 +67,11 @@ def variables():
         }
     }
 
+def unit_lookup():
+    unit_l = {}
+    for var_name,var_info in variables().items():
+        unit_l[var_info['request-variable']] = var_name
+    return unit_l
 def UDXsources():
     return {
         # UDX Organisation
@@ -76,7 +81,8 @@ def UDXsources():
                 # Stream name
                 'PM2.5': [
                     # Included variables
-                    'PM2.5'
+                    'PM2.5',
+                    'PM10',
                 ],
                 'Traffic-Flow': ['Traffic Flow'],
                 'Weather': [
@@ -85,7 +91,9 @@ def UDXsources():
                     'Pressure'
                 ]
             },
-            'Sheffield-UF': {
+        },
+        'Sheffield Urban Observatory':{
+        'Sheffield-UF': {
                 'Air-Quality': [
                     'PM10',
                     'PM2.5',

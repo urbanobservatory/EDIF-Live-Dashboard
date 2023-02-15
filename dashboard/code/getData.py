@@ -15,7 +15,6 @@ def run(variable, start, end):
 
     dfs = []
     for organisation in source_map:
-        print(organisation)
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
 
@@ -25,8 +24,15 @@ def run(variable, start, end):
                         if organisation == 'Cranfield':
 
                             df = requestCranfield(organisation, source, stream, requestVariable, start, end,units)
-                            print(df)
+
                             if len(df) > 0:
+                                print('adding')
+                                dfs.append(df)
+                        elif organisation == 'Newcastle Urban Observatory':
+                            df = get_uo_data(organisation, source, stream, requestVariable, start, end,units)
+
+                            if len(df) > 0:
+                                print(df )
                                 print('adding')
                                 dfs.append(df)
                         else:
@@ -47,7 +53,6 @@ def run(variable, start, end):
 
     if dfs:
         df = pd.concat(dfs)
-    print(df)
     df.to_csv('/csvs/mega.csv')
     return df
 
@@ -72,12 +77,38 @@ def request(organisation, source, stream, variable, start, end):
     return pd.json_normalize(json_data)
 
 
+def get_uo_data(organisation, source, stream, variable, start, end,units):
+
+    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates In'}
+
+    headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
+        ",")
+    url = f"http://uoweb3.ncl.ac.uk/api/v1.1/sensors/data/csv/?starttime={start.strftime('%Y%m%d%H%M%S')}&endtime={end.strftime('%Y%m%d%H%M%S')}&data_variable={uo_var_lookup[variable]}"
+
+    df = pd.read_csv(url)
+    df['ID'] = df['Sensor Name']
+    df['Suspect Reading'] = df['Flagged as Suspect Reading']
+    df['Datetime'] = df['Timestamp']
+    df['Datetime'] = pd.to_datetime(df['Datetime'])
+    df['Timestamp'] = df['Datetime'].astype(int) / 10 ** 6
+    df['Longitude'] = df['Sensor Centroid Longitude']
+    df['Latitude'] = df['Sensor Centroid Latitude']
+    df['Organisation'] = organisation
+    df['Source'] = source
+    df['Stream'] = stream
+    df['Units'] = units
+    df['Variable'] = mapping.unit_lookup()[variable]
+    df = df[headers]
+    df = df.sort_values(by=['Timestamp'])
+    thinned_frames = []
+    for sensor_name,frame in df.groupby('ID'):
+        thinned_frames.append(frame.iloc[::10, :])
+    df = pd.concat(thinned_frames)
+    df = df.sort_values(by=['Timestamp'])
+    return df
+
 def requestCranfield(organisation, source, stream, variable, start, end,units):
 
-    """
-	ID	Value	Suspect Reading	Datetime	Timestamp	Longitude	Latitude	Organisation	Source	Stream	Variable	Units
-789	PER_AIRMON_MESH1913150	22.99	False	2023-02-14 12:33:00	1676377980000	-1.704298	55.000748	Newcastle Urban Observatory	Newcastle-UO	PM2.5	PM2.5	μgm⁻³
- """
     import datetime
 
     var_lookup = {'pm25':'PM2.5','pm10':'PM10','co':'CO','no':'NO'}
@@ -88,6 +119,7 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
     r = requests.get(url)
     print(start,end)
     station_json = r.json()
+    pandas_row = []
     for stat in station_json:
         url = "https://api.airmonitors.net/3.5/GET/4ed8059b-C/8cac-fef6-jRSq-AS04-N8u7-6R8y-539d-b388/stationdata/{StartTimestamp}/{EndTimestamp}/{UniqueId}"
         data_url = url.format(
@@ -122,10 +154,13 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
 
         frame = pd.DataFrame(pandas_row,columns=headers)
         frame['Value'] = pd.to_numeric(frame['Value'])
-        frame['Timestamp'] = pd.to_numeric(frame['Value'])
+
         frame['Datetime'] = pd.to_datetime(frame['Datetime'])
+        frame['Timestamp'] = frame['Datetime'].astype(int) / 10 ** 6
+
         frame.to_csv('/csvs/cran.csv')
         return frame
+    return pd.DataFrame([])
 
 def selectNewcastle(variable, df):
             
