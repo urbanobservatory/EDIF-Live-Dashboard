@@ -55,7 +55,7 @@ def layout():
                             'Sulfur Dioxide',
                             'Temperature',
                             'Humidity',
-                            #'Pressure'
+                            'Pressure'
                         ],
                         value='PM2.5',
                         clearable=False)
@@ -127,36 +127,46 @@ def layout():
                 ], className="row"),
 
                 html.Br(),
+
                 html.Div([
-                    # html.Div([
-                    #     html.Div([
-                    #         dcc.Graph(id='Scatter3D')
-                    #     ], className='graph')
-                    # ], className='six columns'),
+
                     html.Div([
                         html.Div([
-                            dcc.Graph(id='Scatter Hover')
-                        ], className='hover')
+                            dcc.Graph(id='Scatter3D')
+                        ], className='scatter3d')
                     ], className='six columns'),
+
                     html.Div([
+
+                        html.Div([
+                            dcc.Graph(id='Scatter Hover')
+                        ], className='hover'),
+
+                        html.Br(),
+
                         html.Div([
                             dcc.Graph(id='Histogram')
                         ], className='histogram')
+
                     ], className='six columns')
-                ], className='row')
+
+                ], className='row'),
 
             ], className="eight columns"),
+
             html.Div([
                 html.Div([
+
                     html.Div([
                         html.Div([
                             dcc.Graph(id='Map')
                         ], className='map')
                     ], className='twelve columns')
+                    
                 ], className='row')
             ], className='four columns')
         ], className="row"),
-
+        
         html.Div([
             html.Div([
             ], className='divider')

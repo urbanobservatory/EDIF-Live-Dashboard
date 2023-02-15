@@ -206,7 +206,7 @@ def scatter_hover(df):
                 text = df['ID']+': '+df['Value'].astype(str)+units,
                 mode = 'lines+markers',
                 marker = {
-                    'color': '#00CC96'
+                    'color': '#ccccdc' #'#00CC96'
                 }
             )
         )
@@ -219,31 +219,53 @@ def scatter_hover(df):
 
 
 def scatter3D(df):
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    df = graphCustomisation.customise(df, variable)
 
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter3d(
-            x = df['Period'],
-            y = df['Traffic_Flow_values'],
-            z = df['Variable_values'],
-            mode = 'lines+markers',
-            marker = {
-                'size': 5,
-                # 'marker_symbol': 'circle-open',
-                'color': df['Variable_values'],
-                # 'opacity': 0.5,
-                'showscale': True,
-                # 'colorbar': {
-                #     #'title': units,
-                #     'orientation': 'v'
-                # }
-            }
+    sources = df['Source'].unique()
+
+    for source in sources:
+        df2 = df.loc[df['Source'] == source]
+
+        fig.add_trace(
+            go.Scatter3d(
+                x = df2['Datetime'],
+                y = df2['Source'],
+                z = df2['Value'],
+                text = df['ID']+': '+df['Value'].astype(str)+' '+units,
+                mode = 'markers',
+                marker = {
+                    'size': 2
+                }
+            )
         )
-    )
+
+        # fig.add_trace(
+        #     go.Scatter3d(
+        #         x = df['Period'],
+        #         y = df['Traffic_Flow_values'],
+        #         z = df['Variable_values'],
+        #         mode = 'lines+markers',
+        #         marker = {
+        #             'size': 5,
+        #             # 'marker_symbol': 'circle-open',
+        #             'color': df['Variable_values'],
+        #             # 'opacity': 0.5,
+        #             'showscale': True,
+        #             # 'colorbar': {
+        #             #     #'title': units,
+        #             #     'orientation': 'v'
+        #             # }
+        #         }
+        #     )
+        # )
     
     fig.update_layout(
-        layouts.surface()
+        layouts.scatter3d(variable, units)
     )
 
     return fig
@@ -291,7 +313,7 @@ def histogram(df):
         go.Histogram(
             x = df['Value'],
             # opacity=0.7,
-            marker_color='#00CC96' #'indianred'
+            marker_color='#ccccdc' #'#00CC96' #'indianred'
         )
     )
 
