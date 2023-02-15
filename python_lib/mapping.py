@@ -91,8 +91,6 @@ def UDXsources():
                     'Pressure'
                 ]
             },
-        },
-        'Sheffield Urban Observatory':{
         'Sheffield-UF': {
                 'Air-Quality': [
                     'PM10',
@@ -127,6 +125,7 @@ def UDXsources():
                     'Ozone',
                     'Nitrogen Dioxide',
                     'PM1',
+                    'PM2.5',
                     'PM10',
                     'Humidity',
                     # 'Pressure'

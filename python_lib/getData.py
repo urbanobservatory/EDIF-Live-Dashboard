@@ -86,7 +86,7 @@ def pull_data(variable, start, end):
 
                                 print('adding')
                                 dfs.append(df)
-                        elif organisation == 'Newcastle Urban Observatory':
+                        elif source == 'Newcastle-UO':
 
                             df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
 
