@@ -242,6 +242,10 @@
   font-size: 3em;
 }
 
+.loading_wrapper > div {
+    visibility: visible !important;
+}
+
 /* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
 - Plotly.js

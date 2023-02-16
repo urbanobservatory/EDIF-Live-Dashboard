@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, ctx
+from dash import dcc, html
 import dash_bootstrap_components as dbc
 import json
 
@@ -57,7 +57,7 @@ def layout():
                             'Humidity',
                             'Pressure'
                         ],
-                        value='PM2.5',
+                        value='Traffic Flow',
                         clearable=False)
                 ], className='dropDown')
             ], className='dropDownBox'),
@@ -87,26 +87,29 @@ def layout():
         ], className='banner'),
 
         html.Br(),
-
+        
         html.Div([
             html.Div([
-
                 html.Div([
-                    html.Div([
-                        html.Div([
-                            html.Div([
-                                dcc.Graph(id='Indicators A')
-                            ], className='twelve columns')
-                        ])
-                    ], className="row"),
+                    dcc.Loading([
 
-                    html.Div([
                         html.Div([
                             html.Div([
-                                dcc.Graph(id='Indicators B')
-                            ], className='twelve columns')
-                        ])
-                    ], className="row")
+                                html.Div([
+                                    dcc.Graph(id='Indicators A')
+                                ], className='twelve columns')
+                            ])
+                        ], className="row"),
+
+                        html.Div([
+                            html.Div([
+                                html.Div([
+                                    dcc.Graph(id='Indicators B')
+                                ], className='twelve columns')
+                            ])
+                        ], className="row")
+
+                    ])
                 ], className='graph'),
 
                 html.Br(),
@@ -114,13 +117,17 @@ def layout():
 
                     html.Div([
                         html.Div([
-                            dcc.Graph(id='Scatter All')
+                            dcc.Loading(
+                                dcc.Graph(id='Scatter All')
+                            )
                         ], className='graph')
                     ], className='eight columns'),
 
                     html.Div([
                         html.Div([
-                            dcc.Graph(id='BoxPlot')
+                            dcc.Loading(
+                                dcc.Graph(id='BoxPlot')
+                            )
                         ], className='boxplot')
                     ], className='four columns')
 
@@ -132,20 +139,26 @@ def layout():
 
                     html.Div([
                         html.Div([
-                            dcc.Graph(id='Scatter3D')
+                            dcc.Loading(
+                                dcc.Graph(id='Scatter3D')
+                            )
                         ], className='scatter3d')
                     ], className='six columns'),
 
                     html.Div([
 
                         html.Div([
-                            dcc.Graph(id='Scatter Hover')
+                            dcc.Loading(
+                                dcc.Graph(id='Scatter Hover')
+                            )
                         ], className='hover'),
 
                         html.Br(),
 
                         html.Div([
-                            dcc.Graph(id='Histogram')
+                            dcc.Loading(
+                                dcc.Graph(id='Histogram')
+                            )
                         ], className='histogram')
 
                     ], className='six columns')
@@ -159,7 +172,9 @@ def layout():
 
                     html.Div([
                         html.Div([
-                            dcc.Graph(id='Map')
+                            dcc.Loading(
+                                dcc.Graph(id='Map')
+                            )
                         ], className='map')
                     ], className='twelve columns')
                     
@@ -176,62 +191,66 @@ def layout():
             html.Div([
                 html.Div([
                     html.Div([
-                        html.Label(
-                            children=[
-                                html.Span('Stream Health', className='labels')
-                            ]
-                        ),
-                        dash.dash_table.DataTable(
-                            id = 'Health Table',
-                            page_size = 12,
-                            style_table = {
-                                'overflowY': 'auto'},
-                            style_as_list_view = True,
-                            style_cell = {
-                                'backgroundColor': '#111217', 
-                                'textAlign': 'center'},
-                            style_header = {
-                                'backgroundColor': '#181b1f',
-                                'fontWeight': 'bold',
-                                'color': '#ccccdc'},
-                            style_data_conditional = [
-                                {
-                                    'if': {
-                                        'filter_query': "{Alert} contains 'Online'"
+                        dcc.Loading([
+                            html.Label(
+                                children=[
+                                    html.Span('Stream Health', className='labels')
+                                ]
+                            ),
+                            dash.dash_table.DataTable(
+                                id = 'Health Table',
+                                page_size = 12,
+                                style_table = {
+                                    'overflowY': 'auto'},
+                                style_as_list_view = True,
+                                style_cell = {
+                                    'backgroundColor': '#111217', 
+                                    'textAlign': 'center'},
+                                style_header = {
+                                    'backgroundColor': '#181b1f',
+                                    'fontWeight': 'bold',
+                                    'color': '#ccccdc'},
+                                style_data_conditional = [
+                                    {
+                                        'if': {
+                                            'filter_query': "{Alert} contains 'Online'"
+                                        },
+                                        'backgroundColor': '#00cc96'
                                     },
-                                    'backgroundColor': '#00cc96'
-                                },
-                                {
-                                    'if': {
-                                        'filter_query': "{Alert} contains 'Offline'"
-                                    },
-                                    'backgroundColor': '#ef553b'
-                                }
-                                
-                            ]
-                        )
+                                    {
+                                        'if': {
+                                            'filter_query': "{Alert} contains 'Offline'"
+                                        },
+                                        'backgroundColor': '#ef553b'
+                                    }
+                                    
+                                ]
+                            )
+                        ])
                     ], className='healthTable')
                 ], className='four columns'),
                 html.Div([
                     html.Div([
-                        html.Label(
-                            children=[
-                                html.Span('Suspect Reading Logs', className='labels')
-                            ]),
-                        dash.dash_table.DataTable(
-                            id = 'Suspect Table',
-                            page_size = 12,
-                            style_table = {
-                                'overflowY': 'auto'},
-                            style_as_list_view = True,
-                            style_cell = {
-                                'backgroundColor': '#111217'},
-                            style_header = {
-                                'backgroundColor': '#181b1f',
-                                'fontWeight': 'bold',
-                                'color': '#ccccdc'},
-                            style_data = {'color': "#ccccdc"}
-                        )
+                        dcc.Loading([
+                            html.Label(
+                                children=[
+                                    html.Span('Suspect Reading Logs', className='labels')
+                                ]),
+                            dash.dash_table.DataTable(
+                                id = 'Suspect Table',
+                                page_size = 12,
+                                style_table = {
+                                    'overflowY': 'auto'},
+                                style_as_list_view = True,
+                                style_cell = {
+                                    'backgroundColor': '#111217'},
+                                style_header = {
+                                    'backgroundColor': '#181b1f',
+                                    'fontWeight': 'bold',
+                                    'color': '#ccccdc'},
+                                style_data = {'color': "#ccccdc"}
+                            )
+                        ])
                     ], className='suspectTable')
                 ], className='eight columns')
             ], className='table')
@@ -242,6 +261,7 @@ def layout():
             id='interval-component',
             interval=60000*update_frequency,
             n_intervals=0),
+
         dcc.Store(id='signal')
 
     ], className="body")

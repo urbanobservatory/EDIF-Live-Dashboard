@@ -35,6 +35,7 @@ def scatterAll(variable, units):
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         xaxis = dict(
+            # domain = [0,0.7],
             gridwidth=1, 
             gridcolor=theme['gridlines'],
             zerolinecolor=theme['gridlines'],
@@ -69,7 +70,10 @@ def scatterAll(variable, units):
         plot_bgcolor=theme['background_frame'],
         font = {
             'color': theme['text']
-        }
+        },
+        # xaxis2 = dict(
+        #     domain = [0.7,1],
+        # )
     )
 
 
@@ -161,7 +165,7 @@ def boxplot(variable, units):
         hovermode = 'closest',
         hoverlabel = dict(namelength=-1),
         xaxis = dict(
-            title = 'Source',
+            # title = 'Source',
             gridwidth=1, 
             gridcolor=theme['gridlines'],
             zerolinecolor=theme['gridlines']

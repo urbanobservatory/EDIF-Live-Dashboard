@@ -171,10 +171,27 @@ def scatter_all(df):
                 go.Scatter(
                     x=list(df['Datetime']),
                     y=list(df['Value']),
+                    xaxis = 'x',
+                    yaxis = 'y',
                     text=df['ID']+': '+df['Value'].astype(str)+units,
                     mode='lines+markers'
                 )
             )
+
+    # UNCOMMENT TO ADD INTEGRATED BOXPLOT
+    # sources = df['Source'].unique()
+
+    # for source in sources:
+    #     df2 = df.loc[df['Source'] == source]
+
+    #     fig.add_trace(
+    #         go.Box(
+    #             y = df2['Value'],
+    #             xaxis = 'x2',
+    #             name = source,
+    #             boxpoints = False,
+    #         )
+    #     )
 
     fig.update_layout(
         layouts.scatterAll(variable, units), 

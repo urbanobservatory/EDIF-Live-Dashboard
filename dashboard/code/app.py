@@ -2,115 +2,90 @@ import json
 import dash
 import pandas as pd
 from datetime import date, datetime, timedelta
-from dash import dcc, html, ctx
+from dash import ctx, CeleryManager
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
-import dash_bootstrap_components as dbc
-from dateutil.relativedelta import relativedelta
 from flask_caching import Cache
+from celery import Celery
 
 import htmlLayout
 import figures
 import getData
 import allValues
 import latestValues
+import utils
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 env_vars = json.load(open('/code/env.json'))
-
 update_frequency = int(env_vars['update_frequency'])
 day_period = float(env_vars['update_frequency'])
 
-# APPLICATION
-app = dash.Dash(__name__)
-server = app.server
 
+# CONFIGURE CACHE
 CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
-    'CACHE_REDIS_URL':  'redis://edif-cache:6379'
-}
+    'CACHE_REDIS_URL': 'redis://edif-cache:6379'}
+
+# celery_app = Celery(
+#     __name__, 
+#     broker=CACHE_CONFIG['CACHE_REDIS_URL'], 
+#     backend=CACHE_CONFIG['CACHE_REDIS_URL'])
+
+# background_callback_manager = CeleryManager(
+#     celery_app,
+#     cache_by=[])
+
+
+# APPLICATION
+app = dash.Dash(
+    __name__,
+    # background_callback_manager=background_callback_manager
+    )
+server = app.server
+
 cache = Cache()
 cache.init_app(app.server, config=CACHE_CONFIG)
-
-
-# def get_days(start_date, end_date):
-#     print('start_date', start_date, type(start_date))
-#     print('end_date', end_date, type(end_date))
-
-#     days = []
-
-#     start_date = date(
-#         int(start_date.split('-')[0]),
-#         int(start_date.split('-')[1]),
-#         int(start_date.split('-')[2]))
-#     end_date = date(
-#         int(end_date.split('-')[0]),
-#         int(end_date.split('-')[1]),
-#         int(end_date.split('-')[2]))
-
-#     delta = end_date - start_date
-
-#     for i in range(delta.days + 1):
-#         day = start_date + timedelta(days=i)
-#         days.append(day)
-
-#     return days
-
-def hourly_averages(df, hours):
-    averages = []
-    for h in range(0, len(hours)-1):
-        start = hours[h]
-        end = hours[h+1]
-        mask = (df['Datetime'] > start) & (df['Datetime'] <= end)
-        df2 = df.loc[mask]
-        averages.append(df2['Value'].mean())
-    return averages
-
-def select(df, item_selection):
-    selected = []
-    for i in range(0, len(item_selection['points'])):
-        id = item_selection['points'][i]['text'].split(':')[0]
-        selected.append(id)
-    return df.loc[df['ID'].isin(selected)]
 
 app.layout = htmlLayout.layout()
 
 
-# CALLBACKS
+# CACHE MEMOIZE
 @cache.memoize()
-def day_store(variable, start_date=None, end_date=None):
-
-    # start = datetime.strptime(day, '%Y-%m-%d')
-    # end = datetime.strptime(day, '%Y-%m-%d') + timedelta(hours=23, minutes=59, seconds=59)
-
-    # if start_date != None and end_date == None \
-    # or start_date == None and end_date != None:
-    #     raise PreventUpdate
-
-    # elif start_date != None and end_date != None:        
-    #     start = datetime.strptime(start_date, '%Y-%m-%d')
-    #     end = datetime.strptime(end_date, '%Y-%m-%d') 
-    #     end = end + timedelta(hours=23, minutes=59, seconds=59)
-    #     print('start', start)
-    #     print('end', end)
-
-    if start_date != None and end_date != None:
-        start = datetime.strptime(start_date, '%Y-%m-%d')
-        end = datetime.strptime(end_date, '%Y-%m-%d')
-    else:
-        start = datetime.now()-relativedelta(days=day_period)
-        end   = datetime.now()
-
+def day_store(variable, day):
+    start, end = utils.get_start_end_time(day)
     df = getData.run(variable, start, end)
-
     return df
-
 
 @cache.memoize()
 def hour_store(variable, day):
     pass
 
+def cache_controller(variable, start_date, end_date, dfs=[], today=None):
+    # Get past n days if no dates selected
+    if start_date == None or end_date == None:
+        start_date, end_date = utils.get_start_end_date(start_date, end_date)
+    
+    # Request/get df for each day from cache
+    days = utils.get_days(start_date, end_date)
 
+    # If today in days, request fresh data
+    if days[-1] == datetime.today().date():
+        today = days.pop()
+        start, end = utils.get_start_end_time(today)
+
+    for day in days:
+        dfs.append(day_store(variable, day))
+    if today:
+        dfs.append(getData.run(variable, start, end))
+
+    # Concatenate dfs
+    return pd.concat(dfs)
+
+
+# CALLBACKS
 @app.callback(
     Output('signal', 'data'), 
     [
@@ -119,7 +94,7 @@ def hour_store(variable, day):
         Input('Refresh Button', 'n_clicks')
     ])
 def compute_value(intervals, variable, clicks):
-    day_store(variable)
+    #day_store(variable)
     return variable
 
 
@@ -133,7 +108,7 @@ def compute_value(intervals, variable, clicks):
         # Input('Map', 'relayoutData')
     ])
 def update_map(variable, map_selection, start_date, end_date): #, map_relayout):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)
     sensor_dfs = allValues.run(df)
     latest_df = latestValues.run(sensor_dfs)
     return figures.map(latest_df, map_selection) #, map_relayout)
@@ -148,32 +123,9 @@ def update_map(variable, map_selection, start_date, end_date): #, map_relayout):
         Input('date-picker-range', 'end_date')
     ])
 def update_scatter_all(variable, map_selection, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)    
     if 'Map' == ctx.triggered_id:
-        df = select(df, map_selection)
-
-    # else:
-    #     dfs = []
-
-    #     if 'date-picker-range' == ctx.triggered_id:
-    #         print('start_date', start_date, type(start_date))
-    #         print('end_date', end_date, type(end_date))
-    #         days = get_days(start_date, end_date)
-
-    #     else:
-    #         start_date = datetime.today()-relativedelta(days=day_period)
-    #         start_date = start_date.strftime('%Y-%m-%d')
-    #         end_date = datetime.today().strftime('%Y-%m-%d')
-    #         # print('start_date', start_date, type(start_date))
-    #         # print('end_date', end_date, type(end_date))
-    #         # start_date = start_date.strftime('%Y-%m-%d')
-            
-    #         days = get_days(start_date, end_date)
-
-    #     for day in days:
-    #         dfs.append(day_store(variable, day))
-    #     df = pd.concat(dfs)
-
+        df = utils.select(df, map_selection)
     return figures.scatter_all(df)
 
 
@@ -188,7 +140,7 @@ def update_scatter_all(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_scatter_hover(variable, map_hover, scatter_hover, scatter3d_hover, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date) 
     if 'date-picker-range' == ctx.triggered_id:
         raise PreventUpdate
     elif 'signal' == ctx.triggered_id:
@@ -199,8 +151,11 @@ def update_scatter_hover(variable, map_hover, scatter_hover, scatter3d_hover, st
         id = map_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
     elif 'Scatter All' == ctx.triggered_id:
-        id = scatter_hover['points'][0]['text'].split(':')[0]
-        df = df.loc[df['ID'].isin([id])]
+        try:
+            id = scatter_hover['points'][0]['text'].split(':')[0]
+            df = df.loc[df['ID'].isin([id])]
+        except:
+            raise PreventUpdate
     elif 'Scatter3D' == ctx.triggered_id:
         id = scatter3d_hover['points'][0]['text'].split(':')[0]
         df = df.loc[df['ID'].isin([id])]
@@ -216,9 +171,9 @@ def update_scatter_hover(variable, map_hover, scatter_hover, scatter3d_hover, st
         Input('date-picker-range', 'end_date')
     ])
 def update_indicators(variable, map_selection, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date) 
     if 'Map' == ctx.triggered_id:
-        df = select(df, map_selection)
+        df = utils.select(df, map_selection)
     return figures.indicatorsA(df)
 
 
@@ -231,9 +186,9 @@ def update_indicators(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_indicators(variable, map_selection, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date) 
     if 'Map' == ctx.triggered_id:
-        df = select(df, map_selection)
+        df = utils.select(df, map_selection)
     return figures.indicatorsB(df)
 
 
@@ -245,31 +200,7 @@ def update_indicators(variable, map_selection, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_3Dscatter(variable, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
-
-    # if start_date == None and end_date == None:
-    #     start_date = datetime.now()-relativedelta(days=day_period)
-    #     end_date   = datetime.now()
-    #     start_date = start_date.strftime("%Y-%m-%d")
-    #     end_date = end_date.strftime("%Y-%m-%d")
-
-    # df1 = day_store(variable, start_date, end_date)
-    # df2 = day_store('Traffic Flow', start_date, end_date)
-
-    # period = pd.date_range(start_date, end_date, freq='D')
-    # variable_averages = hourly_averages(df1, period)
-    # traffic_averages = hourly_averages(df2, period)
-
-    # period = period.delete(len(period)-1)
-    # period = [str(x) for x in period]
-
-    # df = pd.DataFrame({
-    #     'Period': period,
-    #     'Variable_values': variable_averages,
-    #     'Traffic_Flow_values': traffic_averages
-    #     })
-    # df = df.fillna(0)
-
+    df = cache_controller(variable, start_date, end_date)
     return figures.scatter3D(df)
 
 
@@ -283,9 +214,9 @@ def update_3Dscatter(variable, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_boxplot(variable, map_selection, scatter_selection, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        df = select(df, map_selection)
+        df = utils.select(df, map_selection)
     return figures.boxPlot(df)
 
 
@@ -299,11 +230,11 @@ def update_boxplot(variable, map_selection, scatter_selection, start_date, end_d
         Input('date-picker-range', 'end_date')
     ])
 def update_histogram(variable, map_selection, scatter_selection, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)
     if 'Map' == ctx.triggered_id:
-        df = select(df, map_selection)
+        df = utils.select(df, map_selection)
     if 'Scatter All' == ctx.triggered_id:
-        df = select(df, scatter_selection)
+        df = utils.select(df, scatter_selection)
     return figures.histogram(df)
 
 
@@ -315,7 +246,7 @@ def update_histogram(variable, map_selection, scatter_selection, start_date, end
         Input('date-picker-range', 'end_date')
     ])
 def update_suspect_table(variable, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)
     return figures.suspectTable(df)
 
 
@@ -327,7 +258,7 @@ def update_suspect_table(variable, start_date, end_date):
         Input('date-picker-range', 'end_date')
     ])
 def update_health_table(variable, start_date, end_date):
-    df = day_store(variable, start_date, end_date)
+    df = cache_controller(variable, start_date, end_date)
     return figures.healthTable(df)
 
 

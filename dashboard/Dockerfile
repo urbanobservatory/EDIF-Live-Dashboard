@@ -1,5 +1,5 @@
 FROM python:3.9
-RUN pip install dash pandas plotly python-dotenv requests numpy Flask-Caching redis boto3 dash-bootstrap-components
+RUN pip install dash pandas plotly python-dotenv requests numpy Flask-Caching redis boto3 dash-bootstrap-components dash[celery]
 ADD code/ /code/
 WORKDIR /code/
 
