@@ -235,4 +235,4 @@ def toggle_modal(n1, n2, is_open):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=True, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(debug=False, processes=6, threaded=False, host='0.0.0.0', port=80)
