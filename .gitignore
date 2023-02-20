@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 images
+/dummy_csvs/
+/cached/*
+cached/*

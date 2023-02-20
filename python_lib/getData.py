@@ -1,64 +1,56 @@
 import requests
 import pandas as pd
 import json
-import mapping
-
+from .mapping import UDXsources, variables, unit_lookup
 env_vars = json.load(open('/code/env.json'))
 
-def run(variable, start, end):
+def pull_data(variable, start, end):
+    source_map = UDXsources()
+    dfs = []
+    variable_map = variables()
 
-    variable_map = mapping.variables()
     requestVariable = variable_map[variable]['request-variable']
     units = variable_map[variable]['units']
 
-    source_map = mapping.UDXsources()
-
-    dfs = []
     for organisation in source_map:
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
 
                 if variable in source_map[organisation][source][stream]:
-
                     try:
+
                         if organisation == 'Cranfield':
-
-                            df = requestCranfield(organisation, source, stream, requestVariable, start, end,units)
-
+                            df = requestCranfield(organisation, source, stream, requestVariable, start, end, units)
                             if len(df) > 0:
-                                print('adding')
                                 dfs.append(df)
-                        elif organisation == 'Newcastle Urban Observatory':
-                            df = get_uo_data(organisation, source, stream, requestVariable, start, end,units)
 
+                        elif source == 'Newcastle-UO':
+                            df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
                             if len(df) > 0:
-                                print(df )
-                                print('adding')
                                 dfs.append(df)
+
                         else:
                             df = request(organisation, source, stream, requestVariable, start, end)
                             if source == 'Newcastle-UO':
                                 df = selectNewcastle(requestVariable, df)
                             else:
                                 df = select(requestVariable, df)
-
                             df = format(organisation, source, stream, variable, units, df)
-
                             dfs.append(df)
-                    
+
                     except Exception as e:
-                        print(f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}', flush=True)
+                        print(
+                            f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}',
+                            flush=True)
                         print(e, flush=True)
                         continue
 
     if dfs:
         df = pd.concat(dfs)
-    df.to_csv('/csvs/mega.csv')
-    return df
+        return df
 
 
 def request(organisation, source, stream, variable, start, end):
-
     start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
     end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
 
@@ -78,8 +70,7 @@ def request(organisation, source, stream, variable, start, end):
 
 
 def get_uo_data(organisation, source, stream, variable, start, end,units):
-
-    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates In'}
+    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates%20In','temperature':'Temperature',}
 
     headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
         ",")
@@ -97,18 +88,21 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
     df['Source'] = source
     df['Stream'] = stream
     df['Units'] = units
-    df['Variable'] = mapping.unit_lookup()[variable]
+    df['Variable'] = unit_lookup()[variable]
     df = df[headers]
     df = df.sort_values(by=['Timestamp'])
     thinned_frames = []
     for sensor_name,frame in df.groupby('ID'):
         thinned_frames.append(frame.iloc[::10, :])
-    df = pd.concat(thinned_frames)
-    df = df.sort_values(by=['Timestamp'])
-    return df
+    if thinned_frames:
+        df = pd.concat(thinned_frames)
+        df = df.sort_values(by=['Timestamp'])
+        return df
+    else:
+        return pd.DataFrame([])
+
 
 def requestCranfield(organisation, source, stream, variable, start, end,units):
-
     import datetime
 
     var_lookup = {'pm25':'PM2.5','pm10':'PM10','co':'CO','no':'NO'}
@@ -158,9 +152,9 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
         frame['Datetime'] = pd.to_datetime(frame['Datetime'])
         frame['Timestamp'] = frame['Datetime'].astype(int) / 10 ** 6
 
-        frame.to_csv('/csvs/cran.csv')
         return frame
     return pd.DataFrame([])
+
 
 def selectNewcastle(variable, df):
             

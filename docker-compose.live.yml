@@ -1,11 +1,16 @@
-version: '3.8'
+version: "3.5"
+networks:
+  portal-link:
+     external: true
+  mini-web:
 services:
   edif-dash:
     build: dashboard
+    networks:
+      - portal-link
+      - mini-web
 
     restart: on-failure
-    ports:
-      - 8080:80
     volumes:
       - .env:/env/.env
       - ./cached/:/cached/
@@ -13,7 +18,8 @@ services:
 
   edif-cacher:
     build: python_cacher
-
+    networks:
+      - portal-link
     restart: on-failure
     volumes:
       - .env:/env/.env

@@ -67,11 +67,14 @@ def variables():
         }
     }
 
+
 def unit_lookup():
     unit_l = {}
     for var_name,var_info in variables().items():
         unit_l[var_info['request-variable']] = var_name
     return unit_l
+
+
 def UDXsources():
     return {
         # UDX Organisation
@@ -91,8 +94,6 @@ def UDXsources():
                     'Pressure'
                 ]
             },
-        },
-        'Sheffield Urban Observatory':{
         'Sheffield-UF': {
                 'Air-Quality': [
                     'PM10',
@@ -127,6 +128,7 @@ def UDXsources():
                     'Ozone',
                     'Nitrogen Dioxide',
                     'PM1',
+                    'PM2.5',
                     'PM10',
                     'Humidity',
                     # 'Pressure'
