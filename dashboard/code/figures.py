@@ -208,6 +208,7 @@ def scatter_hover(df):
 
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
+    sensorName = df['ID'].iloc[0]
 
     df = graphCustomisation.customise(df, variable)
 
@@ -229,7 +230,7 @@ def scatter_hover(df):
         )
 
     fig.update_layout(
-        layouts.scatterHover(variable, units)
+        layouts.scatterHover(sensorName, units)
     )
 
     return fig
@@ -260,26 +261,6 @@ def scatter3D(df):
                 }
             )
         )
-
-        # fig.add_trace(
-        #     go.Scatter3d(
-        #         x = df['Period'],
-        #         y = df['Traffic_Flow_values'],
-        #         z = df['Variable_values'],
-        #         mode = 'lines+markers',
-        #         marker = {
-        #             'size': 5,
-        #             # 'marker_symbol': 'circle-open',
-        #             'color': df['Variable_values'],
-        #             # 'opacity': 0.5,
-        #             'showscale': True,
-        #             # 'colorbar': {
-        #             #     #'title': units,
-        #             #     'orientation': 'v'
-        #             # }
-        #         }
-        #     )
-        # )
     
     fig.update_layout(
         layouts.scatter3d(variable, units)

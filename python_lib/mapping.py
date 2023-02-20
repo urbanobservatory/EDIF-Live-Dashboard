@@ -94,7 +94,7 @@ def UDXsources():
                     'Pressure'
                 ]
             },
-        'Sheffield-UF': {
+            'Sheffield-UF': {
                 'Air-Quality': [
                     'PM10',
                     'PM2.5',
@@ -122,7 +122,7 @@ def UDXsources():
         'Birmingham Urban Observatory': {
             'Zephyr': {
                 'PM2.5': [
-                    'Temperature',
+                    'Temperature', #
                     'Traffic Flow',
                     'Nitric Oxide',
                     'Ozone',
@@ -135,7 +135,23 @@ def UDXsources():
                 ]
             },
             'BCC': {},
-            'TfWM': {}
+            'TfWM': {
+                'Air-Quality': [
+                    'Carbon Monoxide',
+                    'Nitric Oxide',
+                    'Ozone',
+                    'Nitorgen Dioxide',
+                    'PM1',
+                    'Sulfur Dioxide',
+                    'PM2.5',
+                    'PM100'
+                ],
+                'Weather': [
+                    'Temperature',
+                    'Humidity',
+                    'Pressure'
+                ]
+            }
         },
         'Cranfield': {
             'Cranfield': {

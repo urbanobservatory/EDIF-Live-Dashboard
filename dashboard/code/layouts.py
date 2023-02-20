@@ -77,13 +77,13 @@ def scatterAll(variable, units):
     )
 
 
-def scatterHover(variable, units):
+def scatterHover(sensorName, units):
 
     period = ['minute', 20, 40, 60, 'm']
 
     return go.Layout(
         title = dict(
-            text = f'{variable} Timeline',
+            text = f'Sensor Timeline: {sensorName}',
             x = 0.5
         ),
         height = 270,

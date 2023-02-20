@@ -19,6 +19,8 @@ def pull_data(variable, start, end):
                 if variable in source_map[organisation][source][stream]:
                     try:
 
+                        print(organisation, source, stream, variable, start, end)
+
                         if organisation == 'Cranfield':
                             df = requestCranfield(organisation, source, stream, requestVariable, start, end, units)
                             if len(df) > 0:
@@ -39,10 +41,9 @@ def pull_data(variable, start, end):
                             dfs.append(df)
 
                     except Exception as e:
-                        print(
-                            f'getData Exception for organisation: {organisation}, source: {source}, stream: {stream}, variable: {variable}',
-                            flush=True)
-                        print(e, flush=True)
+                        print('...getData Exception:', flush=True)
+                        print('......', e, flush=True)
+                        # print('......', df.info(), flush=True)
                         continue
 
     if dfs:
@@ -54,7 +55,7 @@ def request(organisation, source, stream, variable, start, end):
     start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
     end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
 
-    print('fetching UDX data...', organisation, source, stream, variable, start, end)
+    print('...fetching UDX data')
 
     response_API = requests.get(
         url=f"{env_vars[f'{source}_{stream}_url']}?start={start}&end={end}",
@@ -64,7 +65,7 @@ def request(organisation, source, stream, variable, start, end):
         }
     )
             
-    print(variable, 'status code: ', response_API.status_code)
+    print('...^', response_API.status_code)
     json_data = json.loads(response_API.text)
     return pd.json_normalize(json_data)
 
