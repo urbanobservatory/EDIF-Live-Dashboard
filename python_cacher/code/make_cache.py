@@ -32,7 +32,7 @@ def get_days(start_date, end_date):
     return days
 
 
-def get_start_end_date(start_date, end_date, day_period=7):
+def get_start_end_date(day_period=7):
     start_date = datetime.now()-relativedelta(days=day_period)
     end_date   = datetime.now()
     start_date = datetime.strftime(start_date, '%Y-%m-%d')
@@ -55,37 +55,33 @@ def select(df, item_selection):
     return df.loc[df['ID'].isin(selected)]
 
 
-def day_store(variable, start_date, end_date, dfs=[], today=None):
-    # Get past n days if no dates selected
-    if start_date == None or end_date == None:
-        start_date, end_date = get_start_end_date(start_date, end_date)
+def day_store(variable):
+
+    start_date, end_date = get_start_end_date()
     
-    # Request/get df for each day from cache
     days = get_days(start_date, end_date)
 
-    # If today in days, request fresh data
-    if days[-1] == datetime.today().date():
-        days.pop()
-
-    # Append to dfs
     for day in days:
         start, end = get_start_end_time(day)
         day_path = f'{cache_path}{variable}-{day}.csv'
-        if os.path.exists(day_path):
+
+        if day == datetime.today().date():
+            print('CACHE - REFETCH TODAY', variable, day_path)
+            df = getData.pull_data(variable, start, end)
+            if df is not None:
+                df.to_csv(day_path)
+
+        elif os.path.exists(day_path):
             print('CACHE - ALREADY STORED', variable, day_path)
+
         else:
             print('CACHE - RUNNING', variable, day_path)
             df = getData.pull_data(variable, start, end)
             if df is not None:
                 df.to_csv(day_path)
-                dfs.append(df)
-
-    # Concatenate dfs
-    if len(dfs) > 0:
-        return pd.concat(dfs)
 
 
 while True:
     for variable in mapping.variables().keys():
-        df = day_store(variable, None, None)
+        day_store(variable)
     time.sleep(300)

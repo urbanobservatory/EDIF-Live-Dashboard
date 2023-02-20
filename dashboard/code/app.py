@@ -30,20 +30,13 @@ app.layout = htmlLayout.layout()
 
 # CACHE
 def cache_controller(variable, start_date, end_date, today=None, refresh=False):
-    # Get past n days if no dates selected
+
     if (start_date == None or end_date == None) \
     or refresh:
         start_date, end_date = utils.get_start_end_date(start_date, end_date)
     
-    # Request/get df for each day from cache
     days = utils.get_days(start_date, end_date)
 
-    # If today in days, request fresh data
-    if days[-1] == datetime.today().date():
-        today = days.pop()
-        start_time, end_time = utils.get_start_end_time(today)
-
-    # Append to dfs
     dfs = []
     for day in days:
         start, end = utils.get_start_end_time(day)
@@ -58,10 +51,6 @@ def cache_controller(variable, start_date, end_date, today=None, refresh=False):
                 dfs.append(df)
                 df.to_csv(day_path)
 
-    # if today:
-    #     dfs.append(getData.run(variable, start_time, end_time))
-
-    # Concatenate dfs
     if len(dfs) > 0:
         df = pd.concat(dfs)
         df.sort_values(by='Datetime', inplace=True)
