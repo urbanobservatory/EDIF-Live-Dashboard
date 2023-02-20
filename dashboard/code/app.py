@@ -2,7 +2,7 @@ import json
 import dash
 import pandas as pd
 from datetime import datetime
-from dash import ctx
+from dash import dcc, ctx
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 import os
@@ -222,17 +222,44 @@ def update_health_table(data):
     return figures.healthTable(df)
 
 
+# @app.callback(
+#     Output("modal-centered", "is_open"),
+#     [Input("Info Button", "n_clicks"), Input("close-centered", "n_clicks")],
+#     [State("modal-centered", "is_open")],
+# )
+# def toggle_modal(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open
+
+
 @app.callback(
-    Output("modal-centered", "is_open"),
-    [Input("Info Button", "n_clicks"), Input("close-centered", "n_clicks")],
-    [State("modal-centered", "is_open")],
+    Output('download-dataframe-csv', 'data'),
+    [
+        Input('signal', 'data'),
+        Input('Download-Button', 'n_clicks')
+    ],
+    prevent_initial_call=True
 )
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
-    
+def downloadCSV(data, n_clicks):
+    if 'signal' == ctx.triggered_id:
+        raise PreventUpdate
+    if n_clicks == 0 or n_clicks is None:
+        raise PreventUpdate
+    else:
+        df = pd.read_json(data, orient='split')
+        df = df.drop('Unnamed: 0', axis=1)
+        df = df.drop('index', axis=1)
+        df = df.reset_index(drop=True)
+        variable = df['Variable'].iloc[0]
+        start_date = df['Datetime'].min()
+        end_date = df['Datetime'].max()
+        start_date = start_date.strftime('%m-%d-%Y')
+        end_date = end_date.strftime('%m-%d-%Y')
+    return dcc.send_data_frame(
+        df.to_csv, f'{variable}_{start_date}_{end_date}.csv'
+    )   
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=False, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(debug=True, processes=6, threaded=False, host='0.0.0.0', port=80)

@@ -57,7 +57,7 @@ def layout():
                             'Humidity',
                             'Pressure'
                         ],
-                        value='Temperature',
+                        value='Traffic Flow',
                         clearable=False)
                 ], className='dropDown')
             ], className='dropDownBox'),
@@ -70,18 +70,33 @@ def layout():
             ], className='calendarBox'),
             html.Div([
                 html.Div([
-                    html.Button(
-                        'Refresh',
-                        id='Refresh Button',
-                        n_clicks = 0)
+                    dcc.Loading([
+                        html.Button(
+                            'Refresh',
+                            id='Refresh Button',
+                            n_clicks = 0)
+                    ], type='circle')
                 ], className='refresh')
             ], className='refreshBox'),
+            # html.Div([
+            #     html.Div([
+            #         html.Button(
+            #             'Info',
+            #             id='Info Button',
+            #             n_clicks = 0)
+            #     ], className='refresh')
+            # ], className='refreshBox')
             html.Div([
                 html.Div([
-                    html.Button(
-                        'Info',
-                        id='Info Button',
-                        n_clicks = 0)
+                    dcc.Loading([
+                        html.Button(
+                            'Download',
+                            id='Download-Button',
+                            n_clicks = 0),
+                        dcc.Download(
+                            id='download-dataframe-csv'
+                        )
+                    ], type='circle')
                 ], className='refresh')
             ], className='refreshBox')
         ], className='banner'),
