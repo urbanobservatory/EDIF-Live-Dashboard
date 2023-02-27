@@ -263,7 +263,7 @@ def downloadCSV(data, n_clicks):
 # Run App
 if __name__ == "__main__":
     app.run_server(
-        debug=bool(env_vars('debug')), 
+        debug=False, 
         processes=6, 
         threaded=False, 
         host='0.0.0.0', 
