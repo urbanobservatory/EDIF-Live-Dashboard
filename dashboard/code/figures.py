@@ -409,3 +409,47 @@ def map(df, map_selection): #, map_relayout):
     )
 
     return fig
+
+
+def no_data():
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 10],
+            y=[0, 4, 5, 1, 2, 3, 2, 4, 2, 1],
+            mode="lines+markers+text",
+            text=["","","","", "NO DATA", "","","", "", ''],
+            textfont_size=40
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 10],
+            y=[0, 4, 5, 1, 2, 3, 2, 4, 2, 1],
+            mode="lines+markers+text",
+            text=["","","","", "NO DATA", "","","", "", ''],
+            textfont_size=40
+        )
+    )
+
+    fig.update_layout(
+        paper_bgcolor='#181b1f',
+        plot_bgcolor='#181b1f'      
+    )
+
+    fig.update_layout(
+        xaxis = dict(
+            showgrid=False,
+            gridcolor='#2e2f30',
+            zerolinecolor='#181b1f'
+        ),
+        yaxis = dict(
+            showgrid=False,
+            gridcolor='#2e2f30',
+            zerolinecolor='#181b1f'
+        )
+    )
+
+    return fig

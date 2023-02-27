@@ -248,9 +248,9 @@ def downloadCSV(data, n_clicks):
         raise PreventUpdate
     else:
         df = pd.read_json(data, orient='split')
-        df = df.drop('Unnamed: 0', axis=1)
-        df = df.drop('index', axis=1)
-        df = df.reset_index(drop=True)
+        # df = df.drop('Unnamed: 0', axis=1)
+        # df = df.drop('index', axis=1)
+        # df = df.reset_index(drop=True)
         variable = df['Variable'].iloc[0]
         start_date = df['Datetime'].min()
         end_date = df['Datetime'].max()
@@ -262,4 +262,10 @@ def downloadCSV(data, n_clicks):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(debug=False, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(
+        debug=bool(env_vars('debug')), 
+        processes=6, 
+        threaded=False, 
+        host='0.0.0.0', 
+        port=80
+    )
