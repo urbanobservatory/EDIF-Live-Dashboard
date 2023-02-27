@@ -57,7 +57,7 @@ def layout():
                             'Humidity',
                             'Pressure'
                         ],
-                        value='Traffic Flow',
+                        value='PM2.5',
                         clearable=False)
                 ], className='dropDown')
             ], className='dropDownBox'),
