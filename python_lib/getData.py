@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import json
+import datetime
 from .mapping import UDXsources, variables, unit_lookup
 env_vars = json.load(open('/code/env.json'))
 
@@ -19,7 +20,7 @@ def pull_data(variable, start, end):
                 if variable in source_map[organisation][source][stream]:
                     try:
 
-                        print(organisation, source, stream, variable, start, end)
+                        print(f'{organisation}, {source}, {stream}, {variable}, {start}, {end}')
 
                         if organisation == 'Cranfield':
                             df = requestCranfield(organisation, source, stream, requestVariable, start, end, units)
@@ -28,6 +29,18 @@ def pull_data(variable, start, end):
 
                         elif source == 'Newcastle-UO':
                             df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
+                            try:
+                                df = df.drop('Unnamed: 0', axis=1)
+                            except:
+                                pass
+                            try:
+                                df = df.drop('index', axis=1)
+                            except:
+                                pass
+                            try:
+                                df = df.reset_index(drop=True)
+                            except:
+                                pass
                             if len(df) > 0:
                                 dfs.append(df)
 
@@ -61,12 +74,14 @@ def request(organisation, source, stream, variable, start, end):
         url=f"{env_vars[f'{source}_{stream}_url']}?start={start}&end={end}",
         headers={
             "Content-Type":env_vars['cont'],
-            "Authorization":env_vars[f'{source}_auth']+' '+env_vars[f'{source}_{stream}_key']
+            "Authorization":env_vars[f'{organisation}_auth']+' '+env_vars[f'{source}_{stream}_key']
         }
     )
             
     print('...^', response_API.status_code)
     json_data = json.loads(response_API.text)
+    if source == 'TfWM' and variable == 'intensity':
+        print(json_data, flush=True)
     return pd.json_normalize(json_data)
 
 
@@ -94,26 +109,30 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
     df = df.sort_values(by=['Timestamp'])
     thinned_frames = []
     for sensor_name,frame in df.groupby('ID'):
-        thinned_frames.append(frame.iloc[::10, :])
+        thinned_frames.append(frame.iloc[::50, :])
     if thinned_frames:
         df = pd.concat(thinned_frames)
         df = df.sort_values(by=['Timestamp'])
+        df = df.drop('index', axis=1)
+        print(df.info(), flush=True)
+        print(df.head(), flush=True)
         return df
     else:
         return pd.DataFrame([])
 
 
 def requestCranfield(organisation, source, stream, variable, start, end,units):
-    import datetime
-
     var_lookup = {'pm25':'PM2.5','pm10':'PM10','co':'CO','no':'NO'}
+
     if variable not in var_lookup.keys():
         print(variable)
         return pd.DataFrame([])
+
     url = "https://api.airmonitors.net/3.5/GET/4ed8059b-C/8cac-fef6-jRSq-AS04-N8u7-6R8y-539d-b388/stations"
     r = requests.get(url)
     print(start,end)
     station_json = r.json()
+
     pandas_row = []
     for stat in station_json:
         url = "https://api.airmonitors.net/3.5/GET/4ed8059b-C/8cac-fef6-jRSq-AS04-N8u7-6R8y-539d-b388/stationdata/{StartTimestamp}/{EndTimestamp}/{UniqueId}"
@@ -129,6 +148,7 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
             data_json = r.json()
         except:
             continue
+
         pandas_row = []
         for row in data_json:
             dt = datetime.datetime.strptime(row['TETimestamp'].split('+')[0],'%Y-%m-%dT%H:%M:%S')
@@ -138,14 +158,13 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
                     value = channel['Scaled']
                     row_str = f"""{stat["UniqueId"]},{value},False,{dt},{pd.to_datetime(dt).value / 10**6},{row['Longitude']},{row['Latitude']},{organisation},{source},{stream},{var_lookup[variable]},{units}''"""
 
-
                     pandas_row.append(row_str.split(','))
 
         print(data_url)
+
     if pandas_row:
         headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
             ",")
-
 
         frame = pd.DataFrame(pandas_row,columns=headers)
         frame['Value'] = pd.to_numeric(frame['Value'])
@@ -154,6 +173,7 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
         frame['Timestamp'] = frame['Datetime'].astype(int) / 10 ** 6
 
         return frame
+
     return pd.DataFrame([])
 
 

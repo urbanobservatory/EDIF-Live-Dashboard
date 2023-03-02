@@ -30,7 +30,6 @@ app.layout = htmlLayout.layout()
 
 # CACHE
 def cache_controller(variable, start_date, end_date, today=None, refresh=False):
-
     if (start_date == None or end_date == None) \
     or refresh:
         start_date, end_date = utils.get_start_end_date(start_date, end_date)
@@ -262,10 +261,8 @@ def downloadCSV(data, n_clicks):
 
 # Run App
 if __name__ == "__main__":
-    app.run_server(
-        debug=False, 
-        processes=6, 
-        threaded=False, 
-        host='0.0.0.0', 
-        port=80
-    )
+    if str(env_vars['debug']) == 'True':
+        d=True
+    else:
+        d=False
+    app.run_server(debug=d, processes=6, threaded=False, host='0.0.0.0', port=80)

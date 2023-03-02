@@ -327,12 +327,12 @@ def suspectTable(df):
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
 
-    if 'Suspect Reading' in df:
-        df = df.loc[df['Suspect Reading'] == True]
-
     if 'Suspect Reading' not in df or df.empty:
         df = pd.DataFrame.from_dict({"ID":['None'], "Datetime":['-'], "Variable":[variable], "Value":['-'], "Units":[units]})
-    
+    else:
+        df = df.loc[df['Suspect Reading'] == True]
+        df = df[['ID', 'Variable', 'Value', 'Units', 'Datetime', 'Source', 'Longitude', 'Latitude']].copy()
+
     return df.to_dict('records')
 
 

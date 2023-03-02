@@ -78,7 +78,7 @@ def unit_lookup():
 def UDXsources():
     return {
         # UDX Organisation
-        'Newcastle Urban Observatory': {
+        'Newcastle_Urban_Observatory': {
             # Data Source
             'Newcastle-UO': {
                 # Stream name
@@ -112,18 +112,17 @@ def UDXsources():
                 ]
             }
         },
-        'Manchester Urban Observatory': {
+        'Manchester_Urban_Observatory': {
             'Manchester-UO': {
                 'PM2.5': ['PM2.5'],
                 'Traffic-Flow': ['Traffic Flow'],
                 'Black-Carbon': ['Black Carbon']
             }
         },
-        'Birmingham Urban Observatory': {
+        'Birmingham_Urban_Observatory': {
             'Zephyr': {
-                'PM2.5': [
-                    'Temperature', #
-                    'Traffic Flow',
+                'Air-Quality': [
+                    'Temperature',
                     'Nitric Oxide',
                     'Ozone',
                     'Nitrogen Dioxide',
@@ -131,7 +130,7 @@ def UDXsources():
                     'PM2.5',
                     'PM10',
                     'Humidity',
-                    # 'Pressure'
+                    'Pressure'
                 ]
             },
             'BCC': {},
@@ -150,7 +149,8 @@ def UDXsources():
                     'Temperature',
                     'Humidity',
                     'Pressure'
-                ]
+                ],
+                'Traffic-Flow': ['Traffic Flow']
             }
         },
         'Cranfield': {
