@@ -260,7 +260,7 @@ def layout():
                                     html.Div(
                                         dcc.Graph(
                                             id='Calendar Plot',
-                                            style={'height':260}
+                                            style={'height':150}
                                         )
                                     )
                                 )
