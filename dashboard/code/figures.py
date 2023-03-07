@@ -1,5 +1,8 @@
+import os
 import plotly.graph_objects as go
 import pandas as pd
+import datetime
+from plotly_calplot import calplot
 
 import layouts
 import graphCustomisation
@@ -370,8 +373,6 @@ def map(df, map_selection): #, map_relayout):
     variable = df['Variable'].iloc[0]
     units = df['Units'].iloc[0]
 
-    df = graphCustomisation.customise(df, variable)
-
     df['text'] = df['ID'].astype(str)+': '+df['Value'].astype(str)+' '+units
     df = graphCustomisation.customise(df, variable)
 
@@ -407,6 +408,35 @@ def map(df, map_selection): #, map_relayout):
         layouts.map(variable, map_selection), #, map_relayout),
         transition_duration=500
     )
+
+    return fig
+
+
+def calendarPlot(df, dates=[], counts=[]):
+
+    variable = df['Variable'].iloc[0]
+    units = df['Units'].iloc[0]
+
+    for file in sorted(os.listdir('/cached/')):
+        filepath = '/cached/'+file
+        if variable == file.split('-')[0]:
+            date = file.replace(variable+'-', '')
+            date = date.replace('.csv', '')
+            dates.append(datetime.datetime.strptime(date, '%Y-%m-%d'))
+            df2 = pd.read_csv(filepath)
+            counts.append(len(df2.index))
+
+    df3 = pd.DataFrame(list(zip(dates,counts)), columns=['Datetime', 'Value'])
+
+    fig = calplot(
+        df3,
+        x='Datetime',
+        y='Value',
+        dark_theme=True,
+        name='Number of Records'
+    )
+
+    # for heatmap with more control: https://gist.github.com/bendichter/d7dccacf55c7d95aec05c6e7bcf4e66e
 
     return fig
 

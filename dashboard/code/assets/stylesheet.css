@@ -164,11 +164,19 @@
   margin: 0 0 0 8%;
 }
 
+.calendarPlot {
+  width: 100%;
+  height: 320px;
+  text-align: left;
+  /* font-size: 1; */
+  /* margin: 0 0 0 4%; */
+}
+
 .healthTable {
   width: 100%;
   text-align: left;
   font-size: 1;
-  margin: 0 0 0 4%;
+  /* margin: 0 0 0 4%; */
 }
 
 .suspectTable {

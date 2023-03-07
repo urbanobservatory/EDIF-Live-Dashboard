@@ -238,12 +238,35 @@ def layout():
             ),
 
             dcc.Tab(
+                id='Tab2',
                 label='Metadata', 
                 style={'backgroundColor':'#181b1f'},
                 selected_style={
                     'color':'#ccccdc',
                     'backgroundColor':'#272a2e'},
                 children=[
+
+                    html.Br(),
+
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                html.Label(
+                                    children=[
+                                        html.Span('Data Availability', className='labels')
+                                    ]
+                                ),
+                                dcc.Loading(
+                                    html.Div(
+                                        dcc.Graph(
+                                            id='Calendar Plot',
+                                            style={'height':260}
+                                        )
+                                    )
+                                )
+                            ], className='calendarPlot')
+                        ], className='twelve columns')
+                    ], className='row'),
 
                     html.Br(),
 

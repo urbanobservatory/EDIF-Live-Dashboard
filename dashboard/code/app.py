@@ -202,6 +202,16 @@ def update_histogram(data, map_selection, scatter_selection):
 
 
 @app.callback(
+    Output('Calendar Plot', 'figure'),
+    [
+        Input('signal', 'data')
+    ])
+def update_calendar_plot(data):
+    df = pd.read_json(data, orient='split')
+    return figures.calendarPlot(df)
+
+
+@app.callback(
     Output('Suspect Table', 'data'),
     [
         Input('signal', 'data')
