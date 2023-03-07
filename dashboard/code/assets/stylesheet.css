@@ -242,6 +242,41 @@
   font-size: 3em;
 }
 
+.custom-tabs-container {
+  width: 100%;
+}
+
+.custom-tabs {
+  border-top-left-radius: 3px;
+  background-color: #111217;
+  padding: 0px 24px;
+  border-bottom: 1px solid #111217;
+}
+
+.custom-tab {
+  color:#ccccdc;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border-top: 3px solid transparent !important;
+  border-left: 0px !important;
+  border-right: 0px !important;
+  border-bottom: 0px !important;
+  background-color: #181b1f;
+  padding: 12px !important;
+  /* font-family: "system-ui"; */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-tab--selected {
+  color: black;
+  /* box-shadow: 1px 1px 0px white;
+  border-left: 1px solid lightgrey !important;
+  border-right: 1px solid lightgrey !important; */
+  border-top: 3px solid #636EFA !important;
+}
+
 .loading_wrapper > div {
     visibility: visible !important;
 }
@@ -495,10 +530,11 @@
   input[type="password"],
   textarea,
   select {
+    color: #ccccdc;
     height: 38px;
     padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
-    background-color: #fff;
-    border: 1px solid #D1D1D1;
+    background-color: #181b1f;
+    border: 1px solid #ccccdc;
     border-radius: 4px;
     box-shadow: none;
     box-sizing: border-box; 

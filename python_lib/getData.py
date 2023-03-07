@@ -114,8 +114,6 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
         df = pd.concat(thinned_frames)
         df = df.sort_values(by=['Timestamp'])
         df = df.drop('index', axis=1)
-        print(df.info(), flush=True)
-        print(df.head(), flush=True)
         return df
     else:
         return pd.DataFrame([])
