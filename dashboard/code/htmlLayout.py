@@ -102,175 +102,253 @@ def layout():
         ], className='banner'),
 
         html.Br(),
-        
-        html.Div([
-            html.Div([
-                html.Div([
-                    dcc.Loading([
+
+        dcc.Tabs([
+            dcc.Tab(
+                id='Tab1',
+                label='Visualisation',
+                style={'backgroundColor':'#181b1f'},
+                selected_style={
+                    'color':'#ccccdc',
+                    'backgroundColor':'#272a2e'},
+                children=[
+
+                    html.Br(),
+
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                dcc.Loading([
+
+                                    html.Div([
+                                        html.Div([
+                                            html.Div([
+                                                dcc.Graph(
+                                                    id='Indicators A',
+                                                    style={'height':150}
+                                                )
+                                            ], className='twelve columns')
+                                        ])
+                                    ], className="row"),
+
+                                    html.Div([
+                                        html.Div([
+                                            html.Div([
+                                                dcc.Graph(
+                                                    id='Indicators B',
+                                                    style={'height':150}
+                                                )
+                                            ], className='twelve columns')
+                                        ])
+                                    ], className="row")
+
+                                ])
+                            ], className='graph'),
+
+                            html.Br(),
+                            html.Div([
+
+                                html.Div([
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='Scatter All',
+                                                style={'height':300}
+                                            )
+                                        )
+                                    ], className='graph')
+                                ], className='eight columns'),
+
+                                html.Div([
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='BoxPlot',
+                                                style={'height':300}
+                                            )
+                                        )
+                                    ], className='boxplot')
+                                ], className='four columns')
+
+                            ], className="row"),
+
+                            html.Br(),
+
+                            html.Div([
+
+                                html.Div([
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='Scatter3D',
+                                                style={'height':600}
+                                            )
+                                        )
+                                    ], className='scatter3d')
+                                ], className='six columns'),
+
+                                html.Div([
+
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='Scatter Hover',
+                                                style={'height':278}
+                                            )
+                                        )
+                                    ], className='hover'),
+
+                                    html.Br(),
+
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='Histogram',
+                                                style={'height':278}
+                                            )
+                                        )
+                                    ], className='histogram')
+
+                                ], className='six columns')
+
+                            ], className='row'),
+
+                        ], className="eight columns"),
 
                         html.Div([
                             html.Div([
+
                                 html.Div([
-                                    dcc.Graph(id='Indicators A')
+                                    html.Div([
+                                        dcc.Loading(
+                                            dcc.Graph(
+                                                id='Map',
+                                                style={'height':1288}
+                                            )
+                                        )
+                                    ], className='map')
                                 ], className='twelve columns')
-                            ])
-                        ], className="row"),
-
-                        html.Div([
-                            html.Div([
-                                html.Div([
-                                    dcc.Graph(id='Indicators B')
-                                ], className='twelve columns')
-                            ])
-                        ], className="row")
-
-                    ])
-                ], className='graph'),
-
-                html.Br(),
-                html.Div([
-
-                    html.Div([
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='Scatter All')
-                            )
-                        ], className='graph')
-                    ], className='eight columns'),
-
-                    html.Div([
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='BoxPlot')
-                            )
-                        ], className='boxplot')
-                    ], className='four columns')
-
-                ], className="row"),
-
-                html.Br(),
-
-                html.Div([
-
-                    html.Div([
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='Scatter3D')
-                            )
-                        ], className='scatter3d')
-                    ], className='six columns'),
-
-                    html.Div([
-
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='Scatter Hover')
-                            )
-                        ], className='hover'),
-
-                        html.Br(),
-
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='Histogram')
-                            )
-                        ], className='histogram')
-
-                    ], className='six columns')
-
-                ], className='row'),
-
-            ], className="eight columns"),
-
-            html.Div([
-                html.Div([
-
-                    html.Div([
-                        html.Div([
-                            dcc.Loading(
-                                dcc.Graph(id='Map')
-                            )
-                        ], className='map')
-                    ], className='twelve columns')
+                                
+                            ], className='row')
+                        ], className='four columns')
+                    ], className="row"),
                     
-                ], className='row')
-            ], className='four columns')
-        ], className="row"),
-        
-        html.Div([
-            html.Div([
-            ], className='divider')
-        ], className='row'),
-
-        html.Div([
-            html.Div([
-                html.Div([
-                    html.Div([
-                        dcc.Loading([
-                            html.Label(
-                                children=[
-                                    html.Span('Stream Health', className='labels')
-                                ]
-                            ),
-                            dash.dash_table.DataTable(
-                                id = 'Health Table',
-                                page_size = 12,
-                                style_table = {
-                                    'overflowY': 'auto'},
-                                style_as_list_view = True,
-                                style_cell = {
-                                    'backgroundColor': '#111217', 
-                                    'textAlign': 'center'},
-                                style_header = {
-                                    'backgroundColor': '#181b1f',
-                                    'fontWeight': 'bold',
-                                    'color': '#ccccdc'},
-                                style_data_conditional = [
-                                    {
-                                        'if': {
-                                            'filter_query': "{Alert} contains 'Online'"
-                                        },
-                                        'backgroundColor': '#00cc96'
-                                    },
-                                    {
-                                        'if': {
-                                            'filter_query': "{Alert} contains 'Offline'"
-                                        },
-                                        'backgroundColor': '#ef553b'
-                                    }
-                                    
-                                ]
-                            )
-                        ])
-                    ], className='healthTable')
-                ], className='four columns'),
-                html.Div([
-                    html.Div([
-                        dcc.Loading([
-                            html.Label(
-                                children=[
-                                    html.Span('Suspect Reading Logs', className='labels')
-                                ]),
-                            dash.dash_table.DataTable(
-                                id = 'Suspect Table',
-                                page_size = 12,
-                                style_table = {
-                                    'overflowY': 'auto'},
-                                style_as_list_view = True,
-                                style_cell = {
-                                    'backgroundColor': '#111217'},
-                                style_header = {
-                                    'backgroundColor': '#181b1f',
-                                    'fontWeight': 'bold',
-                                    'color': '#ccccdc'},
-                                style_data = {'color': "#ccccdc"}
-                            )
-                        ])
-                    ], className='suspectTable')
-                ], className='eight columns')
-            ], className='table')
+                ], className='custom-tab', selected_className='custom-tab--selected'
             
-        ], className='row'),
+            ),
+
+            dcc.Tab(
+                id='Tab2',
+                label='Metadata', 
+                style={'backgroundColor':'#181b1f'},
+                selected_style={
+                    'color':'#ccccdc',
+                    'backgroundColor':'#272a2e'},
+                children=[
+
+                    html.Br(),
+
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                html.Label(
+                                    children=[
+                                        html.Span('Data Availability', className='labels')
+                                    ]
+                                ),
+                                dcc.Loading(
+                                    html.Div(
+                                        dcc.Graph(
+                                            id='Calendar Plot',
+                                            style={'height':150}
+                                        )
+                                    )
+                                )
+                            ], className='calendarPlot')
+                        ], className='twelve columns')
+                    ], className='row'),
+
+                    html.Br(),
+
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                html.Div([
+                                    dcc.Loading([
+                                        html.Label(
+                                            children=[
+                                                html.Span('Stream Health', className='labels')
+                                            ]
+                                        ),
+                                        dash.dash_table.DataTable(
+                                            id = 'Health Table',
+                                            page_size = 12,
+                                            style_table = {
+                                                'overflowY': 'auto'},
+                                            style_as_list_view = True,
+                                            style_cell = {
+                                                'backgroundColor': '#111217', 
+                                                'textAlign': 'center'},
+                                            style_header = {
+                                                'backgroundColor': '#181b1f',
+                                                'fontWeight': 'bold',
+                                                'color': '#ccccdc'},
+                                            style_data_conditional = [
+                                                {
+                                                    'if': {
+                                                        'filter_query': "{Alert} contains 'Online'"
+                                                    },
+                                                    'backgroundColor': '#00cc96'
+                                                },
+                                                {
+                                                    'if': {
+                                                        'filter_query': "{Alert} contains 'Offline'"
+                                                    },
+                                                    'backgroundColor': '#ef553b'
+                                                }
+                                                
+                                            ]
+                                        )
+                                    ])
+                                ], className='healthTable')
+                            ], className='four columns'),
+                            html.Div([
+                                html.Div([
+                                    dcc.Loading([
+                                        html.Label(
+                                            children=[
+                                                html.Span('Suspect Reading Logs', className='labels')
+                                            ]),
+                                        dash.dash_table.DataTable(
+                                            id = 'Suspect Table',
+                                            page_size = 12,
+                                            style_table = {
+                                                'overflowY': 'auto'},
+                                            style_as_list_view = True,
+                                            style_cell = {
+                                                'backgroundColor': '#111217'},
+                                            style_header = {
+                                                'backgroundColor': '#181b1f',
+                                                'fontWeight': 'bold',
+                                                'color': '#ccccdc'},
+                                            style_data = {'color': "#ccccdc"}
+                                        )
+                                    ])
+                                ], className='suspectTable')
+                            ], className='eight columns')
+                        ], className='table')
+                        
+                    ], className='row'),
+
+                ], className='custom-tab', selected_className='custom-tab--selected'
+            )
+        ], parent_className='custom-tabs', className='custom-tabs-container',),
+             
+        # html.Div([
+        #     html.Div([
+        #     ], className='divider')
+        # ], className='row'),
+
         
         dcc.Interval(
             id='interval-component',
