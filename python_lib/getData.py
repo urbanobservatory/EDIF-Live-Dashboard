@@ -1,7 +1,9 @@
+import os
 import requests
 import pandas as pd
 import json
 import datetime
+import traceback
 from .mapping import UDXsources, variables, unit_lookup
 env_vars = json.load(open('/code/env.json'))
 
@@ -52,12 +54,15 @@ def pull_data(variable, start, end):
                                 df = selectTfWMtraffic(requestVariable, df)
                             else:
                                 df = select(requestVariable, df)
+                            print('...select success', flush=True)
                             df = format(organisation, source, stream, variable, units, df)
+                            print('...format success', flush=True)
                             dfs.append(df)
 
-                    except Exception as e:
+                    except Exception:
                         print('...getData Exception:', flush=True)
-                        print('......', e, flush=True)
+                        # print('......', e, flush=True)
+                        print(traceback.format_exc(), flush=True)
                         # print('......', df.info(), flush=True)
                         continue
 
@@ -241,39 +246,45 @@ def select(variable, df):
 
 def selectTfWMtraffic(variable, df, dfs=[], vehicles=[]):
 
+    # Get list of vehicles
     columns = list(df.columns)
     for column in columns:
         if '.value.In' in column:
             vehicles.append(column.replace('.value.In',''))
 
-    df_locations = df[[
-        'id',
-        'location.value.coordinates'
-    ]].copy()
-
+    # Get a DF for each vehicle
     for vehicle in vehicles:
-        dfs.append(df[[
-            'id', 
-            f'{vehicle}.value.In', 
-            f'{vehicle}.value.Out', 
-            f'{vehicle}.dateObserved']])
-    
+        try:
+            dfs.append(df[[
+                'id', 
+                f'{vehicle}.value.In', 
+                f'{vehicle}.value.Out', 
+                f'{vehicle}.dateObserved',
+                'location.value.coordinates']])
+        except:
+            continue
+
+    # Format DFs and get Value from sum of In and Out
     for df in dfs:
         df['Value'] = df.filter(like='value').sum(axis=1)
         df.rename({
-            # 'id': 'ID',
+            'id': 'ID',
             list(df.columns)[3]:'dateObserved.value'
         }, axis='columns', inplace=True)
+        df['Longitude'] = df['location.value.coordinates'].str[0]
+        df['Latitude'] = df['location.value.coordinates'].str[1]
         df = df.drop(list(df.columns)[1], axis=1)
         df = df.drop(list(df.columns)[2], axis=1)
+        df = df.drop('location.value.coordinates', axis=1)
 
+    # Concatenate DFs and sum values based on matching IDs, dates, and locations
     df = pd.concat(dfs)
-    df = df.groupby(['id','dateObserved.value']).agg({'Value':'sum'})
-    print(df.info(), flush=True)
-    print(df.head(), flush=True)
-    df = pd.merge(df, df_locations, how='left', on=['id'])
-    print(df.info(), flush=True)
-    print(df.head(), flush=True)
+    df = df.groupby(['ID','dateObserved.value','Latitude','Longitude']).agg({'Value':'sum'})
+
+    # Hack to get weird pandas column formatting back into place
+    df.to_csv('/cached/temp.csv')
+    df = pd.read_csv('/cached/temp.csv', index_col=False)
+    os.remove('/cached/temp.csv')
 
     return df
 
@@ -291,8 +302,11 @@ def format(organisation, source, stream, variable, units, df):
 
     df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
     df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
-    df['Longitude'] = df['location.value.coordinates'].str[0]
-    df['Latitude'] = df['location.value.coordinates'].str[1]
+
+    if 'location.value.coordinates' in df.columns:
+        df['Longitude'] = df['location.value.coordinates'].str[0]
+        df['Latitude'] = df['location.value.coordinates'].str[1]
+        df = df.drop(['location.value.coordinates'], axis='columns')
 
     df['Organisation'] = organisation
     df['Source'] = source
@@ -300,7 +314,7 @@ def format(organisation, source, stream, variable, units, df):
     df['Variable'] = variable
     df['Units'] = units
 
-    df = df.drop(['location.value.coordinates', 'dateObserved.value'], axis='columns')
+    df = df.drop(['dateObserved.value'], axis='columns')
     df = df[df['Value'].notna()]
     df.sort_values(by='Datetime', inplace = True)
 
