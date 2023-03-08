@@ -212,6 +212,16 @@ def update_calendar_plot(data):
 
 
 @app.callback(
+    Output('Update Intervals', 'figure'),
+    [
+        Input('signal', 'data')
+    ])
+def update_intervals(data):
+    df = pd.read_json(data, orient='split')
+    return figures.updateIntervals(df)
+
+
+@app.callback(
     Output('Suspect Table', 'data'),
     [
         Input('signal', 'data')

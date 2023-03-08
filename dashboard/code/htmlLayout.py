@@ -273,6 +273,23 @@ def layout():
                     html.Div([
                         html.Div([
                             html.Div([
+                                dcc.Loading(
+                                    html.Div(
+                                        dcc.Graph(
+                                            id='Update Intervals',
+                                            style={'height':300}
+                                        )
+                                    )
+                                )
+                            ], className='calendarPlot')
+                        ], className='twelve columns')
+                    ], className='row'),
+
+                    html.Br(),
+
+                    html.Div([
+                        html.Div([
+                            html.Div([
                                 html.Div([
                                     dcc.Loading([
                                         html.Label(

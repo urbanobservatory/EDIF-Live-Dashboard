@@ -184,13 +184,14 @@ def selectNewcastle(variable, df):
             variable+'.value', 
             variable+'.suspectReading',
             'dateObserved.value',
+            'timestamp.value',
             'location.value.coordinates'
             ]]
         df.rename({
             'id': 'ID',
             # variable+'.unit': 'Units',
             variable+'.value': 'Value',
-            'timestamp.value': 'Timestamp',
+            'timestamp.value': 'Received_Timestamp',
             variable+'.suspectReading': 'Suspect Reading'
         }, axis='columns', inplace=True)
 
@@ -201,13 +202,14 @@ def selectNewcastle(variable, df):
             variable+'.value', 
             'suspectReading.value',
             'dateObserved.value',
+            'timestamp.value',
             'location.value.coordinates'
             ]]
         df.rename({
             'id': 'ID',
             # variable+'.unit': 'Units',
             variable+'.value': 'Value',
-            'timestamp.value': 'Timestamp',
+            'timestamp.value': 'Received_Timestamp',
             'suspectReading.value': 'Suspect Reading'
         }, axis='columns', inplace=True)
 
@@ -221,6 +223,7 @@ def select(variable, df):
         # variable+'.unit', 
         variable+'.value', 
         'dateObserved.value',
+        'timestamp.value',
         'location.value.coordinates'
         ]]
 
@@ -228,7 +231,7 @@ def select(variable, df):
         'id': 'ID',
         # variable+'.unit': 'Units',
         variable+'.value': 'Value',
-        'timestamp.value': 'Timestamp'
+        'timestamp.value': 'Received_Timestamp'
     }, axis='columns', inplace=True)
 
     return df

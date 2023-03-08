@@ -441,6 +441,25 @@ def calendarPlot(df, dates=[], counts=[]):
     return fig
 
 
+def updateIntervals(df, n_records=[]):
+    times = df['Received_Timestamp'].unique()
+
+    for time in times:
+        n_records.append(len(df[df['Received_Timestamp']==time]))
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=times,
+            y=n_records,
+            mode="markers"
+        )
+    )
+    
+    return fig
+
+
 def no_data():
     fig = go.Figure()
 
