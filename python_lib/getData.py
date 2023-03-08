@@ -48,6 +48,8 @@ def pull_data(variable, start, end):
                             df = request(organisation, source, stream, requestVariable, start, end)
                             if source == 'Newcastle-UO':
                                 df = selectNewcastle(requestVariable, df)
+                            if source == 'TfWM' and stream == 'Traffic-Flow':
+                                df = selectTfWMtraffic(requestVariable, df)
                             else:
                                 df = select(requestVariable, df)
                             df = format(organisation, source, stream, variable, units, df)
@@ -80,9 +82,9 @@ def request(organisation, source, stream, variable, start, end):
             
     print('...^', response_API.status_code)
     json_data = json.loads(response_API.text)
-    if source == 'TfWM' and variable == 'intensity':
-        print(json_data, flush=True)
-    return pd.json_normalize(json_data)
+    df = pd.json_normalize(json_data)
+
+    return df
 
 
 def get_uo_data(organisation, source, stream, variable, start, end,units):
@@ -236,11 +238,52 @@ def select(variable, df):
     return df
 
 
+def selectTfWMtraffic(variable, df, dfs=[], vehicles=[]):
+
+    columns = list(df.columns)
+    for column in columns:
+        if '.value.In' in column:
+            vehicles.append(column.replace('.value.In',''))
+
+    df_locations = df[[
+        'id',
+        'location.value.coordinates'
+    ]].copy()
+
+    for vehicle in vehicles:
+        dfs.append(df[[
+            'id', 
+            f'{vehicle}.value.In', 
+            f'{vehicle}.value.Out', 
+            f'{vehicle}.dateObserved']])
+    
+    for df in dfs:
+        df['Value'] = df.filter(like='value').sum(axis=1)
+        df.rename({
+            # 'id': 'ID',
+            list(df.columns)[3]:'dateObserved.value'
+        }, axis='columns', inplace=True)
+        df = df.drop(list(df.columns)[1], axis=1)
+        df = df.drop(list(df.columns)[2], axis=1)
+
+    df = pd.concat(dfs)
+    df = df.groupby(['id','dateObserved.value']).agg({'Value':'sum'})
+    print(df.info(), flush=True)
+    print(df.head(), flush=True)
+    df = pd.merge(df, df_locations, how='left', on=['id'])
+    print(df.info(), flush=True)
+    print(df.head(), flush=True)
+
+    return df
+
+
 def format(organisation, source, stream, variable, units, df):
 
     if source == 'Zephyr':
         df['ID'] = df['ID'].str.split(":").str[5]
     elif source == 'Sheffield-UF':
+        df['ID'] = df['ID'].str.split(":").str[4]
+    elif source == 'TfWM' and stream == 'Traffic-Flow':
         df['ID'] = df['ID'].str.split(":").str[4]
     else:
         df['ID'] = df['ID'].str.split(":").str[3]
