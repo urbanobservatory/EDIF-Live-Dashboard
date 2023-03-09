@@ -13,7 +13,9 @@ def layout():
     html.Div([
       dbc.Modal([
         dbc.ModalHeader(dbc.ModalTitle("Information")),
-        dbc.ModalBody("Info coming soon. Please report any bugs to daniel.bell2@ncl.ac.uk"),
+        dbc.ModalBody(
+          "Info coming soon. Please report any bugs to daniel.bell2@ncl.ac.uk"
+        ),
         dbc.ModalFooter(
           dbc.Button(
             "Close",
@@ -245,7 +247,9 @@ def layout():
               html.Div([
                 html.Div([
                   html.Label(
-                    children=[html.Span('Data Availability', className='labels')]
+                    children=[
+                      html.Span('Data Availability', className='labels')
+                    ]
                   ),
                   dcc.Loading(
                     html.Div(
@@ -285,7 +289,9 @@ def layout():
                   html.Div([
                     dcc.Loading([
                       html.Label(
-                        children=[html.Span('Stream Health', className='labels')]
+                        children=[
+                          html.Span('Stream Health', className='labels')
+                        ]
                       ),
                       dash.dash_table.DataTable(
                         id = 'Health Table',
@@ -318,7 +324,9 @@ def layout():
                   html.Div([
                     dcc.Loading([
                       html.Label(
-                        children=[html.Span('Suspect Reading Logs', className='labels')]
+                        children=[
+                          html.Span('Suspect Reading Logs', className='labels')
+                        ]
                       ),
                       dash.dash_table.DataTable(
                         id = 'Suspect Table',

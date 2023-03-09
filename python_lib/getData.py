@@ -120,7 +120,7 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
     if thinned_frames:
         df = pd.concat(thinned_frames)
         df = df.sort_values(by=['Timestamp'])
-        df = df.drop('index', axis=1)
+        # df = df.drop('index', axis=1)
         return df
     else:
         return pd.DataFrame([])
@@ -246,11 +246,19 @@ def select(variable, df):
 
 def selectTfWMtraffic(variable, df, dfs=[], vehicles=[]):
 
+    ok_vehicles = [
+        'motorbike', 'car', 'truck', 'van', 'bus', 'minibus', 'emergency_car', 
+        'emergency_van', 'taxi', 'luton_van', 'small_van', 'private_bus', 
+        'london_bus', 'other_taxis'
+    ]
+
     # Get list of vehicles
     columns = list(df.columns)
     for column in columns:
         if '.value.In' in column:
-            vehicles.append(column.replace('.value.In',''))
+            vehicle = column.replace('.value.In','')
+            if vehicle in ok_vehicles:
+                vehicles.append(vehicle)
 
     # Get a DF for each vehicle
     for vehicle in vehicles:
