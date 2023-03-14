@@ -7,7 +7,7 @@ def customise(df, variable):
         df = df[df['Value'] <= 50]
     elif variable == 'Traffic Flow':
         df = df[df['Value'] != 0]
-        df = df[df['Value'] <= 400]
+        #df = df[df['Value'] <= 400]
     elif variable == 'PM10':
         df = df[df['Value'] <= 50]
 

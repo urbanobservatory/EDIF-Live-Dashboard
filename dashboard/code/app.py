@@ -37,7 +37,7 @@ def cache_controller(variable, start_date, end_date, today=None, refresh=False):
     days = utils.get_days(start_date, end_date)
 
     dfs = []
-    for day in days:
+    for day in reversed(days):
         start, end = utils.get_start_end_time(day)
         day_path = f'{cache_path}{variable}-{day}.csv'
         if os.path.exists(day_path):

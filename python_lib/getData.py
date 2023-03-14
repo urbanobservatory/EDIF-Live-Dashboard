@@ -50,8 +50,6 @@ def pull_data(variable, start, end):
                             df = request(organisation, source, stream, requestVariable, start, end)
                             if source == 'Newcastle-UO':
                                 df = selectNewcastle(requestVariable, df)
-                            if source == 'TfWM' and stream == 'Traffic-Flow':
-                                df = selectTfWMtraffic(requestVariable, df)
                             else:
                                 df = select(requestVariable, df)
                             print('...select success', flush=True)
@@ -126,7 +124,7 @@ def get_uo_data(organisation, source, stream, variable, start, end,units):
         return pd.DataFrame([])
 
 
-def requestCranfield(organisation, source, stream, variable, start, end,units):
+def requestCranfield(organisation, source, stream, variable, start, end, units):
     var_lookup = {'pm25':'PM2.5','pm10':'PM10','co':'CO','no':'NO'}
 
     if variable not in var_lookup.keys():
@@ -146,6 +144,7 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
             EndTimestamp=end.strftime('%Y%m%dT%H%M%S'),
             UniqueId=stat["UniqueId"]
         )
+        print(data_url)
 
         r = requests.get(data_url)
 
@@ -168,8 +167,7 @@ def requestCranfield(organisation, source, stream, variable, start, end,units):
         print(data_url)
 
     if pandas_row:
-        headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
-            ",")
+        headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(",")
 
         frame = pd.DataFrame(pandas_row,columns=headers)
         frame['Value'] = pd.to_numeric(frame['Value'])
@@ -244,59 +242,6 @@ def select(variable, df):
     return df
 
 
-def selectTfWMtraffic(variable, df, dfs=[], vehicles=[]):
-
-    ok_vehicles = [
-        'motorbike', 'car', 'truck', 'van', 'bus', 'minibus', 'emergency_car', 
-        'emergency_van', 'taxi', 'luton_van', 'small_van', 'private_bus', 
-        'london_bus', 'other_taxis'
-    ]
-
-    # Get list of vehicles
-    columns = list(df.columns)
-    for column in columns:
-        if '.value.In' in column:
-            vehicle = column.replace('.value.In','')
-            if vehicle in ok_vehicles:
-                vehicles.append(vehicle)
-
-    # Get a DF for each vehicle
-    for vehicle in vehicles:
-        try:
-            dfs.append(df[[
-                'id', 
-                f'{vehicle}.value.In', 
-                f'{vehicle}.value.Out', 
-                f'{vehicle}.dateObserved',
-                'location.value.coordinates']])
-        except:
-            continue
-
-    # Format DFs and get Value from sum of In and Out
-    for df in dfs:
-        df['Value'] = df.filter(like='value').sum(axis=1)
-        df.rename({
-            'id': 'ID',
-            list(df.columns)[3]:'dateObserved.value'
-        }, axis='columns', inplace=True)
-        df['Longitude'] = df['location.value.coordinates'].str[0]
-        df['Latitude'] = df['location.value.coordinates'].str[1]
-        df = df.drop(list(df.columns)[1], axis=1)
-        df = df.drop(list(df.columns)[2], axis=1)
-        df = df.drop('location.value.coordinates', axis=1)
-
-    # Concatenate DFs and sum values based on matching IDs, dates, and locations
-    df = pd.concat(dfs)
-    df = df.groupby(['ID','dateObserved.value','Latitude','Longitude']).agg({'Value':'sum'})
-
-    # Hack to get weird pandas column formatting back into place
-    df.to_csv('/cached/temp.csv')
-    df = pd.read_csv('/cached/temp.csv', index_col=False)
-    os.remove('/cached/temp.csv')
-
-    return df
-
-
 def format(organisation, source, stream, variable, units, df):
 
     if source == 'Zephyr':
@@ -308,7 +253,8 @@ def format(organisation, source, stream, variable, units, df):
     else:
         df['ID'] = df['ID'].str.split(":").str[3]
 
-    df['Datetime'] = pd.to_datetime(df['dateObserved.value'].str.replace('.000','', regex=True), format='%Y-%m-%dT%H:%M:%SZ')
+    df['Datetime'] = pd.to_datetime(
+        df['dateObserved.value'], format='%Y-%m-%dT%H:%M:%S.%fZ')
     df['Timestamp'] = pd.to_datetime(df['Datetime']).astype(int) / 10**6
 
     if 'location.value.coordinates' in df.columns:

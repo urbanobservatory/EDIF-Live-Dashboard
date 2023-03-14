@@ -61,27 +61,28 @@ def day_store(variable):
     
     days = get_days(start_date, end_date)
 
-    for day in days:
+    for day in reversed(days):
         start, end = get_start_end_time(day)
         day_path = f'{cache_path}{variable}-{day}.csv'
 
-        if day == datetime.today().date():
-            print('CACHE - REFETCH TODAY', variable, day_path)
-            df = getData.pull_data(variable, start, end)
-            if df is not None:
-                df.to_csv(day_path)
+        # if day == datetime.today().date():
+        #print('CACHE - REFETCH TODAY', variable, day_path)
+        print('CACHE', variable, day_path)
+        df = getData.pull_data(variable, start, end)
+        if df is not None:
+            df.to_csv(day_path)
 
-        elif os.path.exists(day_path):
-            print('CACHE - ALREADY STORED', variable, day_path)
+        # elif os.path.exists(day_path):
+        #     print('CACHE - ALREADY STORED', variable, day_path)
 
-        else:
-            print('CACHE - RUNNING', variable, day_path)
-            df = getData.pull_data(variable, start, end)
-            if df is not None:
-                df.to_csv(day_path)
+        # else:
+        #     print('CACHE - RUNNING', variable, day_path)
+        #     df = getData.pull_data(variable, start, end)
+        #     if df is not None:
+        #         df.to_csv(day_path)
 
 
 while True:
     for variable in mapping.variables().keys():
         day_store(variable)
-    time.sleep(300)
+    time.sleep(1800)
