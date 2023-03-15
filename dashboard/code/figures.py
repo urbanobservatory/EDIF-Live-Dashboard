@@ -64,7 +64,7 @@ def indicatorsA(df):
 
     fig.update_layout(
         layouts.indicators(variable),
-        transition_duration=500
+        # transition_duration=500
     )
 
     return fig
@@ -126,7 +126,7 @@ def indicatorsB(df):
 
     fig.update_layout(
         layouts.indicators(variable),
-        transition_duration=500
+        # transition_duration=500
     )
 
     return fig
@@ -201,7 +201,7 @@ def scatter_all(df):
 
     fig.update_layout(
         layouts.scatterAll(variable, units), 
-        transition_duration=500
+        # transition_duration=500
     )
 
     return fig
@@ -295,7 +295,7 @@ def boxPlot(df):
 
     fig.update_layout(
         layouts.boxplot(variable, units),
-        transition_duration=500,
+        # transition_duration=500,
     )
     
     return fig
@@ -320,7 +320,7 @@ def histogram(df):
 
     fig.update_layout(
         layouts.histogram(variable, units),
-        transition_duration=500,
+        # transition_duration=500,
     )
 
     return fig
@@ -406,7 +406,7 @@ def map(df, map_selection): #, map_relayout):
 
     fig.update_layout(
         layouts.map(variable, map_selection), #, map_relayout),
-        transition_duration=500
+        # transition_duration=500
     )
 
     return fig
