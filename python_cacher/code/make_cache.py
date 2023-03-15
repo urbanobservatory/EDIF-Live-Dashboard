@@ -1,4 +1,5 @@
 import time
+import json
 import pandas as pd
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -8,8 +9,9 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
-cache_path = '/cached/'
+env_vars = json.load(open('/code/env.json'))
 
+cache_path = '/cached/'
 
 def get_days(start_date, end_date):
     days = []
@@ -32,7 +34,7 @@ def get_days(start_date, end_date):
     return days
 
 
-def get_start_end_date(day_period=7):
+def get_start_end_date(day_period=int(env_vars['day_period'])):
     start_date = datetime.now()-relativedelta(days=day_period)
     end_date   = datetime.now()
     start_date = datetime.strftime(start_date, '%Y-%m-%d')

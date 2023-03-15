@@ -153,6 +153,22 @@ def UDXsources():
                 'Traffic-Flow': ['Traffic Flow']
             }
         },
+        'Hull_City_Council': {
+            'Hull-City-Council': {
+                'Air-Quality': [
+                    'Nitric Oxide',
+                    'Ozone',
+                    'Nitrogen Dioxide',
+                    'PM1',
+                    'PM10',
+                    'PM2.5',
+                    'Temperature',
+                    'Humidity',
+                    'Pressure'
+                ],
+                'Traffic-Flow': ['Traffic Flow']
+            }
+        },
         'Cranfield': {
             'Cranfield': {
                 'Air-Quality': [
