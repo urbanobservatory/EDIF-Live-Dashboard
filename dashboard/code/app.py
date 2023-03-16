@@ -30,9 +30,8 @@ app.layout = htmlLayout.layout()
 
 # CACHE
 def cache_controller(variable, start_date, end_date, today=None, refresh=False):
-    if (start_date == None or end_date == None) \
-    or refresh:
-        start_date, end_date = utils.get_start_end_date(start_date, end_date)
+    if refresh:
+        start_date, end_date = utils.get_start_end_date()
     
     days = utils.get_days(start_date, end_date)
 

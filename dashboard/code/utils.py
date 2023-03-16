@@ -4,30 +4,19 @@ from dateutil.relativedelta import relativedelta
 
 def get_days(start_date, end_date):
     days = []
-
-    start_date = date(
-        int(start_date.split('-')[0]),
-        int(start_date.split('-')[1]),
-        int(start_date.split('-')[2]))
-    end_date = date(
-        int(end_date.split('-')[0]),
-        int(end_date.split('-')[1]),
-        int(end_date.split('-')[2]))
-
+    start_date, end_date = datetime_to_date(start_date, end_date)
     delta = end_date - start_date
-
     for i in range(delta.days + 1):
         day = start_date + timedelta(days=i)
         days.append(day)
-
     return days
 
 
-def get_start_end_date(start_date, end_date, day_period=3):
+def get_start_end_date(day_period=3):
     start_date = datetime.now()-relativedelta(days=day_period)
     end_date   = datetime.now()
     start_date = datetime.strftime(start_date, '%Y-%m-%d')
-    end_date = datetime.strftime(end_date, '%Y-%m-%d')
+    end_date   = datetime.strftime(end_date, '%Y-%m-%d')
     return start_date, end_date
 
 
@@ -44,3 +33,27 @@ def select(df, item_selection):
         id = item_selection['points'][i]['text'].split(':')[0]
         selected.append(id)
     return df.loc[df['ID'].isin(selected)]
+
+
+def default_dates():
+    start_date, end_date = get_start_end_date()
+    start_date, end_date = datetime_to_date(start_date, end_date)
+    return [start_date, end_date]
+
+
+def date_limits():
+    start_date, end_date = get_start_end_date(28)
+    start_date, end_date = datetime_to_date(start_date, end_date)
+    return [start_date, end_date]
+
+
+def datetime_to_date(start_date, end_date):
+    start_date = date(
+        int(start_date.split('-')[0]),
+        int(start_date.split('-')[1]),
+        int(start_date.split('-')[2]))
+    end_date = date(
+        int(end_date.split('-')[0]),
+        int(end_date.split('-')[1]),
+        int(end_date.split('-')[2]))
+    return start_date, end_date
