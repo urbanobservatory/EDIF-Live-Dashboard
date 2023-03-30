@@ -1,6 +1,7 @@
 import os
 import requests
 import pandas as pd
+import numpy as np
 import json
 import datetime
 import traceback
@@ -19,9 +20,11 @@ def pull_data(variable, start, end):
         for source in source_map[organisation]:
             for stream in source_map[organisation][source]:
 
-                if variable in source_map[organisation][source][stream]:
+                if variable in source_map[organisation][source][stream]['variables']:
+                    per_page_limit = source_map[organisation][source][stream]['parameters']['per-page-limit']
+                    offset_step = source_map[organisation][source][stream]['parameters']['offset-step']
+                    
                     try:
-
                         print(f'{organisation}, {source}, {stream}, {variable}, {start}, {end}')
 
                         if organisation == 'Cranfield':
@@ -29,25 +32,33 @@ def pull_data(variable, start, end):
                             if len(df) > 0:
                                 dfs.append(df)
 
-                        elif source == 'Newcastle-UO':
-                            df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
-                            try:
-                                df = df.drop('Unnamed: 0', axis=1)
-                            except:
-                                pass
-                            try:
-                                df = df.drop('index', axis=1)
-                            except:
-                                pass
-                            try:
-                                df = df.reset_index(drop=True)
-                            except:
-                                pass
-                            if len(df) > 0:
-                                dfs.append(df)
+                        # elif source == 'Newcastle-UO':
+                        #     df = get_uo_data(organisation, source, stream, requestVariable, start, end, units)
+                        #     try:
+                        #         df = df.drop('Unnamed: 0', axis=1)
+                        #     except:
+                        #         pass
+                        #     try:
+                        #         df = df.drop('index', axis=1)
+                        #     except:
+                        #         pass
+                        #     try:
+                        #         df = df.reset_index(drop=True)
+                        #     except:
+                        #         pass
+                        #     if len(df) > 0:
+                        #         dfs.append(df)
 
                         else:
-                            df = request(organisation, source, stream, requestVariable, start, end)
+                            df = request(
+                                organisation, 
+                                source, 
+                                stream, 
+                                requestVariable, 
+                                start, 
+                                end,
+                                per_page_limit,
+                                offset_step)
                             if source == 'Newcastle-UO':
                                 df = selectNewcastle(requestVariable, df)
                             else:
@@ -66,62 +77,75 @@ def pull_data(variable, start, end):
 
     if dfs:
         df = pd.concat(dfs)
+        df.sort_values(by='Datetime', inplace = True)
         return df
 
 
-def request(organisation, source, stream, variable, start, end):
+def request(organisation, source, stream, variable, start, end, per_page_limit, offset_step):
+    url = env_vars[f'{source}_{stream}_url']
     start = f"{start.strftime('%Y-%m-%d')}T{start.strftime('%H')}%3A{start.strftime('%M')}%3A{start.strftime('%S')}.000Z"
     end = f"{end.strftime('%Y-%m-%d')}T{end.strftime('%H')}%3A{end.strftime('%M')}%3A{end.strftime('%S')}.000Z"
 
     print('...fetching UDX data')
 
-    response_API = requests.get(
-        url=f"{env_vars[f'{source}_{stream}_url']}?start={start}&end={end}",
-        headers={
-            "Content-Type":env_vars['cont'],
-            "Authorization":env_vars[f'{organisation}_auth']+' '+env_vars[f'{source}_{stream}_key']
-        }
-    )
-            
-    print('...^', response_API.status_code)
-    json_data = json.loads(response_API.text)
-    df = pd.json_normalize(json_data)
-
+    dfs=[]
+    for i in range(0, 10000, offset_step):
+        response_API = requests.get(
+            url=f"{url}?start={start}&end={end}&limit={per_page_limit}&offset={i}",
+            headers={
+                "Content-Type":env_vars['cont'],
+                "Authorization":env_vars[f'{organisation}_auth']+' '+env_vars[f'{source}_{stream}_key']
+            }
+        )
+        
+        if response_API.status_code != 200:
+            print('finished break')
+            break
+        else:
+            print('...^', i, organisation, source, stream, variable, start, end, response_API.status_code)
+            json_data = json.loads(response_API.text)
+            print('json_data', type(json_data), len(json_data), flush=True)
+            if len(json_data) == 0:
+                break
+            dfs.append(pd.json_normalize(json_data))
+            continue
+    
+    df = pd.concat(dfs)
     return df
 
 
-def get_uo_data(organisation, source, stream, variable, start, end,units):
-    uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates%20In','temperature':'Temperature',}
+# def get_uo_data(organisation, source, stream, variable, start, end,units):
+#     uo_var_lookup = {'pm25':'PM2.5','pm10':'PM10','intensity':'Plates%20In','temperature':'Temperature',}
 
-    headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
-        ",")
-    url = f"http://uoweb3.ncl.ac.uk/api/v1.1/sensors/data/csv/?starttime={start.strftime('%Y%m%d%H%M%S')}&endtime={end.strftime('%Y%m%d%H%M%S')}&data_variable={uo_var_lookup[variable]}"
+#     headers = "ID,Value,Suspect Reading,Datetime,Timestamp,Longitude,Latitude,Organisation,Source,Stream,Variable,Units".split(
+#         ",")
+#     url = f"http://uoweb3.ncl.ac.uk/api/v1.1/sensors/data/csv/?starttime={start.strftime('%Y%m%d%H%M%S')}&endtime={end.strftime('%Y%m%d%H%M%S')}&data_variable={uo_var_lookup[variable]}"
 
-    df = pd.read_csv(url)
-    df['ID'] = df['Sensor Name']
-    df['Suspect Reading'] = df['Flagged as Suspect Reading']
-    df['Datetime'] = df['Timestamp']
-    df['Datetime'] = pd.to_datetime(df['Datetime'])
-    df['Timestamp'] = df['Datetime'].astype(int) / 10 ** 6
-    df['Longitude'] = df['Sensor Centroid Longitude']
-    df['Latitude'] = df['Sensor Centroid Latitude']
-    df['Organisation'] = organisation
-    df['Source'] = source
-    df['Stream'] = stream
-    df['Units'] = units
-    df['Variable'] = unit_lookup()[variable]
-    df = df[headers]
-    df = df.sort_values(by=['Timestamp'])
-    thinned_frames = []
-    for sensor_name,frame in df.groupby('ID'):
-        thinned_frames.append(frame.iloc[::50, :])
-    if thinned_frames:
-        df = pd.concat(thinned_frames)
-        df = df.sort_values(by=['Timestamp'])
-        # df = df.drop('index', axis=1)
-        return df
-    else:
-        return pd.DataFrame([])
+#     df = pd.read_csv(url)
+#     df['ID'] = df['Sensor Name']
+#     df['Suspect Reading'] = df['Flagged as Suspect Reading']
+#     df['Datetime'] = df['Timestamp']
+#     df['Datetime'] = pd.to_datetime(df['Datetime'])
+#     df['Timestamp'] = df['Datetime'].astype(int) / 10 ** 6
+#     df['Longitude'] = df['Sensor Centroid Longitude']
+#     df['Latitude'] = df['Sensor Centroid Latitude']
+#     df['Organisation'] = organisation
+#     df['Source'] = source
+#     df['Stream'] = stream
+#     df['Units'] = units
+#     df['Variable'] = unit_lookup()[variable]
+#     df = df[headers]
+#     df = df.sort_values(by=['Timestamp'])
+#     thinned_frames = []
+#     for sensor_name,frame in df.groupby('ID'):
+#         thinned_frames.append(frame.iloc[::50, :])
+#     if thinned_frames:
+#         df = pd.concat(thinned_frames)
+#         df = df.sort_values(by=['Timestamp'])
+#         # df = df.drop('index', axis=1)
+#         return df
+#     else:
+#         return pd.DataFrame([])
 
 
 def requestCranfield(organisation, source, stream, variable, start, end, units):
@@ -182,7 +206,7 @@ def requestCranfield(organisation, source, stream, variable, start, end, units):
 
 def selectNewcastle(variable, df):
             
-    if variable == 'Temperature':
+    if variable in ['temperature','relativeHumidity','rainFall','atmosphericPressure']:
         df = df[[
             'id', 
             # variable+'.unit', 
@@ -248,7 +272,9 @@ def format(organisation, source, stream, variable, units, df):
         df['ID'] = df['ID'].str.split(":").str[5]
     elif source == 'Sheffield-UF':
         df['ID'] = df['ID'].str.split(":").str[4]
-    elif source == 'TfWM' and stream == 'Traffic-Flow':
+    elif source == 'TfWM':
+        df['ID'] = df['ID'].str.split(":").str[4]
+    elif source == 'Hull-City-Council':
         df['ID'] = df['ID'].str.split(":").str[4]
     else:
         df['ID'] = df['ID'].str.split(":").str[3]
@@ -270,6 +296,12 @@ def format(organisation, source, stream, variable, units, df):
 
     df = df.drop(['dateObserved.value'], axis='columns')
     df = df[df['Value'].notna()]
-    df.sort_values(by='Datetime', inplace = True)
+
+    #drop rows which do not have location embedded (one of the Hull sensors)
+    try:
+        df['Longitude'].replace('', np.nan, inplace=True)
+        df.dropna(subset=['Longitude'], inplace=True)
+    except:
+        pass
 
     return df

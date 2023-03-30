@@ -43,11 +43,11 @@ def cache_controller(variable, start_date, end_date, today=None, refresh=False):
             print('USER - ALREADY STORED', day_path, flush=True)
             dfs.append(pd.read_csv(day_path, index_col=False))
         else:
-            print('USER - RUNNING', variable, day_path, flush=True)
-            df = getData.pull_data(variable, start, end)
-            if df is not None:
-                dfs.append(df)
-                df.to_csv(day_path)
+            print('not available yet', variable, day_path, flush=True)
+            # df = getData.pull_data(variable, start, end)
+            # if df is not None:
+            #     dfs.append(df)
+            #     df.to_csv(day_path)
 
     if len(dfs) > 0:
         df = pd.concat(dfs)
@@ -276,7 +276,7 @@ def downloadCSV(data, n_clicks):
         end_date = end_date.strftime('%m-%d-%Y')
     return dcc.send_data_frame(
         df.to_csv, f'{variable}_{start_date}_{end_date}.csv'
-    )   
+    )
 
 # Run App
 if __name__ == "__main__":
@@ -284,4 +284,4 @@ if __name__ == "__main__":
         d=True
     else:
         d=False
-    app.run_server(debug=d, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(debug=d,processes=6,threaded=False,host='0.0.0.0',port=80)
