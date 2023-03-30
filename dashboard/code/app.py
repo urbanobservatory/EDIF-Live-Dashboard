@@ -29,10 +29,7 @@ server = app.server
 app.layout = htmlLayout.layout()
 
 # CACHE
-def cache_controller(variable, start_date, end_date, today=None, refresh=False):
-    if refresh:
-        start_date, end_date = utils.get_start_end_date()
-    
+def cache_controller(variable, start_date, end_date):
     days = utils.get_days(start_date, end_date)
 
     dfs = []
@@ -63,17 +60,27 @@ def cache_controller(variable, start_date, end_date, today=None, refresh=False):
         Input('interval-component', 'n_intervals'),
         Input('checklist', 'value'),
         Input('date-picker-range', 'start_date'),
-        Input('date-picker-range', 'end_date'),
-        Input('Refresh Button', 'n_clicks')
+        Input('date-picker-range', 'end_date')
     ])
-def compute_value(intervals, variable, start_date, end_date, clicks):
-    if 'Refresh Button' == ctx.triggered_id:
-        data = cache_controller(variable, start_date, end_date, refresh=True)
-    else:
-        data = cache_controller(variable, start_date, end_date)
+def compute_value(intervals, variable, start_date, end_date):
+    data = cache_controller(variable, start_date, end_date)
     data.reset_index(inplace=True)
     data = data.to_json(orient='split')
     return data
+
+
+@app.callback(
+    [
+        Output('date-picker-range', 'start_date'),
+        Output('date-picker-range', 'end_date'),
+        Output('date-picker-range', 'min_date_allowed'),
+        Output('date-picker-range', 'max_date_allowed')
+    ],
+    Input('Refresh Button', 'n_clicks')
+)
+def datepicker(n_clicks):
+    return utils.default_dates()[0], utils.default_dates()[1],\
+        utils.date_limits()[0], utils.date_limits()[1]
 
 
 @app.callback(
@@ -276,7 +283,8 @@ def downloadCSV(data, n_clicks):
         end_date = end_date.strftime('%m-%d-%Y')
     return dcc.send_data_frame(
         df.to_csv, f'{variable}_{start_date}_{end_date}.csv'
-    )   
+    )
+
 
 # Run App
 if __name__ == "__main__":
@@ -284,4 +292,4 @@ if __name__ == "__main__":
         d=True
     else:
         d=False
-    app.run_server(debug=d, processes=6, threaded=False, host='0.0.0.0', port=80)
+    app.run_server(debug=d,processes=6,threaded=False,host='0.0.0.0',port=80)

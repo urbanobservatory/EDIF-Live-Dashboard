@@ -64,11 +64,7 @@ def layout():
         html.Div([
           dcc.DatePickerRange(
             id='date-picker-range',
-            month_format='Do-MMM-Y',
-            start_date=utils.default_dates()[0],
-            end_date=utils.default_dates()[1],
-            min_date_allowed=utils.date_limits()[0],
-            max_date_allowed=utils.date_limits()[1]
+            month_format='Do-MMM-Y'
           )
         ], className='calendar')
       ], className='calendarBox'),
