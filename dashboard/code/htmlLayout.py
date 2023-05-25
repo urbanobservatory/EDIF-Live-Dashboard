@@ -32,11 +32,17 @@ def layout():
       html.Div([
         html.Img(
           id='DTlogo',
-          src='/assets/thumbnail_image006_inverted_201x100.png')
-      ], className='logo'),
+          src='/assets/thumbnail_image006_inverted_153x76.png'
+        )
+      ], className='oneBanner column'),
       html.Div([
-        html.H1('Live Dashboard Demo')
-      ], className="title"),
+        html.Div([
+          html.H1(
+            'Live Dashboard Demo',
+            style={"color": "#ccccdc"}
+          )
+        ], className='bannerBox')
+      ], className='threeBanner columns'),
       html.Div([
         html.Div([
           dcc.Dropdown(
@@ -57,48 +63,42 @@ def layout():
               'Pressure'
             ],
             value='PM2.5',
-            clearable=False)
-        ], className='dropDown')
-      ], className='dropDownBox'),
+            clearable=False
+          )
+        ], className='bannerBox')
+      ], className='threeBanner columns'),
       html.Div([
         html.Div([
           dcc.DatePickerRange(
             id='date-picker-range',
             month_format='Do-MMM-Y'
           )
-        ], className='calendar')
-      ], className='calendarBox'),
+        ], className='bannerBox')
+      ], className='threeBanner columns'),
       html.Div([
         html.Div([
           dcc.Loading([
             html.Button(
               'Refresh',
               id='Refresh Button',
-              n_clicks = 0)
+              n_clicks = 0
+            )
           ], type='circle')
-        ], className='refresh')
-      ], className='refreshBox'),
-      # html.Div([
-      #   html.Div([
-      #     html.Button(
-      #       'Info',
-      #        id='Info Button',
-      #        n_clicks = 0
-      #     )
-      #   ], className='refresh')
-      # ], className='refreshBox'),
+        ], className='bannerBox')
+      ], className='oneBanner column'),
       html.Div([
         html.Div([
           dcc.Loading([
             html.Button(
               'Download',
               id='Download-Button',
-              n_clicks = 0),
+              n_clicks = 0
+            ),
             dcc.Download(id='download-dataframe-csv')
           ], type='circle')
-        ], className='refresh')
-      ], className='refreshBox')
-    ], className='banner'),
+        ], className='bannerBox')
+      ], className='oneBanner column'),
+    ], className='row'),
 
     html.Br(),
 
