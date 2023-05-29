@@ -41,7 +41,7 @@ def layout():
             'Live Dashboard Demo',
             style={"color": "#ccccdc"}
           )
-        ], className='bannerBox')
+        ], className='banner box')
       ], className='threeBanner columns'),
       html.Div([
         html.Div([
@@ -65,7 +65,7 @@ def layout():
             value='PM2.5',
             clearable=False
           )
-        ], className='bannerBox')
+        ], className='banner box')
       ], className='threeBanner columns'),
       html.Div([
         html.Div([
@@ -73,7 +73,7 @@ def layout():
             id='date-picker-range',
             month_format='Do-MMM-Y'
           )
-        ], className='bannerBox')
+        ], className='banner box')
       ], className='threeBanner columns'),
       html.Div([
         html.Div([
@@ -84,7 +84,7 @@ def layout():
               n_clicks = 0
             )
           ], type='circle')
-        ], className='bannerBox')
+        ], className='banner box')
       ], className='oneBanner column'),
       html.Div([
         html.Div([
@@ -96,7 +96,7 @@ def layout():
             ),
             dcc.Download(id='download-dataframe-csv')
           ], type='circle')
-        ], className='bannerBox')
+        ], className='banner box')
       ], className='oneBanner column'),
     ], className='row'),
 
@@ -115,60 +115,54 @@ def layout():
           html.Br(),
 
           html.Div([
-            html.Div([
-              html.Div([
-                dcc.Loading([
 
-                  html.Div([
+            html.Div([
+
+              html.Div([
+                html.Div([
+                  dcc.Loading([
                     html.Div([
                       html.Div([
                         dcc.Graph(
                           id='Indicators A',
-                          style={'height':150}
+                          style={'height':140}
                         )
-                      ], className='twelve columns')
-                    ])
-                  ], className="row"),
-
-                  html.Div([
+                      ])
+                    ], className="row"),
                     html.Div([
                       html.Div([
                         dcc.Graph(
                           id='Indicators B',
-                          style={'height':150})
-                      ], className='twelve columns')
-                    ])
-                  ], className="row")
-
-                ])
-              ], className='graph'),
+                          style={'height':140})
+                      ])
+                    ], className="row")
+                  ])
+                ], className='figure box')
+              ], className='row'),
 
               html.Br(),
 
               html.Div([
-
                 html.Div([
                   html.Div([
                     dcc.Loading(
                       dcc.Graph(
                         id='Scatter All',
-                        style={'height':300}
+                        style={'height':280}
                       )
                     )
-                  ], className='graph')
-                ], className='eight columns'),
-
+                  ], className='figure box')
+                ], className='eightGraphsOuter columns'),
                 html.Div([
                   html.Div([
                     dcc.Loading(
                       dcc.Graph(
                         id='BoxPlot',
-                        style={'height':300}
+                        style={'height':280}
                       )
                     )
-                  ], className='boxplot')
-                ], className='four columns')
-
+                  ], className='figure box')
+                ], className='fourGraphsOuter columns')
               ], className="row"),
 
               html.Br(),
@@ -183,22 +177,18 @@ def layout():
                         style={'height':600}
                       )
                     )
-                  ], className='scatter3d')
-                ], className='six columns'),
-
+                  ], className='scatter3d figure box')
+                ], className='sixGraphs columns'),
                 html.Div([
-
                   html.Div([
                     dcc.Loading(
                       dcc.Graph(
                         id='Scatter Hover',
-                          style={'height':278}
+                        style={'height':278}
                       )
                     )
-                  ], className='hover'),
-
+                  ], className='figure box row'),
                   html.Br(),
-
                   html.Div([
                     dcc.Loading(
                       dcc.Graph(
@@ -206,28 +196,22 @@ def layout():
                         style={'height':278}
                       )
                     )
-                  ], className='histogram')
-
-                ], className='six columns')
-
+                  ], className='figure box row')
+                ], className='sixGraphs columns')
               ], className='row'),
 
-            ], className="eight columns"),
+            ], className="eightGraphsOuter columns"),
 
             html.Div([
               html.Div([
-                html.Div([
-                  html.Div([
-                    dcc.Loading(
-                      dcc.Graph(
-                        id='Map',
-                        style={'height':1288}
-                      )
-                    )
-                  ], className='map')
-                ], className='twelve columns')       
-              ], className='row')
-            ], className='four columns')
+                dcc.Loading(
+                  dcc.Graph(
+                    id='Map',
+                    style={'height':1288}
+                  )
+                )
+              ], className='map figure box')
+            ], className='fourGraphsOuter columns')
 
           ], className="row"),
                   

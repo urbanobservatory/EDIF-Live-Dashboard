@@ -28,7 +28,6 @@ def scatterAll(variable, units):
             text = f'{variable} Timeline',
             x = 0.5
         ),
-        height = 300,
         showlegend = False, 
         autosize = True,
         margin = dict(t=60, b=20, l=20, r=20),
@@ -158,7 +157,6 @@ def boxplot(variable, units):
             text = f'{variable} Box Plot',
             x = 0.5
         ),
-        height = 300,
         showlegend = False, 
         autosize = True,
         margin = dict(t=60, b=20, l=20, r=20),
@@ -239,7 +237,7 @@ def map(variable, map_selection): #, map_relayout):
             x = 0.5
         ),
         autosize = True,
-        height = 1280,
+        height = 1236,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color=theme['text']),
